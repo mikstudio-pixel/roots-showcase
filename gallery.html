@@ -8,6 +8,15 @@
       :root {
         --spotlight-x: -1000px;
         --spotlight-y: -1000px;
+        --gallery-butterfly-x: 50%;
+        --gallery-butterfly-y: 50%;
+        --gallery-butterfly-opacity: 0;
+        --gallery-butterfly-rotate: 0deg;
+        --gallery-butterfly-scale: 1;
+        --gallery-butterfly-wing: 18deg;
+        --gallery-butterfly-wing-spread: 0.9;
+        --gallery-butterfly-blur: 2px;
+        --gallery-butterfly-strength: 0.12;
       }
 
       * {
@@ -59,14 +68,69 @@
       }
 
       #page-shadow {
-        position: absolute;
-        top: 0;
-        left: 0;
+        position: fixed;
+        inset: 0;
         z-index: 20;
-        width: 100%;
-        height: 100%;
+        width: 100vw;
+        height: 100vh;
         pointer-events: none;
         mix-blend-mode: multiply;
+      }
+
+      .gallery-butterfly-shadow {
+        position: fixed;
+        inset: 0;
+        z-index: 21;
+        pointer-events: none;
+        opacity: calc(var(--gallery-butterfly-opacity) * var(--gallery-butterfly-strength));
+        filter: blur(var(--gallery-butterfly-blur));
+        mix-blend-mode: multiply;
+      }
+
+      .gallery-butterfly {
+        position: absolute;
+        left: var(--gallery-butterfly-x);
+        top: var(--gallery-butterfly-y);
+        width: 78px;
+        height: 54px;
+        transform:
+          translate(-50%, -50%)
+          rotate(var(--gallery-butterfly-rotate))
+          scale(var(--gallery-butterfly-scale));
+        transform-origin: 50% 50%;
+      }
+
+      .gallery-butterfly::before {
+        content: "";
+        position: absolute;
+        left: 37px;
+        top: 13px;
+        width: 5px;
+        height: 27px;
+        border-radius: 999px;
+        background: rgba(35, 31, 28, 0.68);
+      }
+
+      .gallery-butterfly-wing {
+        position: absolute;
+        top: 1px;
+        width: 42px;
+        height: 50px;
+        background: rgba(35, 31, 28, 0.64);
+      }
+
+      .gallery-butterfly-wing--left {
+        right: 39px;
+        border-radius: 88% 36% 76% 42%;
+        transform: rotate(calc(-10deg - var(--gallery-butterfly-wing))) scaleX(var(--gallery-butterfly-wing-spread)) scaleY(1.08);
+        transform-origin: 100% 55%;
+      }
+
+      .gallery-butterfly-wing--right {
+        left: 39px;
+        border-radius: 36% 88% 42% 76%;
+        transform: rotate(calc(10deg + var(--gallery-butterfly-wing))) scaleX(var(--gallery-butterfly-wing-spread)) scaleY(1.08);
+        transform-origin: 0 55%;
       }
 
       .page {
@@ -454,6 +518,12 @@
   </head>
   <body>
     <canvas id="page-shadow"></canvas>
+    <div class="gallery-butterfly-shadow" aria-hidden="true">
+      <div class="gallery-butterfly">
+        <span class="gallery-butterfly-wing gallery-butterfly-wing--left"></span>
+        <span class="gallery-butterfly-wing gallery-butterfly-wing--right"></span>
+      </div>
+    </div>
     <main class="page">
       <div class="content">
         <header class="topbar">
@@ -769,6 +839,8 @@
     <script>
       const root = document.documentElement;
       const canvas = document.getElementById("page-shadow");
+      const butterflyLayer = document.querySelector(".gallery-butterfly-shadow");
+      const shadowDprCap = 1.25;
       const gl = canvas.getContext("webgl", {
         alpha: true,
         antialias: true,
@@ -818,7 +890,14 @@
         scrollRestUntil: 0,
         smoothScrollTarget: window.scrollY,
         isSmoothScrolling: false,
-        lastFrameTime: 0
+        lastFrameTime: 0,
+        butterflyFrame: 0,
+        butterflyTimeout: 0,
+        dpr: 1,
+        pageWidth: 1,
+        pageHeight: 1,
+        viewportWidth: 1,
+        viewportHeight: 1
       };
 
       const vertexSource = `
@@ -847,6 +926,9 @@
         uniform float u_motion;
         uniform vec2 u_pointer;
         uniform sampler2D u_flowerMask;
+        uniform vec2 u_page_size;
+        uniform vec2 u_viewport_size;
+        uniform float u_scroll_y;
 
         float hash(vec2 p) {
           p = fract(p * vec2(123.34, 456.21));
@@ -920,7 +1002,9 @@
         }
 
         void main() {
-          vec2 uv = v_uv;
+          float pageX = v_uv.x * u_viewport_size.x;
+          float pageY = u_scroll_y + (1.0 - v_uv.y) * u_viewport_size.y;
+          vec2 uv = vec2(pageX / u_page_size.x, 1.0 - pageY / u_page_size.y);
           float t = u_time;
           float angle = mix(-1.15, 1.15, u_light * 0.5 + 0.5);
           vec2 direction = normalize(vec2(cos(angle), sin(angle) * 0.72 - 0.32));
@@ -980,7 +1064,7 @@
           float strength = mix(0.18, 0.88, u_contrast);
           float alpha = clamp(pow(density, 0.82) * strength, 0.0, 0.68);
           float pointerActive = step(0.0, u_pointer.x) * step(0.0, u_pointer.y);
-          float spotlightDistance = length(uv * u_resolution - u_pointer);
+          float spotlightDistance = length(v_uv * u_resolution - u_pointer);
           float spotlight = 1.0 - smoothstep(34.0, 220.0, spotlightDistance);
           alpha *= 1.0 - spotlight * pointerActive * 0.82;
           gl_FragColor = vec4(ink, alpha);
@@ -1121,7 +1205,10 @@
         pattern: gl.getUniformLocation(program, "u_pattern"),
         motion: gl.getUniformLocation(program, "u_motion"),
         pointer: gl.getUniformLocation(program, "u_pointer"),
-        flowerMask: gl.getUniformLocation(program, "u_flowerMask")
+        flowerMask: gl.getUniformLocation(program, "u_flowerMask"),
+        pageSize: gl.getUniformLocation(program, "u_page_size"),
+        viewportSize: gl.getUniformLocation(program, "u_viewport_size"),
+        scrollY: gl.getUniformLocation(program, "u_scroll_y")
       };
 
       const flowerTexture = gl.createTexture();
@@ -1159,7 +1246,7 @@
         });
 
       function resize() {
-        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        const dpr = Math.min(window.devicePixelRatio || 1, shadowDprCap);
         const pageWidth = Math.max(
           document.documentElement.scrollWidth,
           document.documentElement.clientWidth,
@@ -1170,10 +1257,19 @@
           document.documentElement.clientHeight,
           window.innerHeight
         );
-        canvas.style.width = `${pageWidth}px`;
-        canvas.style.height = `${pageHeight}px`;
-        const width = Math.max(1, Math.round(pageWidth * dpr));
-        const height = Math.max(1, Math.round(pageHeight * dpr));
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+
+        state.dpr = dpr;
+        state.pageWidth = pageWidth;
+        state.pageHeight = pageHeight;
+        state.viewportWidth = viewportWidth;
+        state.viewportHeight = viewportHeight;
+
+        canvas.style.width = `${viewportWidth}px`;
+        canvas.style.height = `${viewportHeight}px`;
+        const width = Math.max(1, Math.round(viewportWidth * dpr));
+        const height = Math.max(1, Math.round(viewportHeight * dpr));
         if (canvas.width !== width || canvas.height !== height) {
           canvas.width = width;
           canvas.height = height;
@@ -1183,9 +1279,9 @@
 
       window.addEventListener("resize", resize);
       window.addEventListener("pointermove", (event) => {
-        const dpr = Math.min(window.devicePixelRatio || 1, 2);
-        state.pointerX = (event.clientX + window.scrollX) * dpr;
-        state.pointerY = canvas.height - (event.clientY + window.scrollY) * dpr;
+        const dpr = state.dpr;
+        state.pointerX = event.clientX * dpr;
+        state.pointerY = canvas.height - event.clientY * dpr;
         root.style.setProperty("--spotlight-x", `${event.clientX}px`);
         root.style.setProperty("--spotlight-y", `${event.clientY}px`);
       });
@@ -1234,8 +1330,116 @@
         document.documentElement.style.scrollBehavior = previousBehavior;
       }
 
+      function syncButterflySurface() {
+        root.style.setProperty("--gallery-butterfly-blur", `${(1.4 + state.blur * 10).toFixed(2)}px`);
+        root.style.setProperty("--gallery-butterfly-strength", (0.05 + state.contrast * 0.14).toFixed(3));
+      }
+
+      function cancelButterflyFlight() {
+        if (state.butterflyFrame) {
+          cancelAnimationFrame(state.butterflyFrame);
+          state.butterflyFrame = 0;
+        }
+
+        if (state.butterflyTimeout) {
+          clearTimeout(state.butterflyTimeout);
+          state.butterflyTimeout = 0;
+        }
+
+        root.style.setProperty("--gallery-butterfly-opacity", "0");
+      }
+
+      function smoothstep(value) {
+        return value * value * (3 - 2 * value);
+      }
+
+      function cubicBezier(a, b, c, d, t) {
+        const mt = 1 - t;
+        return mt * mt * mt * a + 3 * mt * mt * t * b + 3 * mt * t * t * c + t * t * t * d;
+      }
+
+      function runButterflyFlight() {
+        cancelButterflyFlight();
+
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+          return;
+        }
+
+        const pageWidth = window.innerWidth;
+        const upward = Math.random() > 0.5;
+        const startX = pageWidth * (0.12 + Math.random() * 0.76);
+        const endX = pageWidth * (0.12 + Math.random() * 0.76);
+        const startY = upward
+          ? window.innerHeight + 160 + Math.random() * 160
+          : -160 - Math.random() * 160;
+        const endY = upward
+          ? -160 - Math.random() * 160
+          : window.innerHeight + 160 + Math.random() * 160;
+        const control1X = pageWidth * (0.08 + Math.random() * 0.84);
+        const control2X = pageWidth * (0.08 + Math.random() * 0.84);
+        const control1Y = upward
+          ? window.innerHeight * (0.58 + Math.random() * 0.28)
+          : window.innerHeight * (0.16 + Math.random() * 0.28);
+        const control2Y = upward
+          ? window.innerHeight * (0.16 + Math.random() * 0.28)
+          : window.innerHeight * (0.58 + Math.random() * 0.28);
+        const drift = pageWidth * (-0.08 + Math.random() * 0.16);
+        const wobble = 24 + Math.random() * 42;
+        const duration = 5200 + Math.random() * 1800;
+        const seed = Math.random() * Math.PI * 2;
+        const start = performance.now();
+
+        function tick(now) {
+          const progress = Math.min((now - start) / duration, 1);
+          const eased = smoothstep(progress);
+          const arc = Math.sin(progress * Math.PI);
+          const x = cubicBezier(startX, control1X, control2X, endX, eased)
+            + drift * arc
+            + Math.sin(progress * Math.PI * 8 + seed) * wobble
+            + Math.sin(progress * Math.PI * 17 + seed * 1.7) * wobble * 0.26;
+          const y = cubicBezier(startY, control1Y, control2Y, endY, eased)
+            + Math.sin(progress * Math.PI * 6 + seed) * wobble * 0.82
+            + Math.sin(progress * Math.PI * 15 + seed * 0.8) * wobble * 0.18;
+          const nextT = Math.min(eased + 0.01, 1);
+          const nextX = cubicBezier(startX, control1X, control2X, endX, nextT);
+          const nextY = cubicBezier(startY, control1Y, control2Y, endY, nextT);
+          const fade = Math.min(smoothstep(Math.min(progress / 0.18, 1)), smoothstep(Math.min((1 - progress) / 0.22, 1)));
+          const flap = Math.abs(Math.sin(now * 0.062 + seed));
+          const wing = 18 + flap * 62 + Math.sin(now * 0.108 + seed) * 7;
+          const wingSpread = 0.42 + flap * 0.92;
+          const rotation = Math.atan2(nextY - y, nextX - x) * 180 / Math.PI + Math.sin(progress * Math.PI * 9 + seed) * 13;
+          const scale = 0.58 + arc * 0.2 + Math.sin(progress * Math.PI * 13 + seed) * 0.045;
+
+          root.style.setProperty("--gallery-butterfly-x", `${x.toFixed(2)}px`);
+          root.style.setProperty("--gallery-butterfly-y", `${y.toFixed(2)}px`);
+          root.style.setProperty("--gallery-butterfly-opacity", (fade * 0.9).toFixed(3));
+          root.style.setProperty("--gallery-butterfly-wing", `${wing.toFixed(3)}deg`);
+          root.style.setProperty("--gallery-butterfly-wing-spread", wingSpread.toFixed(3));
+          root.style.setProperty("--gallery-butterfly-rotate", `${rotation.toFixed(3)}deg`);
+          root.style.setProperty("--gallery-butterfly-scale", scale.toFixed(3));
+
+          if (progress < 1) {
+            state.butterflyFrame = requestAnimationFrame(tick);
+          } else {
+            state.butterflyFrame = 0;
+            root.style.setProperty("--gallery-butterfly-opacity", "0");
+            scheduleButterflyFlight();
+          }
+        }
+
+        state.butterflyFrame = requestAnimationFrame(tick);
+      }
+
+      function scheduleButterflyFlight() {
+        if (state.butterflyTimeout) {
+          clearTimeout(state.butterflyTimeout);
+        }
+        state.butterflyTimeout = setTimeout(runButterflyFlight, 2400 + Math.random() * 5200);
+      }
+
       function render(now) {
         resize();
+        syncButterflySurface();
         const delta = state.lastFrameTime ? Math.min((now - state.lastFrameTime) / 1000, 0.1) : 0;
         state.lastFrameTime = now;
         const pointerEase = 0.12;
@@ -1265,6 +1469,9 @@
         gl.clearColor(0, 0, 0, 0);
         gl.clear(gl.COLOR_BUFFER_BIT);
         gl.uniform2f(uniforms.resolution, canvas.width, canvas.height);
+        gl.uniform2f(uniforms.pageSize, state.pageWidth, state.pageHeight);
+        gl.uniform2f(uniforms.viewportSize, state.viewportWidth, state.viewportHeight);
+        gl.uniform1f(uniforms.scrollY, window.scrollY);
         gl.uniform1f(uniforms.time, now * 0.001);
         gl.uniform1f(uniforms.depth, state.depth);
         gl.uniform1f(uniforms.softness, state.softness);
@@ -1282,6 +1489,8 @@
       }
 
       resize();
+      syncButterflySurface();
+      scheduleButterflyFlight();
       requestAnimationFrame(render);
     </script>
   </body>
