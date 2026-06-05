@@ -1,0 +1,714 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Tac hojnosti - detail projektu</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      :root {
+        --window-shadow-opacity: 0.24;
+        --window-shadow-blur: 9.3px;
+        --window-shadow-x: 25vw;
+        --window-shadow-y: -19vh;
+        --window-shadow-angle: -13deg;
+        --window-shadow-scale: 0.74;
+        --window-shadow-stretch: 2.05;
+        --window-light-opacity: 0.46;
+        --spotlight-x: -1000px;
+        --spotlight-y: -1000px;
+        --spotlight-core: 17px;
+        --spotlight-mid: 56px;
+        --spotlight-falloff: 90px;
+        --spotlight-edge: 110px;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      html,
+      body {
+        margin: 0;
+        min-height: 100%;
+        background: #f7f7f5;
+        color: #111;
+        font-family:
+          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", sans-serif;
+      }
+
+      body {
+        position: relative;
+        overflow-x: hidden;
+      }
+
+      body::before,
+      body::after {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+      }
+
+      body::before {
+        z-index: 30;
+        opacity: 0.66;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='72' viewBox='0 0 72 72'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='2.05' numOctaves='5' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.24 0 0 0 0 0.24 0 0 0 0 0.24 0 0 0 0.44 0'/%3E%3C/filter%3E%3Crect width='72' height='72' filter='url(%23n)'/%3E%3C/svg%3E");
+        background-size: 72px 72px;
+        mix-blend-mode: multiply;
+      }
+
+      body::after {
+        z-index: 20;
+        background:
+          radial-gradient(circle at 100% 100%, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0) 46%),
+          linear-gradient(135deg, rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.045) 34%, rgba(255, 255, 255, 0.16) 72%, rgba(255, 255, 255, 0.34) 100%);
+        mix-blend-mode: multiply;
+      }
+
+      .window-shadow {
+        position: fixed;
+        inset: 0;
+        z-index: 34;
+        pointer-events: none;
+        -webkit-mask-image: radial-gradient(circle at var(--spotlight-x) var(--spotlight-y), rgba(0, 0, 0, 0.18) 0 var(--spotlight-core), rgba(0, 0, 0, 0.43) var(--spotlight-mid), rgba(0, 0, 0, 0.82) var(--spotlight-falloff), #000 var(--spotlight-edge));
+        mask-image: radial-gradient(circle at var(--spotlight-x) var(--spotlight-y), rgba(0, 0, 0, 0.18) 0 var(--spotlight-core), rgba(0, 0, 0, 0.43) var(--spotlight-mid), rgba(0, 0, 0, 0.82) var(--spotlight-falloff), #000 var(--spotlight-edge));
+      }
+
+      .window-shadow-layer {
+        position: absolute;
+        inset: -46vh -46vw;
+        filter: blur(var(--window-shadow-blur));
+        mix-blend-mode: multiply;
+        transform:
+          translate(var(--window-shadow-x), var(--window-shadow-y))
+          rotate(var(--window-shadow-angle))
+          scale(var(--window-shadow-scale))
+          scaleX(var(--window-shadow-stretch));
+        transform-origin: 100% 0;
+        background-size: 100% 100%;
+      }
+
+      .window-shadow-frame {
+        opacity: calc(var(--window-shadow-opacity) * (0.94 + var(--window-light-opacity) * 0.5));
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 220 160' preserveAspectRatio='none'%3E%3Cpath fill='%23302a24' fill-opacity='0.9' fill-rule='evenodd' d='M-160 -160H380V320H-160z M82 48H108V76H82z M122 48H148V76H122z M82 90H108V118H82z M122 90H148V118H122z'/%3E%3C/svg%3E");
+      }
+
+      .window-shadow-glass {
+        display: none;
+      }
+
+      .page {
+        position: relative;
+        z-index: 2;
+        min-height: 100vh;
+        padding: 24px;
+      }
+
+      .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+        min-height: 48px;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.13);
+      }
+
+      .brand {
+        font-size: 16px;
+        font-weight: 680;
+      }
+
+      .nav {
+        display: flex;
+        gap: 18px;
+        font-size: 13px;
+      }
+
+      .nav a {
+        color: #111;
+        text-decoration: none;
+      }
+
+      .hero {
+        display: block;
+        padding-top: 24px;
+      }
+
+      .project-copy {
+        display: grid;
+        grid-template-columns: minmax(360px, 0.56fr) minmax(360px, 0.44fr);
+        grid-template-rows: 1fr auto;
+        gap: 24px;
+        min-height: calc(100vh - 112px);
+        padding: 28px 0 0;
+      }
+
+      .title-block {
+        align-self: start;
+      }
+
+      .shadow-field {
+        position: relative;
+        grid-column: 2;
+        grid-row: 1 / 3;
+        min-height: calc(100vh - 160px);
+        overflow: hidden;
+        border-left: 1px solid rgba(0, 0, 0, 0.1);
+        background:
+          radial-gradient(circle at 100% 18%, rgba(255, 255, 255, 0.58), rgba(255, 255, 255, 0) 46%),
+          rgba(247, 247, 245, 0.42);
+      }
+
+      .shadow-field::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, rgba(0, 0, 0, 0.035), rgba(255, 255, 255, 0.18));
+        mix-blend-mode: multiply;
+      }
+
+      .eyebrow {
+        display: flex;
+        justify-content: space-between;
+        gap: 18px;
+        max-width: 560px;
+        margin-bottom: 42px;
+        color: #666;
+        font-size: 13px;
+      }
+
+      h1 {
+        max-width: 780px;
+        margin: 0;
+        font-size: clamp(56px, 8.8vw, 138px);
+        line-height: 0.9;
+        font-weight: 690;
+        letter-spacing: 0;
+      }
+
+      .lead {
+        max-width: 510px;
+        margin: 28px 0 0;
+        color: #333;
+        font-size: clamp(18px, 1.6vw, 25px);
+        line-height: 1.32;
+      }
+
+      .project-facts {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 1px;
+        align-self: end;
+        margin-top: 44px;
+        background: rgba(0, 0, 0, 0.13);
+      }
+
+      .fact {
+        min-height: 126px;
+        padding: 16px;
+        background: rgba(247, 247, 245, 0.78);
+        backdrop-filter: blur(1px);
+      }
+
+      .fact span {
+        display: block;
+        margin-bottom: 28px;
+        color: #666;
+        font-size: 13px;
+      }
+
+      .fact strong {
+        display: block;
+        font-size: clamp(22px, 2.4vw, 38px);
+        line-height: 1;
+        font-weight: 680;
+      }
+
+      .hero-media {
+        display: grid;
+        min-height: 74vh;
+        margin-top: 24px;
+      }
+
+      .image-stage {
+        position: relative;
+        min-height: 74vh;
+        overflow: hidden;
+        background: #e8e3da;
+      }
+
+      .image-stage::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: 2;
+        pointer-events: none;
+        background:
+          linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(0, 0, 0, 0.08)),
+          radial-gradient(circle at 86% 8%, rgba(255, 255, 255, 0.36), rgba(255, 255, 255, 0) 38%);
+        mix-blend-mode: soft-light;
+      }
+
+      .image-stage img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        min-height: 74vh;
+        object-fit: cover;
+      }
+
+      .story {
+        display: grid;
+        grid-template-columns: minmax(0, 0.9fr) minmax(300px, 0.62fr);
+        gap: 1px;
+        margin-top: 24px;
+        background: rgba(0, 0, 0, 0.13);
+      }
+
+      .story-text,
+      .story-image {
+        background: rgba(247, 247, 245, 0.8);
+      }
+
+      .story-text {
+        display: grid;
+        align-content: center;
+        min-height: 430px;
+        padding: clamp(24px, 5vw, 72px);
+      }
+
+      .story-text p {
+        max-width: 760px;
+        margin: 0;
+        color: #222;
+        font-size: clamp(24px, 3vw, 48px);
+        line-height: 1.08;
+        font-weight: 620;
+      }
+
+      .story-image {
+        min-height: 430px;
+        overflow: hidden;
+      }
+
+      .story-image img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .shadow-panel {
+        position: fixed;
+        right: 18px;
+        bottom: 18px;
+        z-index: 80;
+        width: min(310px, calc(100vw - 36px));
+        border: 1px solid rgba(0, 0, 0, 0.16);
+        border-radius: 8px;
+        background: rgba(247, 247, 245, 0.82);
+        box-shadow: 0 18px 42px rgba(0, 0, 0, 0.12);
+        backdrop-filter: blur(14px);
+      }
+
+      .shadow-panel.is-collapsed {
+        width: auto;
+      }
+
+      .shadow-panel-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        min-height: 44px;
+        padding: 10px 12px;
+      }
+
+      .shadow-panel-title {
+        font-size: 13px;
+        font-weight: 680;
+      }
+
+      .shadow-toggle {
+        display: grid;
+        place-items: center;
+        width: 28px;
+        height: 28px;
+        border: 1px solid rgba(0, 0, 0, 0.16);
+        border-radius: 6px;
+        background: rgba(255, 255, 255, 0.62);
+        color: #111;
+        font: inherit;
+        font-size: 18px;
+        line-height: 1;
+        cursor: pointer;
+      }
+
+      .shadow-panel-body {
+        display: grid;
+        gap: 12px;
+        padding: 0 12px 12px;
+      }
+
+      .shadow-panel.is-collapsed .shadow-panel-body {
+        display: none;
+      }
+
+      .shadow-control {
+        display: grid;
+        gap: 6px;
+      }
+
+      .shadow-control label {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        color: #222;
+        font-size: 12px;
+      }
+
+      .shadow-value {
+        color: #777;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .shadow-control input[type="range"] {
+        width: 100%;
+        accent-color: #ff321f;
+      }
+
+      @media (max-width: 980px) {
+        .story {
+          grid-template-columns: 1fr;
+        }
+
+        .project-copy {
+          grid-template-columns: 1fr;
+          min-height: auto;
+        }
+
+        .title-block,
+        .project-facts,
+        .shadow-field {
+          grid-column: auto;
+          grid-row: auto;
+        }
+
+        .shadow-field {
+          min-height: 44vh;
+          border-left: 0;
+          border-top: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .project-copy,
+        .hero-media,
+        .image-stage,
+        .image-stage img {
+          min-height: auto;
+        }
+
+        .hero-media {
+          position: relative;
+          top: auto;
+        }
+
+        .image-stage {
+          aspect-ratio: 1;
+        }
+
+        .image-stage img {
+          min-height: 0;
+        }
+
+        .project-facts {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 560px) {
+        .page {
+          padding: 16px;
+        }
+
+        .topbar,
+        .eyebrow {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+
+        .window-shadow-layer {
+          inset: -52vh -58vw;
+        }
+
+        .shadow-panel {
+          right: 12px;
+          bottom: 12px;
+          width: min(300px, calc(100vw - 24px));
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="window-shadow" aria-hidden="true">
+      <div class="window-shadow-layer window-shadow-frame"></div>
+      <div class="window-shadow-layer window-shadow-glass"></div>
+    </div>
+    <main class="page">
+      <header class="topbar">
+        <div class="brand">KOŘENY</div>
+        <nav class="nav" aria-label="Pages">
+          <a href="index.html">Laboratoř</a>
+          <a href="gallery.html">Projekty</a>
+        </nav>
+      </header>
+
+      <section class="hero">
+        <div class="project-copy">
+          <div class="title-block">
+            <div class="eyebrow">
+              <span>04 / Masopustní kobližky</span>
+              <span>Tereza Koláříková</span>
+            </div>
+            <h1>Tác hojnosti</h1>
+            <p class="lead">Tác pro masopustní kobližky převádí sváteční hojnost, společné stolování a poslední veselí před půstem do klidného porcelánového objektu.</p>
+          </div>
+
+          <div class="shadow-field" aria-hidden="true"></div>
+
+          <div class="project-facts" aria-label="Project facts">
+            <div class="fact">
+              <span>Objekt</span>
+              <strong>tác na kobližky</strong>
+            </div>
+            <div class="fact">
+              <span>Rituál</span>
+              <strong>masopustní hostina</strong>
+            </div>
+            <div class="fact">
+              <span>Motiv</span>
+              <strong>sdílení a hojnost</strong>
+            </div>
+          </div>
+        </div>
+
+        <aside class="hero-media">
+          <figure class="image-stage">
+            <img src="data/Produkty/Tác na masopustní koblížky/Tereza_Kolaříková_II. ročník_2026/Foto/5057c281-404e-498f-80a1-93ef1603af4b.JPEG" alt="Tác hojnosti na dřevěné desce">
+          </figure>
+        </aside>
+      </section>
+
+      <section class="story">
+        <div class="story-text">
+          <p>Porcelánová plocha se třemi miskami vytváří jednoduchý servisní rytmus pro sladké pečivo, které se během masopustu podává jako drobný společenský dar.</p>
+        </div>
+        <div class="story-image">
+          <img src="data/Produkty/Tác na masopustní koblížky/Tereza_Kolaříková_II. ročník_2026/Foto/7e857462-cf6b-4f18-8f85-ff1f7917aa9e.JPEG" alt="Tác hojnosti na dřevěném stolku">
+        </div>
+      </section>
+    </main>
+
+    <aside class="shadow-panel" aria-label="Window shadow controls">
+      <div class="shadow-panel-header">
+        <div class="shadow-panel-title">Window shadow</div>
+        <button class="shadow-toggle" type="button" aria-expanded="true" aria-label="Minimalizovat ovládání stínu">−</button>
+      </div>
+      <div class="shadow-panel-body">
+        <div class="shadow-control">
+          <label for="shadow-intensity">Intensity <span class="shadow-value" id="shadow-intensity-value"></span></label>
+          <input id="shadow-intensity" data-shadow-control="intensity" type="range" min="0" max="1" step="0.01" value="0.24">
+        </div>
+        <div class="shadow-control">
+          <label for="shadow-blur">Blur <span class="shadow-value" id="shadow-blur-value"></span></label>
+          <input id="shadow-blur" data-shadow-control="blur" type="range" min="0" max="1" step="0.01" value="0.19">
+        </div>
+        <div class="shadow-control">
+          <label for="shadow-light">Glass light <span class="shadow-value" id="shadow-light-value"></span></label>
+          <input id="shadow-light" data-shadow-control="light" type="range" min="0" max="1" step="0.01" value="0.46">
+        </div>
+        <div class="shadow-control">
+          <label for="shadow-angle">Angle <span class="shadow-value" id="shadow-angle-value"></span></label>
+          <input id="shadow-angle" data-shadow-control="angle" type="range" min="-36" max="8" step="1" value="-13">
+        </div>
+        <div class="shadow-control">
+          <label for="shadow-stretch">Projection <span class="shadow-value" id="shadow-stretch-value"></span></label>
+          <input id="shadow-stretch" data-shadow-control="stretch" type="range" min="0.85" max="3.6" step="0.01" value="2.05">
+        </div>
+        <div class="shadow-control">
+          <label for="shadow-x">Offset X <span class="shadow-value" id="shadow-x-value"></span></label>
+          <input id="shadow-x" data-shadow-control="x" type="range" min="-56" max="72" step="1" value="25">
+        </div>
+        <div class="shadow-control">
+          <label for="shadow-y">Offset Y <span class="shadow-value" id="shadow-y-value"></span></label>
+          <input id="shadow-y" data-shadow-control="y" type="range" min="-72" max="56" step="1" value="-19">
+        </div>
+        <div class="shadow-control">
+          <label for="shadow-scale">Scale <span class="shadow-value" id="shadow-scale-value"></span></label>
+          <input id="shadow-scale" data-shadow-control="scale" type="range" min="0.65" max="2.4" step="0.01" value="0.74">
+        </div>
+      </div>
+    </aside>
+
+    <script>
+      const root = document.documentElement;
+      const panel = document.querySelector(".shadow-panel");
+      const toggle = document.querySelector(".shadow-toggle");
+      const spotlight = {
+        core: 34,
+        edge: 220
+      };
+      let introAnimationFrame = 0;
+
+      function updateSpotlightScale() {
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        const core = spotlight.core / dpr;
+        const edge = spotlight.edge / dpr;
+        root.style.setProperty("--spotlight-core", `${core.toFixed(1)}px`);
+        root.style.setProperty("--spotlight-mid", `${(core + (edge - core) * 0.35).toFixed(1)}px`);
+        root.style.setProperty("--spotlight-falloff", `${(core + (edge - core) * 0.74).toFixed(1)}px`);
+        root.style.setProperty("--spotlight-edge", `${edge.toFixed(1)}px`);
+      }
+
+      const shadowControls = {
+        intensity: {
+          input: document.getElementById("shadow-intensity"),
+          value: document.getElementById("shadow-intensity-value"),
+          format: (value) => value.toFixed(2),
+          apply: (value) => root.style.setProperty("--window-shadow-opacity", value.toFixed(2))
+        },
+        blur: {
+          input: document.getElementById("shadow-blur"),
+          value: document.getElementById("shadow-blur-value"),
+          format: (value) => value.toFixed(2),
+          apply: (value) => root.style.setProperty("--window-shadow-blur", `${(4 + value * 28).toFixed(1)}px`)
+        },
+        light: {
+          input: document.getElementById("shadow-light"),
+          value: document.getElementById("shadow-light-value"),
+          format: (value) => value.toFixed(2),
+          apply: (value) => root.style.setProperty("--window-light-opacity", value.toFixed(2))
+        },
+        angle: {
+          input: document.getElementById("shadow-angle"),
+          value: document.getElementById("shadow-angle-value"),
+          format: (value) => value.toFixed(0),
+          apply: (value) => root.style.setProperty("--window-shadow-angle", `${value.toFixed(0)}deg`)
+        },
+        stretch: {
+          input: document.getElementById("shadow-stretch"),
+          value: document.getElementById("shadow-stretch-value"),
+          format: (value) => value.toFixed(2),
+          apply: (value) => root.style.setProperty("--window-shadow-stretch", value.toFixed(2))
+        },
+        x: {
+          input: document.getElementById("shadow-x"),
+          value: document.getElementById("shadow-x-value"),
+          format: (value) => value.toFixed(0),
+          apply: (value) => root.style.setProperty("--window-shadow-x", `${value.toFixed(0)}vw`)
+        },
+        y: {
+          input: document.getElementById("shadow-y"),
+          value: document.getElementById("shadow-y-value"),
+          format: (value) => value.toFixed(0),
+          apply: (value) => root.style.setProperty("--window-shadow-y", `${value.toFixed(0)}vh`)
+        },
+        scale: {
+          input: document.getElementById("shadow-scale"),
+          value: document.getElementById("shadow-scale-value"),
+          format: (value) => value.toFixed(2),
+          apply: (value) => root.style.setProperty("--window-shadow-scale", value.toFixed(2))
+        }
+      };
+
+      function setShadowControl(name, rawValue) {
+        const control = shadowControls[name];
+        const value = Number(rawValue);
+        control.value.textContent = control.format(value);
+        control.apply(value);
+      }
+
+      function cancelIntroAnimation() {
+        if (introAnimationFrame) {
+          cancelAnimationFrame(introAnimationFrame);
+          introAnimationFrame = 0;
+        }
+      }
+
+      function runIntroAnimation() {
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+          return;
+        }
+
+        const startAngle = -17;
+        const endAngle = Number(shadowControls.angle.input.value);
+        const startStretch = 1.8;
+        const endStretch = Number(shadowControls.stretch.input.value);
+        const duration = 2200;
+        const start = performance.now();
+
+        function easeOutCubic(value) {
+          return 1 - Math.pow(1 - value, 3);
+        }
+
+        function tick(now) {
+          const progress = Math.min((now - start) / duration, 1);
+          const eased = easeOutCubic(progress);
+          const angle = startAngle + (endAngle - startAngle) * eased;
+          const stretch = startStretch + (endStretch - startStretch) * eased;
+
+          root.style.setProperty("--window-shadow-angle", `${angle.toFixed(2)}deg`);
+          root.style.setProperty("--window-shadow-stretch", stretch.toFixed(3));
+
+          if (progress < 1) {
+            introAnimationFrame = requestAnimationFrame(tick);
+          } else {
+            introAnimationFrame = 0;
+            setShadowControl("angle", endAngle);
+            setShadowControl("stretch", endStretch);
+          }
+        }
+
+        root.style.setProperty("--window-shadow-angle", `${startAngle}deg`);
+        root.style.setProperty("--window-shadow-stretch", startStretch.toFixed(2));
+        introAnimationFrame = requestAnimationFrame(tick);
+      }
+
+      Object.entries(shadowControls).forEach(([name, control]) => {
+        setShadowControl(name, control.input.value);
+        control.input.addEventListener("input", (event) => {
+          cancelIntroAnimation();
+          setShadowControl(name, event.target.value);
+        });
+      });
+
+      toggle.addEventListener("click", () => {
+        const collapsed = panel.classList.toggle("is-collapsed");
+        toggle.textContent = collapsed ? "+" : "−";
+        toggle.setAttribute("aria-expanded", String(!collapsed));
+        toggle.setAttribute(
+          "aria-label",
+          collapsed ? "Rozbalit ovládání stínu" : "Minimalizovat ovládání stínu"
+        );
+      });
+
+      window.addEventListener("pointermove", (event) => {
+        root.style.setProperty("--spotlight-x", `${event.clientX}px`);
+        root.style.setProperty("--spotlight-y", `${event.clientY}px`);
+      });
+
+      window.addEventListener("pointerleave", () => {
+        root.style.setProperty("--spotlight-x", "-1000px");
+        root.style.setProperty("--spotlight-y", "-1000px");
+      });
+
+      window.addEventListener("resize", updateSpotlightScale);
+      updateSpotlightScale();
+      runIntroAnimation();
+    </script>
+  </body>
+</html>
