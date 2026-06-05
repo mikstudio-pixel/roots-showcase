@@ -81,7 +81,7 @@
 
       .window-shadow-layer {
         position: absolute;
-        inset: -46vh -46vw;
+        inset: -72vh -72vw;
         filter: blur(var(--window-shadow-blur));
         mix-blend-mode: multiply;
         transform:
@@ -94,12 +94,77 @@
       }
 
       .window-shadow-frame {
-        opacity: calc(var(--window-shadow-opacity) * (0.94 + var(--window-light-opacity) * 0.5));
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 220 160' preserveAspectRatio='none'%3E%3Cpath fill='%23302a24' fill-opacity='0.9' fill-rule='evenodd' d='M-160 -160H380V320H-160z M82 48H108V76H82z M122 48H148V76H122z M82 90H108V118H82z M122 90H148V118H122z'/%3E%3C/svg%3E");
+        opacity: var(--window-shadow-opacity);
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 220 160' preserveAspectRatio='none'%3E%3Cpath fill='%23302a24' fill-opacity='0.9' fill-rule='evenodd' d='M-260 -260H480V420H-260z M98 60H124V88H98z M128 60H154V88H128z M98 92H124V120H98z M128 92H154V120H128z'/%3E%3C/svg%3E");
       }
 
       .window-shadow-glass {
-        display: none;
+        opacity: calc(var(--window-shadow-opacity) * (1 - var(--window-light-opacity)));
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 220 160' preserveAspectRatio='none'%3E%3Cpath fill='%23302a24' fill-opacity='0.9' d='M98 60H124V88H98z M128 60H154V88H128z M98 92H124V120H98z M128 92H154V120H128z'/%3E%3C/svg%3E");
+      }
+
+      .window-shadow-butterfly {
+        --butterfly-x: 50%;
+        --butterfly-y: 50%;
+        --butterfly-opacity: 0;
+        --butterfly-rotate: 0deg;
+        --butterfly-scale: 1;
+        --butterfly-wing: 18deg;
+        --butterfly-wing-spread: 0.9;
+        opacity: calc(var(--butterfly-opacity) * var(--window-shadow-opacity) * 0.52);
+        filter: blur(calc(var(--window-shadow-blur) * 0.22));
+        -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 220 160' preserveAspectRatio='none'%3E%3Cpath fill='%23000' d='M98 60H124V88H98z M128 60H154V88H128z M98 92H124V120H98z M128 92H154V120H128z'/%3E%3C/svg%3E");
+        mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 220 160' preserveAspectRatio='none'%3E%3Cpath fill='%23000' d='M98 60H124V88H98z M128 60H154V88H128z M98 92H124V120H98z M128 92H154V120H128z'/%3E%3C/svg%3E");
+        -webkit-mask-size: 100% 100%;
+        mask-size: 100% 100%;
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+      }
+
+      .butterfly-shadow {
+        position: absolute;
+        left: var(--butterfly-x);
+        top: var(--butterfly-y);
+        width: 78px;
+        height: 54px;
+        transform:
+          translate(-50%, -50%)
+          rotate(var(--butterfly-rotate))
+          scale(var(--butterfly-scale));
+        transform-origin: 50% 50%;
+      }
+
+      .butterfly-shadow::before {
+        content: "";
+        position: absolute;
+        left: 37px;
+        top: 13px;
+        width: 5px;
+        height: 27px;
+        border-radius: 999px;
+        background: rgba(40, 34, 28, 0.68);
+      }
+
+      .butterfly-wing {
+        position: absolute;
+        top: 1px;
+        width: 42px;
+        height: 50px;
+        background: rgba(40, 34, 28, 0.64);
+      }
+
+      .butterfly-wing--left {
+        right: 39px;
+        border-radius: 88% 36% 76% 42%;
+        transform: rotate(calc(-10deg - var(--butterfly-wing))) scaleX(var(--butterfly-wing-spread)) scaleY(1.08);
+        transform-origin: 100% 55%;
+      }
+
+      .butterfly-wing--right {
+        left: 39px;
+        border-radius: 36% 88% 42% 76%;
+        transform: rotate(calc(10deg + var(--butterfly-wing))) scaleX(var(--butterfly-wing-spread)) scaleY(1.08);
+        transform-origin: 0 55%;
       }
 
       .page {
@@ -382,6 +447,42 @@
         accent-color: #ff321f;
       }
 
+      .shadow-state-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr auto auto;
+        gap: 6px;
+        align-items: center;
+      }
+
+      .shadow-state,
+      .shadow-save,
+      .shadow-play {
+        min-height: 30px;
+        border: 1px solid rgba(0, 0, 0, 0.16);
+        border-radius: 6px;
+        background: rgba(255, 255, 255, 0.56);
+        color: #111;
+        font: inherit;
+        font-size: 12px;
+        cursor: pointer;
+      }
+
+      .shadow-state.is-active {
+        border-color: rgba(255, 50, 31, 0.72);
+        background: rgba(255, 50, 31, 0.12);
+      }
+
+      .shadow-save,
+      .shadow-play {
+        padding: 0 10px;
+      }
+
+      .shadow-status {
+        min-height: 14px;
+        color: #777;
+        font-size: 11px;
+      }
+
       @media (max-width: 980px) {
         .story {
           grid-template-columns: 1fr;
@@ -442,7 +543,7 @@
         }
 
         .window-shadow-layer {
-          inset: -52vh -58vw;
+          inset: -82vh -82vw;
         }
 
         .shadow-panel {
@@ -457,6 +558,12 @@
     <div class="window-shadow" aria-hidden="true">
       <div class="window-shadow-layer window-shadow-frame"></div>
       <div class="window-shadow-layer window-shadow-glass"></div>
+      <div class="window-shadow-layer window-shadow-butterfly">
+        <div class="butterfly-shadow">
+          <span class="butterfly-wing butterfly-wing--left"></span>
+          <span class="butterfly-wing butterfly-wing--right"></span>
+        </div>
+      </div>
     </div>
     <main class="page">
       <header class="topbar">
@@ -519,6 +626,13 @@
         <button class="shadow-toggle" type="button" aria-expanded="true" aria-label="Minimalizovat ovládání stínu">−</button>
       </div>
       <div class="shadow-panel-body">
+        <div class="shadow-state-row" aria-label="Animation state">
+          <button class="shadow-state" data-shadow-state="0" type="button">0</button>
+          <button class="shadow-state is-active" data-shadow-state="1" type="button">1</button>
+          <button class="shadow-play" type="button">Play</button>
+          <button class="shadow-save" type="button">Save</button>
+        </div>
+        <div class="shadow-status" aria-live="polite"></div>
         <div class="shadow-control">
           <label for="shadow-intensity">Intensity <span class="shadow-value" id="shadow-intensity-value"></span></label>
           <input id="shadow-intensity" data-shadow-control="intensity" type="range" min="0" max="1" step="0.01" value="0.24">
@@ -558,11 +672,43 @@
       const root = document.documentElement;
       const panel = document.querySelector(".shadow-panel");
       const toggle = document.querySelector(".shadow-toggle");
+      const stateButtons = document.querySelectorAll("[data-shadow-state]");
+      const saveButton = document.querySelector(".shadow-save");
+      const playButton = document.querySelector(".shadow-play");
+      const status = document.querySelector(".shadow-status");
+      const butterflyLayer = document.querySelector(".window-shadow-butterfly");
       const spotlight = {
         core: 34,
         edge: 220
       };
+      const storageKey = "koreny.windowShadow.tacHojnosti";
+      const shadowDefaults = {
+        0: {
+          intensity: 0.24,
+          blur: 0.19,
+          light: 0.46,
+          angle: -17,
+          stretch: 1.8,
+          x: 25,
+          y: -19,
+          scale: 0.74
+        },
+        1: {
+          intensity: 0.24,
+          blur: 0.19,
+          light: 0.46,
+          angle: -13,
+          stretch: 2.05,
+          x: 25,
+          y: -19,
+          scale: 0.74
+        }
+      };
+      const shadowNames = Object.keys(shadowDefaults[1]);
       let introAnimationFrame = 0;
+      let butterflyAnimationFrame = 0;
+      let butterflyTimeout = 0;
+      let activeShadowState = "1";
 
       function updateSpotlightScale() {
         const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -625,11 +771,78 @@
         }
       };
 
-      function setShadowControl(name, rawValue) {
+      function readSavedShadowStates() {
+        try {
+          const saved = JSON.parse(localStorage.getItem(storageKey));
+          if (!saved || typeof saved !== "object") {
+            return JSON.parse(JSON.stringify(shadowDefaults));
+          }
+
+          return {
+            0: Object.fromEntries(shadowNames.map((name) => {
+              const value = Number(saved[0]?.[name]);
+              return [name, Number.isFinite(value) ? value : shadowDefaults[0][name]];
+            })),
+            1: Object.fromEntries(shadowNames.map((name) => {
+              const value = Number(saved[1]?.[name]);
+              return [name, Number.isFinite(value) ? value : shadowDefaults[1][name]];
+            }))
+          };
+        } catch {
+          return JSON.parse(JSON.stringify(shadowDefaults));
+        }
+      }
+
+      let shadowStates = readSavedShadowStates();
+
+      function setShadowControl(name, rawValue, options = {}) {
         const control = shadowControls[name];
         const value = Number(rawValue);
+        control.input.value = String(value);
         control.value.textContent = control.format(value);
-        control.apply(value);
+        if (options.updateState !== false) {
+          shadowStates[activeShadowState][name] = value;
+        }
+        if (options.apply !== false) {
+          control.apply(value);
+        }
+      }
+
+      function applyAnimatedShadowValue(name, value) {
+        if (name === "intensity") {
+          root.style.setProperty("--window-shadow-opacity", value.toFixed(4));
+        } else if (name === "blur") {
+          root.style.setProperty("--window-shadow-blur", `${(4 + value * 28).toFixed(3)}px`);
+        } else if (name === "light") {
+          root.style.setProperty("--window-light-opacity", value.toFixed(4));
+        } else if (name === "angle") {
+          root.style.setProperty("--window-shadow-angle", `${value.toFixed(3)}deg`);
+        } else if (name === "stretch") {
+          root.style.setProperty("--window-shadow-stretch", value.toFixed(4));
+        } else if (name === "x") {
+          root.style.setProperty("--window-shadow-x", `${value.toFixed(3)}vw`);
+        } else if (name === "y") {
+          root.style.setProperty("--window-shadow-y", `${value.toFixed(3)}vh`);
+        } else if (name === "scale") {
+          root.style.setProperty("--window-shadow-scale", value.toFixed(4));
+        }
+      }
+
+      function applyShadowState(stateKey) {
+        shadowNames.forEach((name) => {
+          setShadowControl(name, shadowStates[stateKey][name], {
+            updateState: false
+          });
+        });
+      }
+
+      function showShadowState(stateKey) {
+        activeShadowState = stateKey;
+        stateButtons.forEach((button) => {
+          button.classList.toggle("is-active", button.dataset.shadowState === stateKey);
+        });
+        applyShadowState(stateKey);
+        status.textContent = "";
       }
 
       function cancelIntroAnimation() {
@@ -639,52 +852,171 @@
         }
       }
 
-      function runIntroAnimation() {
+      function cancelButterflyFlight() {
+        if (butterflyAnimationFrame) {
+          cancelAnimationFrame(butterflyAnimationFrame);
+          butterflyAnimationFrame = 0;
+        }
+
+        if (butterflyTimeout) {
+          clearTimeout(butterflyTimeout);
+          butterflyTimeout = 0;
+        }
+
+        butterflyLayer.style.setProperty("--butterfly-opacity", "0");
+      }
+
+      function smoothstep(value) {
+        return value * value * (3 - 2 * value);
+      }
+
+      function cubicBezier(a, b, c, d, t) {
+        const mt = 1 - t;
+        return mt * mt * mt * a + 3 * mt * mt * t * b + 3 * mt * t * t * c + t * t * t * d;
+      }
+
+      function runButterflyFlight() {
+        cancelButterflyFlight();
+
         if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
           return;
         }
 
-        const startAngle = -17;
-        const endAngle = Number(shadowControls.angle.input.value);
-        const startStretch = 1.8;
-        const endStretch = Number(shadowControls.stretch.input.value);
+        const upward = Math.random() > 0.5;
+        const startX = 42 + Math.random() * 34;
+        const endX = 42 + Math.random() * 34;
+        const startY = upward ? 84 + Math.random() * 8 : 24 - Math.random() * 8;
+        const endY = upward ? 24 - Math.random() * 8 : 84 + Math.random() * 8;
+        const control1X = 38 + Math.random() * 42;
+        const control2X = 38 + Math.random() * 42;
+        const control1Y = upward ? 66 + Math.random() * 18 : 42 - Math.random() * 18;
+        const control2Y = upward ? 42 - Math.random() * 18 : 66 + Math.random() * 18;
+        const drift = -12 + Math.random() * 24;
+        const wobble = 2.4 + Math.random() * 3.2;
+        const duration = 4200 + Math.random() * 1500;
+        const seed = Math.random() * Math.PI * 2;
+        const start = performance.now();
+
+        function tick(now) {
+          const progress = Math.min((now - start) / duration, 1);
+          const eased = smoothstep(progress);
+          const arc = Math.sin(progress * Math.PI);
+          const x = cubicBezier(startX, control1X, control2X, endX, eased)
+            + drift * arc
+            + Math.sin(progress * Math.PI * 8 + seed) * wobble
+            + Math.sin(progress * Math.PI * 17 + seed * 1.7) * wobble * 0.26;
+          const y = cubicBezier(startY, control1Y, control2Y, endY, eased)
+            + Math.sin(progress * Math.PI * 6 + seed) * wobble * 0.82
+            + Math.sin(progress * Math.PI * 15 + seed * 0.8) * wobble * 0.18;
+          const fade = Math.min(smoothstep(Math.min(progress / 0.18, 1)), smoothstep(Math.min((1 - progress) / 0.22, 1)));
+          const nextT = Math.min(eased + 0.01, 1);
+          const nextX = cubicBezier(startX, control1X, control2X, endX, nextT);
+          const nextY = cubicBezier(startY, control1Y, control2Y, endY, nextT);
+          const flap = Math.abs(Math.sin(now * 0.068 + seed));
+          const wing = 18 + flap * 62 + Math.sin(now * 0.112 + seed) * 7;
+          const wingSpread = 0.42 + flap * 0.92;
+          const rotation = Math.atan2(nextY - y, nextX - x) * 180 / Math.PI + Math.sin(progress * Math.PI * 9 + seed) * 13;
+          const scale = 0.52 + arc * 0.22 + Math.sin(progress * Math.PI * 13 + seed) * 0.05;
+
+          butterflyLayer.style.setProperty("--butterfly-x", `${x.toFixed(3)}%`);
+          butterflyLayer.style.setProperty("--butterfly-y", `${y.toFixed(3)}%`);
+          butterflyLayer.style.setProperty("--butterfly-opacity", (fade * 0.92).toFixed(3));
+          butterflyLayer.style.setProperty("--butterfly-wing", `${wing.toFixed(3)}deg`);
+          butterflyLayer.style.setProperty("--butterfly-wing-spread", wingSpread.toFixed(3));
+          butterflyLayer.style.setProperty("--butterfly-rotate", `${rotation.toFixed(3)}deg`);
+          butterflyLayer.style.setProperty("--butterfly-scale", scale.toFixed(3));
+
+          if (progress < 1) {
+            butterflyAnimationFrame = requestAnimationFrame(tick);
+          } else {
+            butterflyAnimationFrame = 0;
+            butterflyLayer.style.setProperty("--butterfly-opacity", "0");
+          }
+        }
+
+        butterflyAnimationFrame = requestAnimationFrame(tick);
+      }
+
+      function scheduleButterflyFlight() {
+        cancelButterflyFlight();
+        butterflyTimeout = setTimeout(runButterflyFlight, 450 + Math.random() * 1100);
+      }
+
+      function runIntroAnimation() {
+        cancelIntroAnimation();
+        cancelButterflyFlight();
+
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+          showShadowState("1");
+          return;
+        }
+
+        const startState = shadowStates[0];
+        const endState = shadowStates[1];
         const duration = 2200;
         const start = performance.now();
 
-        function easeOutCubic(value) {
-          return 1 - Math.pow(1 - value, 3);
+        function easeInOutQuad(value) {
+          return value < 0.5 ? 2 * value * value : 1 - Math.pow(-2 * value + 2, 2) / 2;
         }
 
         function tick(now) {
           const progress = Math.min((now - start) / duration, 1);
-          const eased = easeOutCubic(progress);
-          const angle = startAngle + (endAngle - startAngle) * eased;
-          const stretch = startStretch + (endStretch - startStretch) * eased;
+          const eased = easeInOutQuad(progress);
 
-          root.style.setProperty("--window-shadow-angle", `${angle.toFixed(2)}deg`);
-          root.style.setProperty("--window-shadow-stretch", stretch.toFixed(3));
+          shadowNames.forEach((name) => {
+            const value = startState[name] + (endState[name] - startState[name]) * eased;
+            applyAnimatedShadowValue(name, value);
+          });
 
           if (progress < 1) {
             introAnimationFrame = requestAnimationFrame(tick);
           } else {
             introAnimationFrame = 0;
-            setShadowControl("angle", endAngle);
-            setShadowControl("stretch", endStretch);
+            showShadowState("1");
+            scheduleButterflyFlight();
           }
         }
 
-        root.style.setProperty("--window-shadow-angle", `${startAngle}deg`);
-        root.style.setProperty("--window-shadow-stretch", startStretch.toFixed(2));
+        shadowNames.forEach((name) => {
+          applyAnimatedShadowValue(name, startState[name]);
+        });
         introAnimationFrame = requestAnimationFrame(tick);
       }
 
-      Object.entries(shadowControls).forEach(([name, control]) => {
-        setShadowControl(name, control.input.value);
+      shadowNames.forEach((name) => {
+        const control = shadowControls[name];
         control.input.addEventListener("input", (event) => {
           cancelIntroAnimation();
+          cancelButterflyFlight();
           setShadowControl(name, event.target.value);
+          status.textContent = "";
         });
       });
+
+      stateButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+          cancelIntroAnimation();
+          cancelButterflyFlight();
+          showShadowState(button.dataset.shadowState);
+        });
+      });
+
+      saveButton.addEventListener("click", () => {
+        try {
+          localStorage.setItem(storageKey, JSON.stringify(shadowStates));
+          status.textContent = "Saved";
+        } catch {
+          status.textContent = "Save failed";
+        }
+      });
+
+      playButton.addEventListener("click", () => {
+        status.textContent = "";
+        runIntroAnimation();
+      });
+
+      showShadowState("1");
 
       toggle.addEventListener("click", () => {
         const collapsed = panel.classList.toggle("is-collapsed");
