@@ -8,6 +8,13 @@
       :root {
         --spotlight-x: -1000px;
         --spotlight-y: -1000px;
+        --gallery-distance-page: 2400px;
+        --project-track-top: 52vh;
+        --ambient-shadow: 0.1;
+        --ambient-mid: 0.045;
+        --ambient-light: 0.16;
+        --ambient-glow: 0.34;
+        --ambient-radial: 0.72;
         --gallery-butterfly-x: 50%;
         --gallery-butterfly-y: 50%;
         --gallery-butterfly-opacity: 0;
@@ -43,28 +50,28 @@
         overflow-x: hidden;
       }
 
-      body::before {
-        content: "";
-        position: absolute;
+      #grain-canvas {
+        position: fixed;
         inset: 0;
         z-index: 19;
+        width: 100vw;
+        height: 100vh;
         pointer-events: none;
         opacity: 0.72;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='72' viewBox='0 0 72 72'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='2.15' numOctaves='5' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.22 0 0 0 0 0.22 0 0 0 0 0.22 0 0 0 0.56 0'/%3E%3C/filter%3E%3Crect width='72' height='72' filter='url(%23n)'/%3E%3C/svg%3E");
-        background-size: 72px 72px;
         mix-blend-mode: multiply;
       }
 
       body::after {
         content: "";
-        position: absolute;
+        position: fixed;
         inset: 0;
         z-index: 18;
+        width: 100vw;
+        height: 100vh;
         pointer-events: none;
         background:
-          radial-gradient(circle at 100% 100%, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0) 46%),
-          linear-gradient(135deg, rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.045) 34%, rgba(255, 255, 255, 0.16) 72%, rgba(255, 255, 255, 0.34) 100%);
-        mix-blend-mode: multiply;
+          radial-gradient(circle at 100% 100%, rgba(255, 255, 255, var(--ambient-radial)), rgba(255, 255, 255, 0) 46%),
+          linear-gradient(135deg, rgba(0, 0, 0, var(--ambient-shadow)) 0%, rgba(0, 0, 0, var(--ambient-mid)) 34%, rgba(255, 255, 255, var(--ambient-light)) 72%, rgba(255, 255, 255, var(--ambient-glow)) 100%);
       }
 
       #page-shadow {
@@ -173,8 +180,8 @@
         display: grid;
         grid-template-columns: minmax(0, 1fr) minmax(240px, 360px);
         gap: 32px;
-        padding: 52px 0 36px;
-        border-bottom: 1px solid #dedede;
+        min-height: clamp(320px, 45vh, 520px);
+        padding: clamp(58px, 9vh, 108px) 0 36px;
       }
 
       h1 {
@@ -195,11 +202,31 @@
       }
 
       .overview {
-        display: grid;
+        display: none;
         grid-template-columns: repeat(4, minmax(0, 1fr));
         gap: 1px;
-        margin-top: 24px;
+        margin-top: 0;
         background: #dedede;
+      }
+
+      .shadow-aperture {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(220px, 320px);
+        gap: 32px;
+        min-height: clamp(120px, 23vh, 280px);
+        padding: 18px 0;
+        border-top: 1px solid #dedede;
+        border-bottom: 1px solid #dedede;
+      }
+
+      .shadow-aperture span {
+        align-self: end;
+        color: #666;
+        font-size: 13px;
+      }
+
+      .shadow-aperture::before {
+        content: "";
       }
 
       .overview-item {
@@ -224,16 +251,41 @@
       }
 
       .gallery {
-        display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 1px;
-        margin-top: 24px;
-        background: #dedede;
+        display: flex;
+        gap: clamp(28px, 4vw, 72px);
+        will-change: transform;
+      }
+
+      .projects-scroll {
+        --gallery-progress: 0;
+        --gallery-distance: 0px;
+        --gallery-start: calc(100vw - 48px);
+        position: relative;
+        height: max(140vh, calc(var(--gallery-distance) + 100vh));
+        margin-top: 0;
+      }
+
+      .projects-pin {
+        position: sticky;
+        top: 24px;
+        overflow: hidden;
+        min-height: calc(100vh - 48px);
+      }
+
+      .projects-scroll .gallery {
+        width: max-content;
+        min-height: calc(100vh - 49px);
+        transform: translate3d(
+          calc(var(--gallery-start) - (var(--gallery-distance) + var(--gallery-start)) * var(--gallery-progress)),
+          0,
+          0
+        );
       }
 
       .project {
         display: grid;
         grid-template-rows: auto 1fr;
+        flex: 0 0 clamp(320px, 31vw, 520px);
         background: rgba(250, 250, 250, 0.82);
         backdrop-filter: blur(1px);
       }
@@ -244,18 +296,69 @@
       }
 
       .project.featured {
-        grid-column: span 2;
+        flex-basis: clamp(520px, 52vw, 840px);
+      }
+
+      @media (min-width: 961px) {
+        .page {
+          min-height: calc(100vh + var(--gallery-distance-page));
+        }
+
+        .content {
+          position: sticky;
+          top: 0;
+          min-height: 100vh;
+          overflow: hidden;
+        }
+
+        .shadow-aperture {
+          min-height: calc(100vh - var(--project-track-top) - 24px);
+          border-bottom: 0;
+        }
+
+        .projects-scroll {
+          position: fixed;
+          left: 24px;
+          right: 24px;
+          top: var(--project-track-top);
+          z-index: 6;
+          height: calc(100vh - var(--project-track-top) - 24px);
+          min-height: 180px;
+          margin: 0;
+          overflow: hidden;
+        }
+
+        .projects-pin {
+          position: static;
+          min-height: 100%;
+          height: 100%;
+          overflow: visible;
+        }
+
+        .projects-scroll .gallery {
+          min-height: 100%;
+          height: 100%;
+        }
+
+        .project {
+          min-height: 100%;
+        }
+
+        .project-media,
+        .project.featured .project-media {
+          height: clamp(220px, 31vh, 420px);
+        }
       }
 
       .project-media {
         position: relative;
-        aspect-ratio: 4 / 3;
+        height: clamp(220px, 26vh, 360px);
         overflow: hidden;
         background: #f1eee8;
       }
 
       .project.featured .project-media {
-        aspect-ratio: 16 / 9;
+        height: clamp(220px, 26vh, 360px);
       }
 
       .project-media img {
@@ -273,11 +376,16 @@
         opacity: 0;
         object-fit: cover;
         object-position: center;
-        transition: opacity 180ms ease;
+        transition: opacity 2s cubic-bezier(0.2, 0, 0.18, 1);
+      }
+
+      .shadow-clear-image--auto {
+        transition: opacity 120ms linear;
       }
 
       .project-body {
         display: grid;
+        align-content: start;
         gap: 14px;
         padding: 16px;
       }
@@ -505,9 +613,44 @@
         }
 
         .intro,
+        .shadow-aperture,
         .gallery,
         .overview {
           grid-template-columns: 1fr;
+        }
+
+        .overview {
+          display: grid;
+        }
+
+        .projects-scroll {
+          height: auto;
+          margin-top: 24px;
+        }
+
+        .projects-pin {
+          position: static;
+          overflow: visible;
+          min-height: 0;
+        }
+
+        .projects-scroll .gallery {
+          display: grid;
+          width: auto;
+          min-height: 0;
+          transform: none;
+        }
+
+        .project {
+          flex-basis: auto;
+        }
+
+        .intro {
+          min-height: 52vh;
+        }
+
+        .shadow-aperture {
+          min-height: 32vh;
         }
 
         .project.featured {
@@ -540,6 +683,7 @@
     </style>
   </head>
   <body>
+    <canvas id="grain-canvas" aria-hidden="true"></canvas>
     <canvas id="page-shadow"></canvas>
     <div class="gallery-butterfly-shadow" aria-hidden="true">
       <div class="gallery-butterfly">
@@ -562,6 +706,10 @@
           <p class="meta">Studentské práce převádějí české, moravské a slovanské tradice do současného produktového designu. Spojuje je porcelán, rodinné rituály, sezónnost a tichá symbolika předmětů.</p>
         </section>
 
+        <section class="shadow-aperture" aria-label="Shadow study surface">
+          <span>Stínová plocha pro promítání motivů</span>
+        </section>
+
         <section class="overview" aria-label="Project overview">
           <div class="overview-item">
             <span>Materiál</span>
@@ -581,8 +729,10 @@
           </div>
         </section>
 
-        <section class="gallery">
-          <a class="project featured" href="project-pramen.html" aria-label="Detail projektu Pramen">
+        <section class="projects-scroll" aria-label="Project gallery">
+          <div class="projects-pin">
+            <div class="gallery">
+              <a class="project featured" href="project-pramen.html" aria-label="Detail projektu Pramen">
             <div class="project-media">
               <img src="data/Produkty/Otvírání Studánek/Jagošová_Jana_4.ročník_APD_Pramen/Projekt/render1.png" alt="Pramen, porcelánová miska na vodu">
             </div>
@@ -772,7 +922,7 @@
             </div>
           </a>
 
-          <a class="project" href="project-pernicek.html" aria-label="Detail projektu Perníček">
+              <a class="project" href="project-pernicek.html" aria-label="Detail projektu Perníček">
             <div class="project-media">
               <img src="data/Produkty/Vánoce (VZOR)/Vzorovy_Jan_4r_APD_Pernicek/Foto/Vzorovy_Jan_4r_APD_Pernicek_01.jpg" alt="Perníček, forma na vykrajování perníku">
             </div>
@@ -789,51 +939,57 @@
                 <span>Vánoce</span>
               </div>
             </div>
-          </a>
+              </a>
+            </div>
+          </div>
         </section>
       </div>
 
-      <aside class="controls" aria-label="Shadow controls">
+      <aside class="controls is-collapsed" aria-label="Shadow controls">
         <div class="controls-header">
           <div>
             <h2>Shadow lab</h2>
             <p>Barevná stínová vrstva pro microsite Kořeny.</p>
           </div>
-          <button class="controls-toggle" type="button" aria-expanded="true" aria-label="Minimalizovat ovládání stínu">−</button>
+          <button class="controls-toggle" type="button" aria-expanded="false" aria-label="Rozbalit ovládání stínu">+</button>
         </div>
         <div class="controls-body">
           <div class="group">
             <div class="control">
               <label for="depth">Depth offset <span class="value" id="depth-value"></span></label>
-              <input id="depth" type="range" min="0" max="1" step="0.01" value="0.68">
+              <input id="depth" type="range" min="0" max="1" step="0.01" value="0">
             </div>
             <div class="control">
               <label for="softness">Softness <span class="value" id="softness-value"></span></label>
-              <input id="softness" type="range" min="0" max="1" step="0.01" value="0.26">
+              <input id="softness" type="range" min="0" max="1" step="0.01" value="0.65">
             </div>
             <div class="control">
               <label for="blur">Blur <span class="value" id="blur-value"></span></label>
-              <input id="blur" type="range" min="0" max="1" step="0.01" value="0.08">
+              <input id="blur" type="range" min="0" max="1" step="0.01" value="0">
             </div>
             <div class="control">
               <label for="contrast">Contrast <span class="value" id="contrast-value"></span></label>
-              <input id="contrast" type="range" min="0" max="1" step="0.01" value="0.57">
+              <input id="contrast" type="range" min="0" max="1" step="0.01" value="1">
             </div>
             <div class="control">
               <label for="saturation">Saturation <span class="value" id="saturation-value"></span></label>
-              <input id="saturation" type="range" min="0" max="1" step="0.01" value="0.36">
+              <input id="saturation" type="range" min="0" max="1" step="0.01" value="0.66">
             </div>
             <div class="control">
               <label for="light">Light angle <span class="value" id="light-value"></span></label>
-              <input id="light" type="range" min="-1" max="1" step="0.01" value="0.8">
+              <input id="light" type="range" min="-1" max="1" step="0.01" value="0.02">
             </div>
             <div class="control">
               <label for="pattern-x">Pattern X <span class="value" id="pattern-x-value"></span></label>
-              <input id="pattern-x" type="range" min="0" max="1" step="0.01" value="0.36">
+              <input id="pattern-x" type="range" min="0" max="1" step="0.01" value="0.45">
             </div>
             <div class="control">
               <label for="pattern-y">Pattern Y <span class="value" id="pattern-y-value"></span></label>
-              <input id="pattern-y" type="range" min="0" max="1" step="0.01" value="0.59">
+              <input id="pattern-y" type="range" min="0" max="1" step="0.01" value="0.34">
+            </div>
+            <div class="control">
+              <label for="scale">Scale <span class="value" id="scale-value"></span></label>
+              <input id="scale" type="range" min="0.65" max="1.8" step="0.01" value="1.8">
             </div>
             <div class="control">
               <label for="motion">Motion <span class="value" id="motion-value"></span></label>
@@ -865,20 +1021,96 @@
 
     <script>
       const root = document.documentElement;
+      const grainCanvas = document.getElementById("grain-canvas");
+      const grainCtx = grainCanvas.getContext("2d", { alpha: true });
       const canvas = document.getElementById("page-shadow");
+      const projectsScroll = document.querySelector(".projects-scroll");
+      const projectsTrack = document.querySelector(".projects-scroll .gallery");
+      const shadowAperture = document.querySelector(".shadow-aperture");
       const butterflyLayer = document.querySelector(".gallery-butterfly-shadow");
-      const shadowClearImage = document.createElement("img");
       const shadowDprCap = 1.25;
-      shadowClearImage.className = "shadow-clear-image";
-      shadowClearImage.alt = "";
-      shadowClearImage.setAttribute("aria-hidden", "true");
+      let shadowClearImage = createClearOverlay("shadow-clear-image shadow-clear-image--auto");
       document.body.appendChild(shadowClearImage);
-      let activeClearImage = null;
+      let previousAutoClearOverlay = null;
+      let focusedProjectImage = null;
+      let hoverClearImage = null;
+      let hoverClearOverlay = null;
       const gl = canvas.getContext("webgl", {
         alpha: true,
         antialias: true,
         premultipliedAlpha: false
       });
+
+      function createClearOverlay(className = "shadow-clear-image") {
+        const image = document.createElement("img");
+        image.className = className;
+        image.alt = "";
+        image.setAttribute("aria-hidden", "true");
+        return image;
+      }
+
+      function positionClearOverlay(overlay, sourceImage) {
+        if (!overlay || !sourceImage) {
+          return false;
+        }
+
+        const rect = sourceImage.getBoundingClientRect();
+        if (rect.width <= 0 || rect.height <= 0 || rect.right < 0 || rect.left > window.innerWidth || rect.bottom < 0 || rect.top > window.innerHeight) {
+          overlay.style.opacity = "0";
+          return false;
+        }
+
+        const styles = getComputedStyle(sourceImage);
+        overlay.src = sourceImage.currentSrc || sourceImage.src;
+        overlay.style.left = `${rect.left}px`;
+        overlay.style.top = `${rect.top}px`;
+        overlay.style.width = `${rect.width}px`;
+        overlay.style.height = `${rect.height}px`;
+        overlay.style.objectFit = styles.objectFit;
+        overlay.style.objectPosition = styles.objectPosition;
+        overlay.style.borderRadius = styles.borderRadius;
+        return true;
+      }
+
+      function grainRandom(seed) {
+        let value = seed >>> 0;
+        return () => {
+          value += 0x6D2B79F5;
+          let next = value;
+          next = Math.imul(next ^ (next >>> 15), next | 1);
+          next ^= next + Math.imul(next ^ (next >>> 7), next | 61);
+          return ((next ^ (next >>> 14)) >>> 0) / 4294967296;
+        };
+      }
+
+      function renderStaticGrain(width, height) {
+        if (!grainCtx) {
+          return;
+        }
+
+        const grainWidth = Math.max(1, Math.round(width));
+        const grainHeight = Math.max(1, Math.round(height));
+        if (grainCanvas.width !== grainWidth || grainCanvas.height !== grainHeight) {
+          grainCanvas.width = grainWidth;
+          grainCanvas.height = grainHeight;
+        }
+
+        const image = grainCtx.createImageData(grainWidth, grainHeight);
+        const data = image.data;
+        const random = grainRandom((grainWidth * 73856093) ^ (grainHeight * 19349663) ^ 0x9E3779B9);
+        for (let i = 0; i < data.length; i += 4) {
+          const fine = random();
+          const neighbor = random();
+          const value = Math.max(0, Math.min(255, 118 + (fine - 0.5) * 92 + (neighbor - 0.5) * 34));
+          const alpha = Math.max(0, Math.min(255, 24 + Math.abs(fine - 0.5) * 52 + random() * 16));
+          data[i] = value;
+          data[i + 1] = value;
+          data[i + 2] = value;
+          data[i + 3] = alpha;
+        }
+        grainCtx.putImageData(image, 0, 0);
+        document.body.dataset.grainSize = `${grainWidth}x${grainHeight}`;
+      }
 
       const controls = {
         depth: document.getElementById("depth"),
@@ -889,6 +1121,7 @@
         light: document.getElementById("light"),
         patternX: document.getElementById("pattern-x"),
         patternY: document.getElementById("pattern-y"),
+        scale: document.getElementById("scale"),
         motion: document.getElementById("motion"),
         haze: document.getElementById("haze")
       };
@@ -902,6 +1135,7 @@
         light: document.getElementById("light-value"),
         patternX: document.getElementById("pattern-x-value"),
         patternY: document.getElementById("pattern-y-value"),
+        scale: document.getElementById("scale-value"),
         motion: document.getElementById("motion-value")
       };
 
@@ -914,12 +1148,19 @@
         light: Number(controls.light.value),
         patternX: Number(controls.patternX.value),
         patternY: Number(controls.patternY.value),
+        scale: Number(controls.scale.value),
         motion: Number(controls.motion.value),
         haze: controls.haze.checked ? 1 : 0,
         pointerX: -1000,
         pointerY: -1000,
         smoothPointerX: -1000,
         smoothPointerY: -1000,
+        mouseLight: Number(controls.light.value),
+        smoothMouseLight: Number(controls.light.value),
+        mousePatternY: Number(controls.patternY.value),
+        smoothMousePatternY: Number(controls.patternY.value),
+        mouseBrightness: 0.5,
+        smoothMouseBrightness: 0.5,
         scrollMotion: 0,
         scrollMotionTarget: 0,
         scrollRestUntil: 0,
@@ -963,6 +1204,7 @@
         uniform float u_saturation;
         uniform float u_light;
         uniform vec2 u_pattern;
+        uniform float u_scale;
         uniform float u_motion;
         uniform float u_haze;
         uniform vec2 u_pointer;
@@ -1011,9 +1253,11 @@
           float pageAspect = u_page_size.y / max(u_page_size.x, 1.0);
           float gust = sin(t * 1.15 + maskUv.y * 6.2);
           gust += sin(t * 0.73 + maskUv.y * 10.4 + maskUv.x * 1.8) * 0.45;
-          float verticalShape = smoothstep(0.05, 0.95, maskUv.y);
-          float bend = gust * u_motion * 0.024 * verticalShape;
-          float lift = sin(t * 0.82 + maskUv.x * 5.8) * u_motion * 0.005 / pageAspect;
+          float bladeHeight = smoothstep(0.12, 0.62, maskUv.y);
+          bladeHeight *= smoothstep(0.02, 0.11, maskUv.y);
+          float localFlutter = 0.68 + 0.32 * sin(maskUv.x * 38.0 + maskUv.y * 17.0 + t * 0.9);
+          float bend = gust * u_motion * 0.028 * bladeHeight * localFlutter;
+          float lift = sin(t * 0.82 + maskUv.x * 5.8) * u_motion * 0.004 * bladeHeight / pageAspect;
           return maskUv + vec2(bend, lift);
         }
 
@@ -1039,6 +1283,24 @@
           return clamp(m, 0.0, 1.0);
         }
 
+        float prismMask(vec2 uv, float radius, float t) {
+          uv = windWarp(uv, t);
+          float pageAspect = u_page_size.y / max(u_page_size.x, 1.0);
+          vec2 radiusX = vec2(radius, 0.0);
+          vec2 radiusY = vec2(0.0, radius / pageAspect);
+          float m = maskAt(uv) * 0.34;
+          m += maskAt(uv + radiusX) * 0.165;
+          m += maskAt(uv - radiusX) * 0.165;
+          m += maskAt(uv + radiusY) * 0.165;
+          m += maskAt(uv - radiusY) * 0.165;
+          return clamp(m, 0.0, 1.0);
+        }
+
+        vec2 metricOffset(vec2 direction, float amount) {
+          float pageAspect = u_page_size.y / max(u_page_size.x, 1.0);
+          return vec2(direction.x * amount, direction.y * amount / pageAspect);
+        }
+
         vec2 projectedUv(vec2 uv, vec2 direction, float distance, float scale, float stretch) {
           float pageAspect = u_page_size.y / max(u_page_size.x, 1.0);
           vec2 metricUv = vec2(uv.x, uv.y * pageAspect);
@@ -1049,12 +1311,14 @@
           float along = dot(p, direction);
           p += direction * along * ((1.0 / stretch) - 1.0);
           vec2 metricSample = p / scale + metricCenter;
+          vec2 groundAnchor = vec2(0.5, 0.0);
+          metricSample = groundAnchor + (metricSample - groundAnchor) / u_scale;
           return vec2(metricSample.x, metricSample.y / pageAspect);
         }
 
         void main() {
           float pageX = v_uv.x * u_viewport_size.x;
-          float pageY = u_scroll_y + (1.0 - v_uv.y) * u_viewport_size.y;
+          float pageY = (1.0 - v_uv.y) * u_viewport_size.y;
           vec2 uv = vec2(pageX / u_page_size.x, 1.0 - pageY / u_page_size.y);
           float t = u_time;
           float angle = mix(-1.15, 1.15, u_light * 0.5 + 0.5);
@@ -1068,16 +1332,22 @@
           float bodyStretch = 1.0 + lowLight * 1.2;
           float spreadStretch = 1.0 + lowLight * (1.75 + spread * 1.1);
           float tailStretch = 1.0 + lowLight * (2.65 + spread * 1.8);
+          float veilStretch = 1.0 + lowLight * (2.18 + spread * 1.42);
+          float mistStretch = 1.0 + lowLight * (3.25 + spread * 2.16);
 
           vec2 contactUv = projectedUv(uv, direction, baseDistance * 0.35, scale, contactStretch);
           vec2 bodyUv = projectedUv(uv, direction, baseDistance, scale, bodyStretch);
           vec2 spreadUv = projectedUv(uv, direction, baseDistance * (1.0 + spread * 1.6), scale, spreadStretch);
           vec2 tailUv = projectedUv(uv, direction, baseDistance * (1.0 + spread * 3.0), scale, tailStretch);
+          vec2 veilUv = projectedUv(uv, direction, baseDistance * (1.0 + spread * 2.25), scale, veilStretch);
+          vec2 mistUv = projectedUv(uv, direction, baseDistance * (1.0 + spread * 3.85), scale, mistStretch);
 
           float contactFlower = blurredMask(contactUv, blur * 0.58, t);
           float bodyFlower = blurredMask(bodyUv, blur, t);
           float spreadFlower = blurredMask(spreadUv, blur * (1.35 + spread * 0.8), t);
           float tailFlower = blurredMask(tailUv, blur * (1.8 + spread * 1.15), t);
+          float veilFlower = blurredMask(veilUv, blur * (1.58 + spread * 1.0), t);
+          float mistFlower = blurredMask(mistUv, blur * (2.2 + spread * 1.38), t);
           float unevenLight = 0.0;
           if (u_haze > 0.5) {
             unevenLight = smoothstep(0.38, 0.86, fbm((uv + direction * baseDistance) * vec2(6.2, 4.6) + vec2(t, -t * 0.45)));
@@ -1093,27 +1363,51 @@
           float lightTexture = mix(1.0, 0.84 + unevenLight * 0.15, u_haze);
           float contactLayer = smoothstep(0.04, 0.95, contactFlower) * 0.25 * lightTexture;
           float bodyLayer = smoothstep(0.02, 0.98, bodyFlower) * 0.43 * lightTexture;
-          float spreadLayer = smoothstep(0.0, 0.88, spreadFlower) * spread * 0.50 * lightTexture;
-          float tailLayer = smoothstep(0.0, 0.82, tailFlower) * spread * 0.36 * lightTexture;
-          float hazeLayer = smoothstep(0.0, 1.0, bodyFlower + spreadFlower + tailFlower) * 0.012 * lightTexture;
+          float spreadEase = smoothstep(0.0, 1.0, spread);
+          float spreadLayer = smoothstep(0.0, 0.88, spreadFlower) * spreadEase * 0.34 * lightTexture;
+          float veilLayer = smoothstep(0.0, 0.84, veilFlower) * spreadEase * 0.28 * lightTexture;
+          float tailLayer = smoothstep(0.0, 0.82, tailFlower) * spreadEase * 0.22 * lightTexture;
+          float mistLayer = smoothstep(0.0, 0.76, mistFlower) * spreadEase * 0.16 * lightTexture;
+          float hazeLayer = smoothstep(0.0, 1.0, bodyFlower + spreadFlower + veilFlower + tailFlower + mistFlower) * 0.012 * lightTexture;
 
-          float redMix = bodyLayer * 0.62 + contactLayer * 0.16;
-          float mintMix = spreadLayer * 0.5;
-          float blueMix = tailLayer * 0.34;
-          float brownMix = contactLayer * 0.42 + tailLayer * 0.18;
-          float creamMix = hazeLayer * 0.45;
-          float colorWeight = redMix + mintMix + blueMix + brownMix + creamMix;
-          vec3 paletteMix = inkRed * redMix;
-          paletteMix += inkMint * mintMix;
-          paletteMix += inkBlue * blueMix;
-          paletteMix += inkBrown * brownMix;
-          paletteMix += inkCream * creamMix;
-          paletteMix /= max(colorWeight, 0.001);
+          float density = contactLayer + bodyLayer + spreadLayer + veilLayer + tailLayer + mistLayer + hazeLayer;
+          float shadowBody = max(max(contactFlower, bodyFlower), max(max(spreadFlower, veilFlower), max(tailFlower, mistFlower)));
+          vec2 perpendicular = vec2(-direction.y, direction.x);
+          float prismSpread = (0.004 + u_depth * 0.019 + spread * 0.014 + u_blur * 0.006) * (0.35 + u_saturation * 1.85);
+          vec2 prismStep = metricOffset(direction, prismSpread);
+          vec2 prismCross = metricOffset(perpendicular, prismSpread * 0.58);
 
-          float density = contactLayer + bodyLayer + spreadLayer + tailLayer + hazeLayer;
-          vec3 chromaticInk = mix(paperShadow, paletteMix, 0.88);
-          vec3 ink = mix(paperShadow, chromaticInk, u_saturation);
-          ink = mix(ink, paperShadow, smoothstep(0.46, 1.02, density) * 0.1);
+          float redPrism = prismMask(spreadUv - prismStep * 1.35 + prismCross * 0.22, blur * 0.86, t);
+          float mintPrism = prismMask(bodyUv - prismStep * 0.48 - prismCross * 1.1, blur * 0.8, t);
+          float bluePrism = prismMask(spreadUv + prismStep * 1.35 - prismCross * 0.18, blur * 0.86, t);
+          float brownPrism = prismMask(tailUv + prismStep * 2.1 + prismCross * 0.42, blur * 1.2, t);
+          float creamPrism = prismMask(contactUv - prismStep * 0.72 + prismCross * 0.9, blur * 0.72, t);
+
+          float redEdge = max(redPrism - shadowBody * 0.68, 0.0);
+          float mintEdge = max(mintPrism - shadowBody * 0.72, 0.0);
+          float blueEdge = max(bluePrism - shadowBody * 0.68, 0.0);
+          float brownEdge = max(brownPrism - shadowBody * 0.76, 0.0);
+          float creamEdge = max(creamPrism - shadowBody * 0.8, 0.0);
+          float innerEdge = smoothstep(0.025, 0.28, shadowBody) * (1.0 - smoothstep(0.34, 0.82, shadowBody));
+
+          redEdge += abs(redPrism - spreadFlower) * innerEdge * 0.42;
+          mintEdge += abs(mintPrism - bodyFlower) * innerEdge * 0.34;
+          blueEdge += abs(bluePrism - spreadFlower) * innerEdge * 0.42;
+          brownEdge += abs(brownPrism - tailFlower) * innerEdge * 0.24;
+          creamEdge += abs(creamPrism - contactFlower) * innerEdge * 0.18;
+
+          float prismWeight = redEdge + mintEdge + blueEdge + brownEdge + creamEdge;
+          vec3 prismInk = inkRed * redEdge;
+          prismInk += inkMint * mintEdge;
+          prismInk += inkBlue * blueEdge;
+          prismInk += inkBrown * brownEdge;
+          prismInk += inkCream * creamEdge;
+          prismInk /= max(prismWeight, 0.001);
+
+          float prismPresence = smoothstep(0.005, 0.16, prismWeight) * u_saturation;
+          prismPresence *= 1.0 - smoothstep(0.62, 1.12, density);
+          vec3 ink = mix(paperShadow, prismInk, prismPresence);
+          density += prismWeight * u_saturation * 0.19;
 
           float strength = mix(0.18, 0.88, u_contrast);
           float alpha = clamp(pow(density, 0.82) * strength, 0.0, 0.68);
@@ -1137,6 +1431,13 @@
         state[name] = Number(value);
         controls[name].value = String(value);
         values[name].textContent = Number(value).toFixed(2);
+        if (name === "light") {
+          state.mouseLight = state.light;
+          state.smoothMouseLight = state.light;
+        } else if (name === "patternY") {
+          state.mousePatternY = state.patternY;
+          state.smoothMousePatternY = state.patternY;
+        }
       }
 
       function setHaze(enabled) {
@@ -1164,14 +1465,15 @@
       });
 
       document.getElementById("reference").addEventListener("click", () => {
-        setControl("depth", 0.68);
-        setControl("softness", 0.26);
-        setControl("blur", 0.08);
-        setControl("contrast", 0.57);
-        setControl("saturation", 0.36);
-        setControl("light", 0.8);
-        setControl("patternX", 0.36);
-        setControl("patternY", 0.59);
+        setControl("depth", 0);
+        setControl("softness", 0.65);
+        setControl("blur", 0);
+        setControl("contrast", 1);
+        setControl("saturation", 0.66);
+        setControl("light", 0.02);
+        setControl("patternX", 0.45);
+        setControl("patternY", 0.34);
+        setControl("scale", 1.8);
         setControl("motion", 0.27);
         setHaze(true);
       });
@@ -1216,6 +1518,71 @@
         ctx.restore();
       }
 
+      function meadowValue(index, salt = 0) {
+        const value = Math.sin(index * 12.9898 + salt * 78.233) * 43758.5453;
+        return value - Math.floor(value);
+      }
+
+      function drawMeadowStem(ctx, x, footY, headY, sway, width, alpha) {
+        ctx.save();
+        ctx.globalAlpha = alpha;
+        ctx.lineWidth = width;
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+        ctx.strokeStyle = "rgba(0, 0, 0, 1)";
+        ctx.beginPath();
+        ctx.moveTo(x, footY);
+        ctx.bezierCurveTo(
+          x + sway * 0.22,
+          footY - (footY - headY) * 0.36,
+          x + sway * 0.82,
+          footY - (footY - headY) * 0.74,
+          x + sway,
+          headY
+        );
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      function pointOnStem(x, footY, headY, sway, progress) {
+        const y = footY + (headY - footY) * progress;
+        const curve = Math.sin(progress * Math.PI * 0.72);
+        return {
+          x: x + sway * curve,
+          y
+        };
+      }
+
+      function drawMeadowLeaf(ctx, x, y, size, angle, alpha) {
+        ctx.save();
+        ctx.globalAlpha = alpha;
+        ctx.translate(x, y);
+        ctx.rotate(angle);
+        ctx.fillStyle = "rgba(0, 0, 0, 1)";
+        ctx.beginPath();
+        ctx.ellipse(0, 0, size * 0.34, size, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      function drawMeadowBranch(ctx, x, footY, headY, sway, progress, side, length, width, alpha) {
+        const start = pointOnStem(x, footY, headY, sway, progress);
+        const angle = side * (0.42 + meadowValue(progress * 100, side) * 0.34);
+        const endX = start.x + Math.cos(angle) * length * side;
+        const endY = start.y - Math.sin(Math.abs(angle)) * length * 0.78;
+        ctx.save();
+        ctx.globalAlpha = alpha;
+        ctx.lineWidth = width;
+        ctx.lineCap = "round";
+        ctx.strokeStyle = "rgba(0, 0, 0, 1)";
+        ctx.beginPath();
+        ctx.moveTo(start.x, start.y);
+        ctx.quadraticCurveTo(start.x + side * length * 0.34, start.y - length * 0.16, endX, endY);
+        ctx.stroke();
+        ctx.restore();
+        return { x: endX, y: endY, angle: side * 0.92 };
+      }
+
       async function createFlowerMask(pageWidth = window.innerWidth, pageHeight = window.innerHeight) {
         const mask = document.createElement("canvas");
         const pageAspect = Math.max(pageHeight / Math.max(pageWidth, 1), 0.25);
@@ -1230,12 +1597,66 @@
         const w = mask.width;
         const h = mask.height;
         ctx.clearRect(0, 0, w, h);
-        drawFlower(ctx, flowers[4], w * 0.76, h * 0.2, w * 0.42, -0.22, 0.85);
-        drawFlower(ctx, flowers[0], w * 0.73, h * 0.5, w * 0.3, 0.2, 0.72);
-        drawFlower(ctx, flowers[3], w * 0.35, h * 0.68, w * 0.42, -0.18, 0.72);
-        drawFlower(ctx, flowers[1], w * 0.38, h * 0.3, w * 0.36, -0.74, 0.64);
-        drawFlower(ctx, flowers[2], w * 0.82, h * 0.84, w * 0.32, 0.5, 0.64);
-        drawFlower(ctx, flowers[0], w * 0.16, h * 0.92, w * 0.24, -0.06, 0.42);
+        const meadowCount = 20;
+        const flowerBase = Math.max(24, Math.min(84, w * 0.074));
+        const stemBase = Math.max(1.5, w * 0.0042);
+
+        for (let i = 0; i < meadowCount; i++) {
+          const column = (i + 0.5) / meadowCount;
+          const x = w * (0.03 + column * 0.94 + (meadowValue(i, 1) - 0.5) * 0.09);
+          const footY = h * (0.92 + meadowValue(i, 2) * 0.16);
+          const tall = meadowValue(i, 3);
+          const stemLength = h * (0.14 + Math.pow(tall, 1.75) * 0.58);
+          const headY = Math.max(h * 0.04, footY - stemLength);
+          const sway = w * ((meadowValue(i, 4) - 0.5) * (0.08 + tall * 0.14));
+          const size = flowerBase * (0.52 + meadowValue(i, 5) * 1.05) * (0.72 + tall * 0.55);
+          const alpha = 0.42 + meadowValue(i, 6) * 0.43;
+          const rotation = (meadowValue(i, 7) - 0.5) * 1.7;
+          const image = flowers[i % flowers.length];
+          const stemWidth = stemBase * (0.62 + meadowValue(i, 8) * 0.82);
+          drawMeadowStem(ctx, x, footY, headY, sway, stemWidth, alpha * 0.74);
+
+          const leafCount = 1 + Math.floor(meadowValue(i, 9) * 3);
+          for (let leaf = 0; leaf < leafCount; leaf++) {
+            const progress = 0.28 + meadowValue(i, 10 + leaf) * 0.52;
+            const point = pointOnStem(x, footY, headY, sway, progress);
+            const side = meadowValue(i, 13 + leaf) > 0.5 ? 1 : -1;
+            drawMeadowLeaf(
+              ctx,
+              point.x + side * stemBase * 2.1,
+              point.y,
+              flowerBase * (0.28 + meadowValue(i, 16 + leaf) * 0.46),
+              side * (0.9 + meadowValue(i, 19 + leaf) * 0.7),
+              alpha * 0.36
+            );
+          }
+
+          const branchCount = tall > 0.34 ? 1 + Math.floor(meadowValue(i, 22) * 3) : 0;
+          for (let branch = 0; branch < branchCount; branch++) {
+            const side = meadowValue(i, 23 + branch) > 0.5 ? 1 : -1;
+            const progress = 0.38 + meadowValue(i, 26 + branch) * 0.44;
+            const branchEnd = drawMeadowBranch(
+              ctx,
+              x,
+              footY,
+              headY,
+              sway,
+              progress,
+              side,
+              flowerBase * (0.56 + meadowValue(i, 29 + branch) * 0.9),
+              stemWidth * 0.72,
+              alpha * 0.58
+            );
+
+            if (meadowValue(i, 32 + branch) > 0.38) {
+              drawFlower(ctx, flowers[(i + branch + 2) % flowers.length], branchEnd.x, branchEnd.y, size * (0.34 + meadowValue(i, 35 + branch) * 0.22), branchEnd.angle, alpha * 0.5);
+            } else {
+              drawMeadowLeaf(ctx, branchEnd.x, branchEnd.y, flowerBase * 0.34, branchEnd.angle, alpha * 0.44);
+            }
+          }
+
+          drawFlower(ctx, image, x + sway, headY, size, rotation, alpha);
+        }
         return mask;
       }
 
@@ -1276,6 +1697,7 @@
         saturation: gl.getUniformLocation(program, "u_saturation"),
         light: gl.getUniformLocation(program, "u_light"),
         pattern: gl.getUniformLocation(program, "u_pattern"),
+        scale: gl.getUniformLocation(program, "u_scale"),
         motion: gl.getUniformLocation(program, "u_motion"),
         haze: gl.getUniformLocation(program, "u_haze"),
         pointer: gl.getUniformLocation(program, "u_pointer"),
@@ -1316,9 +1738,9 @@
       }
 
       function refreshFlowerMask(force = false) {
-        const nextAspect = state.pageHeight / Math.max(state.pageWidth, 1);
-        const sizeChanged = Math.abs(state.pageWidth - state.maskPageWidth) > 16 ||
-          Math.abs(state.pageHeight - state.maskPageHeight) > 16;
+        const nextAspect = state.viewportHeight / Math.max(state.viewportWidth, 1);
+        const sizeChanged = Math.abs(state.viewportWidth - state.maskPageWidth) > 16 ||
+          Math.abs(state.viewportHeight - state.maskPageHeight) > 16;
         const aspectChanged = Math.abs(nextAspect - state.maskAspect) >= 0.04;
         if (!force && !sizeChanged && !aspectChanged) {
           return;
@@ -1329,10 +1751,10 @@
         }
 
         state.maskAspect = nextAspect;
-        state.maskPageWidth = state.pageWidth;
-        state.maskPageHeight = state.pageHeight;
+        state.maskPageWidth = state.viewportWidth;
+        state.maskPageHeight = state.viewportHeight;
         state.maskRefreshQueued = true;
-        createFlowerMask(state.pageWidth, state.pageHeight)
+        createFlowerMask(state.viewportWidth, state.viewportHeight)
           .then((mask) => {
             uploadFlowerMask(mask);
           })
@@ -1347,6 +1769,41 @@
               requestAnimationFrame(() => refreshFlowerMask(true));
             }
           });
+      }
+
+      function syncHorizontalGallery() {
+        if (!projectsScroll || !projectsTrack) {
+          return;
+        }
+
+        if (window.innerWidth <= 960) {
+          projectsScroll.style.setProperty("--gallery-progress", "0");
+          projectsScroll.style.setProperty("--gallery-distance", "0px");
+          projectsScroll.style.setProperty("--gallery-start", "0px");
+          root.style.setProperty("--gallery-distance-page", "0px");
+          root.style.setProperty("--project-track-top", "52vh");
+          return;
+        }
+
+        const pin = projectsScroll.querySelector(".projects-pin");
+        const pinWidth = pin ? pin.clientWidth : window.innerWidth;
+        const trackWidth = projectsTrack.scrollWidth;
+        const distance = Math.max(0, trackWidth - pinWidth);
+        const start = Math.max(0, window.innerWidth - 48);
+        projectsScroll.style.setProperty("--gallery-distance", `${distance}px`);
+        projectsScroll.style.setProperty("--gallery-start", `${start}px`);
+        root.style.setProperty("--gallery-distance-page", `${distance + start}px`);
+
+        if (shadowAperture) {
+          const trackTop = Math.max(96, Math.min(window.innerHeight - 220, shadowAperture.offsetTop));
+          root.style.setProperty("--project-track-top", `${trackTop}px`);
+        }
+
+        const scrollLength = Math.max(1, distance + start);
+        const progress = Math.max(0, Math.min(1, window.scrollY / scrollLength));
+
+        projectsScroll.style.setProperty("--gallery-progress", progress.toFixed(4));
+        requestAnimationFrame(syncFocusedProjectImage);
       }
 
       function resize() {
@@ -1370,7 +1827,12 @@
         state.viewportWidth = viewportWidth;
         state.viewportHeight = viewportHeight;
         syncShadowClearImage();
+        renderStaticGrain(viewportWidth, viewportHeight);
+        syncHorizontalGallery();
+        syncFocusedProjectImage();
 
+        grainCanvas.style.width = `${viewportWidth}px`;
+        grainCanvas.style.height = `${viewportHeight}px`;
         canvas.style.width = `${viewportWidth}px`;
         canvas.style.height = `${viewportHeight}px`;
         const width = Math.max(1, Math.round(viewportWidth * dpr));
@@ -1384,94 +1846,192 @@
       }
 
       window.addEventListener("resize", resize);
-      window.addEventListener("scroll", syncShadowClearImage, { passive: true });
-      window.addEventListener("load", () => refreshFlowerMask(true));
+      window.addEventListener("scroll", () => {
+        syncShadowClearImage();
+        syncHorizontalGallery();
+      }, { passive: true });
+      window.addEventListener("load", () => {
+        refreshFlowerMask(true);
+        syncHorizontalGallery();
+        syncFocusedProjectImage();
+      });
       document.querySelectorAll("img").forEach((image) => {
         if (!image.complete) {
-          image.addEventListener("load", () => refreshFlowerMask(true), { once: true });
+          image.addEventListener("load", () => {
+            refreshFlowerMask(true);
+            syncHorizontalGallery();
+            syncFocusedProjectImage();
+          }, { once: true });
         }
       });
 
       function syncShadowClearImage() {
-        if (!activeClearImage) {
+        if (!focusedProjectImage) {
           shadowClearImage.style.opacity = "0";
           return;
         }
 
-        const rect = activeClearImage.getBoundingClientRect();
-        if (rect.width <= 0 || rect.height <= 0) {
+        if (!positionClearOverlay(shadowClearImage, focusedProjectImage)) {
           shadowClearImage.style.opacity = "0";
           return;
         }
 
-        const styles = getComputedStyle(activeClearImage);
-        shadowClearImage.src = activeClearImage.currentSrc || activeClearImage.src;
-        shadowClearImage.style.left = `${rect.left}px`;
-        shadowClearImage.style.top = `${rect.top}px`;
-        shadowClearImage.style.width = `${rect.width}px`;
-        shadowClearImage.style.height = `${rect.height}px`;
-        shadowClearImage.style.objectFit = styles.objectFit;
-        shadowClearImage.style.objectPosition = styles.objectPosition;
-        shadowClearImage.style.borderRadius = styles.borderRadius;
         shadowClearImage.style.opacity = "1";
+      }
+
+      function switchFocusedProjectImage(image) {
+        if (image === focusedProjectImage) {
+          syncShadowClearImage();
+          return;
+        }
+
+        if (!image) {
+          focusedProjectImage = null;
+          shadowClearImage.style.opacity = "0";
+          return;
+        }
+
+        if (previousAutoClearOverlay) {
+          previousAutoClearOverlay.remove();
+        }
+
+        previousAutoClearOverlay = shadowClearImage;
+        previousAutoClearOverlay.style.opacity = "0";
+        window.setTimeout(() => {
+          if (previousAutoClearOverlay && previousAutoClearOverlay.parentNode) {
+            previousAutoClearOverlay.remove();
+          }
+          previousAutoClearOverlay = null;
+        }, 260);
+
+        shadowClearImage = createClearOverlay("shadow-clear-image shadow-clear-image--auto");
+        document.body.appendChild(shadowClearImage);
+        focusedProjectImage = image;
+        if (!positionClearOverlay(shadowClearImage, focusedProjectImage)) {
+          shadowClearImage.style.opacity = "0";
+          return;
+        }
+
+        requestAnimationFrame(() => {
+          shadowClearImage.style.opacity = "1";
+        });
+      }
+
+      function releaseHoverOverlay() {
+        if (!hoverClearOverlay) {
+          hoverClearImage = null;
+          return;
+        }
+
+        const overlay = hoverClearOverlay;
+        hoverClearImage = null;
+        hoverClearOverlay = null;
+        overlay.style.opacity = "0";
+        window.setTimeout(() => overlay.remove(), 2200);
+      }
+
+      function showHoverClearImage(image) {
+        if (!image || image === hoverClearImage || image.classList.contains("shadow-clear-image")) {
+          return;
+        }
+
+        releaseHoverOverlay();
+        const overlay = createClearOverlay("shadow-clear-image shadow-clear-image--hover");
+        if (!positionClearOverlay(overlay, image)) {
+          return;
+        }
+
+        hoverClearImage = image;
+        hoverClearOverlay = overlay;
+        document.body.appendChild(overlay);
+        requestAnimationFrame(() => {
+          overlay.style.opacity = "1";
+        });
+      }
+
+      function syncHoverClearImage() {
+        if (hoverClearOverlay && hoverClearImage) {
+          positionClearOverlay(hoverClearOverlay, hoverClearImage);
+        }
+      }
+
+      function syncFocusedProjectImage() {
+        if (!projectsScroll || window.innerWidth <= 960) {
+          switchFocusedProjectImage(null);
+          return;
+        }
+
+        const candidates = [...projectsScroll.querySelectorAll(".project-media img")];
+        let focused = null;
+        let focusedLeft = Infinity;
+        for (const image of candidates) {
+          const rect = image.getBoundingClientRect();
+          const fullyVisible = rect.left >= 24 && rect.right <= window.innerWidth - 24 && rect.width > 0 && rect.height > 0;
+          if (fullyVisible && rect.left < focusedLeft) {
+            focused = image;
+            focusedLeft = rect.left;
+          }
+        }
+
+        switchFocusedProjectImage(focused);
       }
 
       document.querySelectorAll("img").forEach((image) => {
         image.addEventListener("mouseenter", () => {
-          activeClearImage = image;
-          syncShadowClearImage();
+          showHoverClearImage(image);
         });
-        image.addEventListener("mousemove", syncShadowClearImage);
+        image.addEventListener("mousemove", syncHoverClearImage);
         image.addEventListener("mouseleave", () => {
-          if (activeClearImage === image) {
-            activeClearImage = null;
-            syncShadowClearImage();
+          if (hoverClearImage === image) {
+            releaseHoverOverlay();
           }
         });
       });
 
       document.addEventListener("pointerover", (event) => {
         const image = event.target.closest?.("img");
-        if (!image || image === shadowClearImage) {
+        if (!image || image.classList.contains("shadow-clear-image")) {
           return;
         }
 
-        activeClearImage = image;
-        syncShadowClearImage();
+        showHoverClearImage(image);
       }, true);
 
       document.addEventListener("mouseover", (event) => {
         const image = event.target.closest?.("img");
-        if (!image || image === shadowClearImage) {
+        if (!image || image.classList.contains("shadow-clear-image")) {
           return;
         }
 
-        activeClearImage = image;
-        syncShadowClearImage();
+        showHoverClearImage(image);
       }, true);
 
       document.addEventListener("pointerout", (event) => {
-        if (!activeClearImage || event.target !== activeClearImage) {
+        if (!hoverClearImage || event.target !== hoverClearImage) {
           return;
         }
 
-        activeClearImage = null;
-        syncShadowClearImage();
+        releaseHoverOverlay();
       }, true);
 
-      window.addEventListener("pointermove", (event) => {
-        const dpr = state.dpr;
-        state.pointerX = event.clientX * dpr;
-        state.pointerY = canvas.height - event.clientY * dpr;
-        root.style.setProperty("--spotlight-x", `${event.clientX}px`);
-        root.style.setProperty("--spotlight-y", `${event.clientY}px`);
-      });
+      function updateMouseLight(event) {
+        const x = event.clientX / Math.max(window.innerWidth, 1);
+        const y = event.clientY / Math.max(window.innerHeight, 1);
+        const shadowDiagonal = Math.max(0, Math.min(1, (x + (1 - y)) * 0.5));
+        const axis = shadowDiagonal - 0.5;
+        const backgroundDiagonal = Math.max(0, Math.min(1, (x + y) * 0.5));
+        state.mouseLight = Math.max(-1, Math.min(1, state.light + axis * 0.24));
+        state.mousePatternY = Math.max(0, Math.min(1, state.patternY + axis * 0.028));
+        state.mouseBrightness = backgroundDiagonal;
+      }
+
+      window.addEventListener("pointermove", updateMouseLight);
+      window.addEventListener("mousemove", updateMouseLight);
 
       window.addEventListener("pointerleave", () => {
-        state.pointerX = -1000;
-        state.pointerY = -1000;
-        root.style.setProperty("--spotlight-x", "-1000px");
-        root.style.setProperty("--spotlight-y", "-1000px");
+        state.mouseLight = state.light;
+        state.mousePatternY = state.patternY;
+        state.mouseBrightness = 0.5;
       });
 
       window.addEventListener("wheel", (event) => {
@@ -1626,6 +2186,15 @@
         const pointerEase = 0.12;
         state.smoothPointerX += (state.pointerX - state.smoothPointerX) * pointerEase;
         state.smoothPointerY += (state.pointerY - state.smoothPointerY) * pointerEase;
+        state.smoothMouseLight += (state.mouseLight - state.smoothMouseLight) * 0.035;
+        state.smoothMousePatternY += (state.mousePatternY - state.smoothMousePatternY) * 0.035;
+        state.smoothMouseBrightness += (state.mouseBrightness - state.smoothMouseBrightness) * 0.03;
+        const ambient = state.smoothMouseBrightness;
+        root.style.setProperty("--ambient-shadow", (0.035 + (1 - ambient) * 0.105).toFixed(3));
+        root.style.setProperty("--ambient-mid", (0.014 + (1 - ambient) * 0.06).toFixed(3));
+        root.style.setProperty("--ambient-light", (0.12 + ambient * 0.44).toFixed(3));
+        root.style.setProperty("--ambient-glow", Math.min(1, 0.3 + ambient * 0.9).toFixed(3));
+        root.style.setProperty("--ambient-radial", Math.min(1, 0.56 + ambient * 0.62).toFixed(3));
 
         if (Math.abs(window.scrollY - state.smoothScrollTarget) > 0.5) {
           const scrollEase = 1 - Math.pow(0.012, delta);
@@ -1650,20 +2219,21 @@
         gl.clearColor(0, 0, 0, 0);
         gl.clear(gl.COLOR_BUFFER_BIT);
         gl.uniform2f(uniforms.resolution, canvas.width, canvas.height);
-        gl.uniform2f(uniforms.pageSize, state.pageWidth, state.pageHeight);
+        gl.uniform2f(uniforms.pageSize, state.viewportWidth, state.viewportHeight);
         gl.uniform2f(uniforms.viewportSize, state.viewportWidth, state.viewportHeight);
-        gl.uniform1f(uniforms.scrollY, window.scrollY);
+        gl.uniform1f(uniforms.scrollY, 0);
         gl.uniform1f(uniforms.time, now * 0.001);
         gl.uniform1f(uniforms.depth, state.depth);
         gl.uniform1f(uniforms.softness, state.softness);
         gl.uniform1f(uniforms.blur, state.blur);
         gl.uniform1f(uniforms.contrast, state.contrast);
         gl.uniform1f(uniforms.saturation, state.saturation);
-        gl.uniform1f(uniforms.light, state.light);
-        gl.uniform2f(uniforms.pattern, state.patternX, state.patternY);
+        gl.uniform1f(uniforms.light, state.smoothMouseLight);
+        gl.uniform2f(uniforms.pattern, state.patternX, state.smoothMousePatternY);
+        gl.uniform1f(uniforms.scale, state.scale);
         gl.uniform1f(uniforms.motion, effectiveMotion);
         gl.uniform1f(uniforms.haze, state.haze);
-        gl.uniform2f(uniforms.pointer, state.smoothPointerX, state.smoothPointerY);
+        gl.uniform2f(uniforms.pointer, -1000, -1000);
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, flowerTexture);
         gl.drawArrays(gl.TRIANGLES, 0, 6);
