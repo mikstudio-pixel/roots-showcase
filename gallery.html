@@ -243,10 +243,6 @@
         text-decoration: none;
       }
 
-      a.project:hover .project-media img {
-        transform: scale(1.018);
-      }
-
       .project.featured {
         grid-column: span 2;
       }
@@ -267,7 +263,17 @@
         width: 100%;
         height: 100%;
         object-fit: cover;
-        transition: transform 450ms ease;
+      }
+
+      .shadow-clear-image {
+        position: fixed;
+        z-index: 70;
+        display: block;
+        pointer-events: none;
+        opacity: 0;
+        object-fit: cover;
+        object-position: center;
+        transition: opacity 180ms ease;
       }
 
       .project-body {
@@ -417,6 +423,23 @@
         accent-color: #ff321f;
       }
 
+      .toggle-control {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        min-height: 28px;
+        color: #222;
+        font-size: 13px;
+      }
+
+      .toggle-control input {
+        width: 34px;
+        height: 18px;
+        margin: 0;
+        accent-color: #ff321f;
+      }
+
       .buttons {
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -559,7 +582,7 @@
         </section>
 
         <section class="gallery">
-          <article class="project featured">
+          <a class="project featured" href="project-pramen.html" aria-label="Detail projektu Pramen">
             <div class="project-media">
               <img src="data/Produkty/Otvírání Studánek/Jagošová_Jana_4.ročník_APD_Pramen/Projekt/render1.png" alt="Pramen, porcelánová miska na vodu">
             </div>
@@ -576,9 +599,9 @@
                 <span>obnova</span>
               </div>
             </div>
-          </article>
+          </a>
 
-          <article class="project">
+          <a class="project" href="project-ovo.html" aria-label="Detail projektu OVO">
             <div class="project-media">
               <img src="data/Produkty/Stojánek na vajíčko/Šmoldasová_Sabina_2r_APD_OVO/Projekt/1OVO.jpg" alt="OVO, stojánek na vajíčko">
             </div>
@@ -595,9 +618,9 @@
                 <span>jaro</span>
               </div>
             </div>
-          </article>
+          </a>
 
-          <article class="project">
+          <a class="project" href="project-posledni-sousto.html" aria-label="Detail projektu Poslední sousto">
             <div class="project-media">
               <img src="data/Produkty/Masopust/Keprta_Adam_4.ročník_APD_Poslední_sousto/Projekt/Poslední_sousto2.png" alt="Poslední sousto, porcelánový talíř">
             </div>
@@ -614,7 +637,7 @@
                 <span>hostina</span>
               </div>
             </div>
-          </article>
+          </a>
 
           <a class="project" href="project-tac-hojnosti.html" aria-label="Detail projektu Tác hojnosti">
             <div class="project-media">
@@ -635,7 +658,7 @@
             </div>
           </a>
 
-          <article class="project">
+          <a class="project" href="project-na-chlebicek.html" aria-label="Detail projektu Na Chlebíček">
             <div class="project-media">
               <img src="data/Produkty/Na Chlebíček/Barabasova_Adela_2r_APD_Na_Chlebicek/Foto/Na_Chlebicek_Hneda.png" alt="Na Chlebíček, talířek na obložený chlebíček">
             </div>
@@ -652,9 +675,9 @@
                 <span>oslava</span>
               </div>
             </div>
-          </article>
+          </a>
 
-          <article class="project">
+          <a class="project" href="project-prach.html" aria-label="Detail projektu Prach">
             <div class="project-media">
               <img src="data/Produkty/Dušičky/Metzová_Gabriela_4r_APD_Prach/Foto/vizcom 10-1.png" alt="Prach, porcelánový svícen">
             </div>
@@ -671,9 +694,9 @@
                 <span>paměť</span>
               </div>
             </div>
-          </article>
+          </a>
 
-          <article class="project">
+          <a class="project" href="project-ulej.html" aria-label="Detail projektu Ulej!">
             <div class="project-media">
               <img src="data/Produkty/Koštování slivovice/Špendlík_Ondřej_2r_APD_Ulej!/Foto/Špendlík_Ondřej_2r_APD_Ulej!_01.png" alt="Ulej!, porcelánová čutora na slivovici">
             </div>
@@ -690,9 +713,9 @@
                 <span>slivovice</span>
               </div>
             </div>
-          </article>
+          </a>
 
-          <article class="project">
+          <a class="project" href="project-luno.html" aria-label="Detail projektu Lůno">
             <div class="project-media">
               <img src="data/Produkty/Barborky/Ondřej_Muroň_2r_APD_Lůno/Foto/lůno01.png" alt="Lůno, váza na jednu větvičku">
             </div>
@@ -709,9 +732,9 @@
                 <span>rozkvět</span>
               </div>
             </div>
-          </article>
+          </a>
 
-          <article class="project">
+          <a class="project" href="project-kapr.html" aria-label="Detail projektu Kapr">
             <div class="project-media">
               <img src="data/Produkty/Kapří šupina/Konecna_Veronika_1r_APD_StojanNaSperky/Foto/Veronika_Konecna_1r_APD_Kapr_01.jpg" alt="Kapr, stojan na šperky">
             </div>
@@ -728,9 +751,9 @@
                 <span>štěstí</span>
               </div>
             </div>
-          </article>
+          </a>
 
-          <article class="project">
+          <a class="project" href="project-talir-na-vdolecky.html" aria-label="Detail projektu Talíř na vdolečky">
             <div class="project-media">
               <img src="data/Produkty/Talíř na vdolečky/Boryskova_Karolina_4.rocnik_APD_talir_na_vdolecky/Foto/untitled.28.jpg" alt="Talíř na vdolečky">
             </div>
@@ -747,9 +770,9 @@
                 <span>hody</span>
               </div>
             </div>
-          </article>
+          </a>
 
-          <article class="project">
+          <a class="project" href="project-pernicek.html" aria-label="Detail projektu Perníček">
             <div class="project-media">
               <img src="data/Produkty/Vánoce (VZOR)/Vzorovy_Jan_4r_APD_Pernicek/Foto/Vzorovy_Jan_4r_APD_Pernicek_01.jpg" alt="Perníček, forma na vykrajování perníku">
             </div>
@@ -766,7 +789,7 @@
                 <span>Vánoce</span>
               </div>
             </div>
-          </article>
+          </a>
         </section>
       </div>
 
@@ -816,6 +839,10 @@
               <label for="motion">Motion <span class="value" id="motion-value"></span></label>
               <input id="motion" type="range" min="0" max="1" step="0.01" value="0.27">
             </div>
+            <label class="toggle-control" for="haze">
+              <span>Haze texture</span>
+              <input id="haze" type="checkbox" checked>
+            </label>
           </div>
           <div class="palette" aria-label="Shadow palette">
             <span class="swatch" style="background:#AFD5C4"></span>
@@ -840,7 +867,13 @@
       const root = document.documentElement;
       const canvas = document.getElementById("page-shadow");
       const butterflyLayer = document.querySelector(".gallery-butterfly-shadow");
+      const shadowClearImage = document.createElement("img");
       const shadowDprCap = 1.25;
+      shadowClearImage.className = "shadow-clear-image";
+      shadowClearImage.alt = "";
+      shadowClearImage.setAttribute("aria-hidden", "true");
+      document.body.appendChild(shadowClearImage);
+      let activeClearImage = null;
       const gl = canvas.getContext("webgl", {
         alpha: true,
         antialias: true,
@@ -856,7 +889,8 @@
         light: document.getElementById("light"),
         patternX: document.getElementById("pattern-x"),
         patternY: document.getElementById("pattern-y"),
-        motion: document.getElementById("motion")
+        motion: document.getElementById("motion"),
+        haze: document.getElementById("haze")
       };
 
       const values = {
@@ -881,6 +915,7 @@
         patternX: Number(controls.patternX.value),
         patternY: Number(controls.patternY.value),
         motion: Number(controls.motion.value),
+        haze: controls.haze.checked ? 1 : 0,
         pointerX: -1000,
         pointerY: -1000,
         smoothPointerX: -1000,
@@ -897,7 +932,12 @@
         pageWidth: 1,
         pageHeight: 1,
         viewportWidth: 1,
-        viewportHeight: 1
+        viewportHeight: 1,
+        maskAspect: 0,
+        maskPageWidth: 0,
+        maskPageHeight: 0,
+        maskRefreshQueued: false,
+        maskRefreshPending: false
       };
 
       const vertexSource = `
@@ -924,6 +964,7 @@
         uniform float u_light;
         uniform vec2 u_pattern;
         uniform float u_motion;
+        uniform float u_haze;
         uniform vec2 u_pointer;
         uniform sampler2D u_flowerMask;
         uniform vec2 u_page_size;
@@ -967,38 +1008,48 @@
         }
 
         vec2 windWarp(vec2 maskUv, float t) {
+          float pageAspect = u_page_size.y / max(u_page_size.x, 1.0);
           float gust = sin(t * 1.15 + maskUv.y * 6.2);
           gust += sin(t * 0.73 + maskUv.y * 10.4 + maskUv.x * 1.8) * 0.45;
           float verticalShape = smoothstep(0.05, 0.95, maskUv.y);
           float bend = gust * u_motion * 0.024 * verticalShape;
-          float lift = sin(t * 0.82 + maskUv.x * 5.8) * u_motion * 0.005;
+          float lift = sin(t * 0.82 + maskUv.x * 5.8) * u_motion * 0.005 / pageAspect;
           return maskUv + vec2(bend, lift);
         }
 
         float blurredMask(vec2 uv, float radius, float t) {
           uv = windWarp(uv, t);
+          float pageAspect = u_page_size.y / max(u_page_size.x, 1.0);
+          vec2 radiusX = vec2(radius, 0.0);
+          vec2 radiusY = vec2(0.0, radius / pageAspect);
+          vec2 radiusDiagonal = vec2(radius, radius / pageAspect);
           float m = maskAt(uv) * 0.18;
-          m += maskAt(uv + vec2(radius, 0.0)) * 0.105;
-          m += maskAt(uv + vec2(-radius, 0.0)) * 0.105;
-          m += maskAt(uv + vec2(0.0, radius)) * 0.105;
-          m += maskAt(uv + vec2(0.0, -radius)) * 0.105;
-          m += maskAt(uv + vec2(radius, radius) * 0.72) * 0.085;
-          m += maskAt(uv + vec2(-radius, radius) * 0.72) * 0.085;
-          m += maskAt(uv + vec2(radius, -radius) * 0.72) * 0.085;
-          m += maskAt(uv + vec2(-radius, -radius) * 0.72) * 0.085;
-          m += maskAt(uv + vec2(radius * 1.75, 0.0)) * 0.055;
-          m += maskAt(uv + vec2(-radius * 1.75, 0.0)) * 0.055;
-          m += maskAt(uv + vec2(0.0, radius * 1.75)) * 0.055;
-          m += maskAt(uv + vec2(0.0, -radius * 1.75)) * 0.055;
+          m += maskAt(uv + radiusX) * 0.105;
+          m += maskAt(uv - radiusX) * 0.105;
+          m += maskAt(uv + radiusY) * 0.105;
+          m += maskAt(uv - radiusY) * 0.105;
+          m += maskAt(uv + radiusDiagonal * 0.72) * 0.085;
+          m += maskAt(uv + vec2(-radiusDiagonal.x, radiusDiagonal.y) * 0.72) * 0.085;
+          m += maskAt(uv + vec2(radiusDiagonal.x, -radiusDiagonal.y) * 0.72) * 0.085;
+          m += maskAt(uv - radiusDiagonal * 0.72) * 0.085;
+          m += maskAt(uv + radiusX * 1.75) * 0.055;
+          m += maskAt(uv - radiusX * 1.75) * 0.055;
+          m += maskAt(uv + radiusY * 1.75) * 0.055;
+          m += maskAt(uv - radiusY * 1.75) * 0.055;
           return clamp(m, 0.0, 1.0);
         }
 
         vec2 projectedUv(vec2 uv, vec2 direction, float distance, float scale, float stretch) {
-          vec2 projected = uv - direction * distance;
-          vec2 p = projected - u_pattern;
+          float pageAspect = u_page_size.y / max(u_page_size.x, 1.0);
+          vec2 metricUv = vec2(uv.x, uv.y * pageAspect);
+          vec2 metricPattern = vec2(u_pattern.x, u_pattern.y * pageAspect);
+          vec2 metricCenter = vec2(0.5, 0.5 * pageAspect);
+          vec2 projected = metricUv - direction * distance;
+          vec2 p = projected - metricPattern;
           float along = dot(p, direction);
           p += direction * along * ((1.0 / stretch) - 1.0);
-          return p / scale + vec2(0.5);
+          vec2 metricSample = p / scale + metricCenter;
+          return vec2(metricSample.x, metricSample.y / pageAspect);
         }
 
         void main() {
@@ -1027,7 +1078,10 @@
           float bodyFlower = blurredMask(bodyUv, blur, t);
           float spreadFlower = blurredMask(spreadUv, blur * (1.35 + spread * 0.8), t);
           float tailFlower = blurredMask(tailUv, blur * (1.8 + spread * 1.15), t);
-          float unevenLight = smoothstep(0.38, 0.86, fbm((uv + direction * baseDistance) * vec2(6.2, 4.6) + vec2(t, -t * 0.45)));
+          float unevenLight = 0.0;
+          if (u_haze > 0.5) {
+            unevenLight = smoothstep(0.38, 0.86, fbm((uv + direction * baseDistance) * vec2(6.2, 4.6) + vec2(t, -t * 0.45)));
+          }
 
           vec3 inkMint = vec3(0.686, 0.835, 0.769);
           vec3 inkBlue = vec3(0.169, 0.353, 0.863);
@@ -1036,7 +1090,7 @@
           vec3 inkCream = vec3(0.965, 0.925, 0.82);
           vec3 paperShadow = vec3(0.12, 0.115, 0.105);
 
-          float lightTexture = 0.84 + unevenLight * 0.15;
+          float lightTexture = mix(1.0, 0.84 + unevenLight * 0.15, u_haze);
           float contactLayer = smoothstep(0.04, 0.95, contactFlower) * 0.25 * lightTexture;
           float bodyLayer = smoothstep(0.02, 0.98, bodyFlower) * 0.43 * lightTexture;
           float spreadLayer = smoothstep(0.0, 0.88, spreadFlower) * spread * 0.50 * lightTexture;
@@ -1085,7 +1139,20 @@
         values[name].textContent = Number(value).toFixed(2);
       }
 
+      function setHaze(enabled) {
+        state.haze = enabled ? 1 : 0;
+        controls.haze.checked = enabled;
+      }
+
       Object.keys(controls).forEach((name) => {
+        if (name === "haze") {
+          setHaze(controls.haze.checked);
+          controls.haze.addEventListener("change", (event) => {
+            setHaze(event.target.checked);
+          });
+          return;
+        }
+
         setControl(name, controls[name].value);
         controls[name].addEventListener("input", (event) => {
           setControl(name, event.target.value);
@@ -1106,6 +1173,7 @@
         setControl("patternX", 0.36);
         setControl("patternY", 0.59);
         setControl("motion", 0.27);
+        setHaze(true);
       });
 
       const controlsPanel = document.querySelector(".controls");
@@ -1148,10 +1216,15 @@
         ctx.restore();
       }
 
-      async function createFlowerMask() {
+      async function createFlowerMask(pageWidth = window.innerWidth, pageHeight = window.innerHeight) {
         const mask = document.createElement("canvas");
-        mask.width = 1400;
-        mask.height = 900;
+        const pageAspect = Math.max(pageHeight / Math.max(pageWidth, 1), 0.25);
+        const maxTextureSide = 4096;
+        const baseWidth = 1400;
+        const width = Math.max(320, Math.min(baseWidth, Math.floor(maxTextureSide / pageAspect)));
+        const height = Math.max(320, Math.round(width * pageAspect));
+        mask.width = width;
+        mask.height = Math.min(maxTextureSide, height);
         const ctx = mask.getContext("2d");
         const flowers = await Promise.all(flowerAssets.map(loadImage));
         const w = mask.width;
@@ -1204,6 +1277,7 @@
         light: gl.getUniformLocation(program, "u_light"),
         pattern: gl.getUniformLocation(program, "u_pattern"),
         motion: gl.getUniformLocation(program, "u_motion"),
+        haze: gl.getUniformLocation(program, "u_haze"),
         pointer: gl.getUniformLocation(program, "u_pointer"),
         flowerMask: gl.getUniformLocation(program, "u_flowerMask"),
         pageSize: gl.getUniformLocation(program, "u_page_size"),
@@ -1231,19 +1305,49 @@
       );
       gl.uniform1i(uniforms.flowerMask, 0);
 
-      createFlowerMask()
-        .then((mask) => {
-          gl.activeTexture(gl.TEXTURE0);
-          gl.bindTexture(gl.TEXTURE_2D, flowerTexture);
-          gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-          gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, mask);
-          gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
-          document.body.dataset.mask = "loaded";
-        })
-        .catch((error) => {
-          document.body.dataset.mask = "failed";
-          console.error(error);
-        });
+      function uploadFlowerMask(mask) {
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, flowerTexture);
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, mask);
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+        document.body.dataset.mask = "loaded";
+        document.body.dataset.maskSize = `${mask.width}x${mask.height}`;
+      }
+
+      function refreshFlowerMask(force = false) {
+        const nextAspect = state.pageHeight / Math.max(state.pageWidth, 1);
+        const sizeChanged = Math.abs(state.pageWidth - state.maskPageWidth) > 16 ||
+          Math.abs(state.pageHeight - state.maskPageHeight) > 16;
+        const aspectChanged = Math.abs(nextAspect - state.maskAspect) >= 0.04;
+        if (!force && !sizeChanged && !aspectChanged) {
+          return;
+        }
+        if (state.maskRefreshQueued) {
+          state.maskRefreshPending = true;
+          return;
+        }
+
+        state.maskAspect = nextAspect;
+        state.maskPageWidth = state.pageWidth;
+        state.maskPageHeight = state.pageHeight;
+        state.maskRefreshQueued = true;
+        createFlowerMask(state.pageWidth, state.pageHeight)
+          .then((mask) => {
+            uploadFlowerMask(mask);
+          })
+          .catch((error) => {
+            document.body.dataset.mask = "failed";
+            console.error(error);
+          })
+          .finally(() => {
+            state.maskRefreshQueued = false;
+            if (state.maskRefreshPending) {
+              state.maskRefreshPending = false;
+              requestAnimationFrame(() => refreshFlowerMask(true));
+            }
+          });
+      }
 
       function resize() {
         const dpr = Math.min(window.devicePixelRatio || 1, shadowDprCap);
@@ -1265,6 +1369,7 @@
         state.pageHeight = pageHeight;
         state.viewportWidth = viewportWidth;
         state.viewportHeight = viewportHeight;
+        syncShadowClearImage();
 
         canvas.style.width = `${viewportWidth}px`;
         canvas.style.height = `${viewportHeight}px`;
@@ -1275,9 +1380,85 @@
           canvas.height = height;
           gl.viewport(0, 0, width, height);
         }
+        refreshFlowerMask();
       }
 
       window.addEventListener("resize", resize);
+      window.addEventListener("scroll", syncShadowClearImage, { passive: true });
+      window.addEventListener("load", () => refreshFlowerMask(true));
+      document.querySelectorAll("img").forEach((image) => {
+        if (!image.complete) {
+          image.addEventListener("load", () => refreshFlowerMask(true), { once: true });
+        }
+      });
+
+      function syncShadowClearImage() {
+        if (!activeClearImage) {
+          shadowClearImage.style.opacity = "0";
+          return;
+        }
+
+        const rect = activeClearImage.getBoundingClientRect();
+        if (rect.width <= 0 || rect.height <= 0) {
+          shadowClearImage.style.opacity = "0";
+          return;
+        }
+
+        const styles = getComputedStyle(activeClearImage);
+        shadowClearImage.src = activeClearImage.currentSrc || activeClearImage.src;
+        shadowClearImage.style.left = `${rect.left}px`;
+        shadowClearImage.style.top = `${rect.top}px`;
+        shadowClearImage.style.width = `${rect.width}px`;
+        shadowClearImage.style.height = `${rect.height}px`;
+        shadowClearImage.style.objectFit = styles.objectFit;
+        shadowClearImage.style.objectPosition = styles.objectPosition;
+        shadowClearImage.style.borderRadius = styles.borderRadius;
+        shadowClearImage.style.opacity = "1";
+      }
+
+      document.querySelectorAll("img").forEach((image) => {
+        image.addEventListener("mouseenter", () => {
+          activeClearImage = image;
+          syncShadowClearImage();
+        });
+        image.addEventListener("mousemove", syncShadowClearImage);
+        image.addEventListener("mouseleave", () => {
+          if (activeClearImage === image) {
+            activeClearImage = null;
+            syncShadowClearImage();
+          }
+        });
+      });
+
+      document.addEventListener("pointerover", (event) => {
+        const image = event.target.closest?.("img");
+        if (!image || image === shadowClearImage) {
+          return;
+        }
+
+        activeClearImage = image;
+        syncShadowClearImage();
+      }, true);
+
+      document.addEventListener("mouseover", (event) => {
+        const image = event.target.closest?.("img");
+        if (!image || image === shadowClearImage) {
+          return;
+        }
+
+        activeClearImage = image;
+        syncShadowClearImage();
+      }, true);
+
+      document.addEventListener("pointerout", (event) => {
+        if (!activeClearImage || event.target !== activeClearImage) {
+          return;
+        }
+
+        activeClearImage = null;
+        syncShadowClearImage();
+      }, true);
+
       window.addEventListener("pointermove", (event) => {
         const dpr = state.dpr;
         state.pointerX = event.clientX * dpr;
@@ -1481,6 +1662,7 @@
         gl.uniform1f(uniforms.light, state.light);
         gl.uniform2f(uniforms.pattern, state.patternX, state.patternY);
         gl.uniform1f(uniforms.motion, effectiveMotion);
+        gl.uniform1f(uniforms.haze, state.haze);
         gl.uniform2f(uniforms.pointer, state.smoothPointerX, state.smoothPointerY);
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, flowerTexture);
