@@ -5,25 +5,52 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Kořeny — galerie projektů</title>
     <style>
-      :root {
-        --spotlight-x: -1000px;
-        --spotlight-y: -1000px;
-        --gallery-distance-page: 2400px;
-        --project-track-top: 52vh;
-        --ambient-shadow: 0.1;
-        --ambient-mid: 0.045;
-        --ambient-light: 0.16;
-        --ambient-glow: 0.34;
-        --ambient-radial: 0.72;
-        --gallery-butterfly-x: 50%;
-        --gallery-butterfly-y: 50%;
-        --gallery-butterfly-opacity: 0;
-        --gallery-butterfly-rotate: 0deg;
-        --gallery-butterfly-scale: 1;
-        --gallery-butterfly-wing: 18deg;
-        --gallery-butterfly-wing-spread: 0.9;
-        --gallery-butterfly-blur: 2px;
-        --gallery-butterfly-strength: 0.12;
+      @font-face {
+        font-family: "The Seasons";
+        src: url("assets/font/The Seasons Light.ttf") format("truetype");
+        font-weight: 300;
+        font-style: normal;
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: "The Seasons";
+        src: url("assets/font/The Seasons Regular.ttf") format("truetype");
+        font-weight: 400;
+        font-style: normal;
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: "The Seasons";
+        src: url("assets/font/The Seasons Bold.ttf") format("truetype");
+        font-weight: 700;
+        font-style: normal;
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: "The Seasons";
+        src: url("assets/font/The Seasons Light Italic.ttf") format("truetype");
+        font-weight: 300;
+        font-style: italic;
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: "The Seasons";
+        src: url("assets/font/The Seasons Italic.ttf") format("truetype");
+        font-weight: 400;
+        font-style: italic;
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: "The Seasons";
+        src: url("assets/font/The Seasons Bold Italic.ttf") format("truetype");
+        font-weight: 700;
+        font-style: italic;
+        font-display: swap;
       }
 
       * {
@@ -48,6 +75,12 @@
       body {
         position: relative;
         overflow-x: hidden;
+      }
+
+      h1,
+      h2,
+      h3 {
+        font-family: "The Seasons", Georgia, serif;
       }
 
       #grain-canvas {
@@ -260,6 +293,7 @@
         --gallery-progress: 0;
         --gallery-distance: 0px;
         --gallery-start: calc(100vw - 48px);
+        --project-track-gap: 12px;
         position: relative;
         height: max(140vh, calc(var(--gallery-distance) + 100vh));
         margin-top: 0;
@@ -270,11 +304,12 @@
         top: 24px;
         overflow: hidden;
         min-height: calc(100vh - 48px);
+        padding-top: var(--project-track-gap);
       }
 
       .projects-scroll .gallery {
         width: max-content;
-        min-height: calc(100vh - 49px);
+        min-height: calc(100vh - 49px - var(--project-track-gap));
         transform: translate3d(
           calc(var(--gallery-start) - (var(--gallery-distance) + var(--gallery-start)) * var(--gallery-progress)),
           0,
@@ -296,7 +331,7 @@
       }
 
       .project.featured {
-        flex-basis: clamp(520px, 52vw, 840px);
+        flex-basis: clamp(320px, 31vw, 520px);
       }
 
       @media (min-width: 961px) {
@@ -318,14 +353,14 @@
 
         .projects-scroll {
           position: fixed;
-          left: 24px;
-          right: 24px;
+          left: 0;
+          right: 0;
           top: var(--project-track-top);
           z-index: 6;
           height: calc(100vh - var(--project-track-top) - 24px);
           min-height: 180px;
           margin: 0;
-          overflow: hidden;
+          overflow: visible;
         }
 
         .projects-pin {
@@ -333,11 +368,12 @@
           min-height: 100%;
           height: 100%;
           overflow: visible;
+          padding-top: var(--project-track-gap);
         }
 
         .projects-scroll .gallery {
-          min-height: 100%;
-          height: 100%;
+          min-height: calc(100% - var(--project-track-gap));
+          height: calc(100% - var(--project-track-gap));
         }
 
         .project {
@@ -380,7 +416,7 @@
       }
 
       .shadow-clear-image--auto {
-        transition: opacity 120ms linear;
+        transition: none;
       }
 
       .project-body {
@@ -632,6 +668,7 @@
           position: static;
           overflow: visible;
           min-height: 0;
+          padding-top: var(--project-track-gap);
         }
 
         .projects-scroll .gallery {
@@ -1029,12 +1066,10 @@
       const shadowAperture = document.querySelector(".shadow-aperture");
       const butterflyLayer = document.querySelector(".gallery-butterfly-shadow");
       const shadowDprCap = 1.25;
-      let shadowClearImage = createClearOverlay("shadow-clear-image shadow-clear-image--auto");
-      document.body.appendChild(shadowClearImage);
-      let previousAutoClearOverlay = null;
-      let focusedProjectImage = null;
+      const autoClearOverlays = new Map();
       let hoverClearImage = null;
       let hoverClearOverlay = null;
+      const fadingClearOverlays = [];
       const gl = canvas.getContext("webgl", {
         alpha: true,
         antialias: true,
@@ -1789,7 +1824,7 @@
         const pinWidth = pin ? pin.clientWidth : window.innerWidth;
         const trackWidth = projectsTrack.scrollWidth;
         const distance = Math.max(0, trackWidth - pinWidth);
-        const start = Math.max(0, window.innerWidth - 48);
+        const start = Math.max(0, window.innerWidth);
         projectsScroll.style.setProperty("--gallery-distance", `${distance}px`);
         projectsScroll.style.setProperty("--gallery-start", `${start}px`);
         root.style.setProperty("--gallery-distance-page", `${distance + start}px`);
@@ -1866,55 +1901,74 @@
       });
 
       function syncShadowClearImage() {
-        if (!focusedProjectImage) {
-          shadowClearImage.style.opacity = "0";
+        if (!projectsScroll || window.innerWidth <= 960) {
+          for (const overlay of autoClearOverlays.values()) {
+            overlay.style.opacity = "0";
+          }
           return;
         }
 
-        if (!positionClearOverlay(shadowClearImage, focusedProjectImage)) {
-          shadowClearImage.style.opacity = "0";
-          return;
+        const viewportLeft = 0;
+        const viewportRight = window.innerWidth;
+        const focusStart = viewportLeft + window.innerWidth * 0.02;
+        const focusEnd = viewportLeft + window.innerWidth * 0.22;
+        const holdEnd = viewportLeft + window.innerWidth * 0.42;
+        const fadeOutEnd = viewportLeft + window.innerWidth * 0.64;
+        const activeImages = new Set();
+
+        for (const image of projectsScroll.querySelectorAll(".project-media img")) {
+          let overlay = autoClearOverlays.get(image);
+          if (!overlay) {
+            overlay = createClearOverlay("shadow-clear-image shadow-clear-image--auto");
+            autoClearOverlays.set(image, overlay);
+            document.body.appendChild(overlay);
+          }
+
+          const rect = image.getBoundingClientRect();
+          const visible = rect.right > viewportLeft && rect.left < viewportRight && rect.width > 0 && rect.height > 0;
+          if (!visible || !positionClearOverlay(overlay, image)) {
+            overlay.style.opacity = "0";
+            continue;
+          }
+
+          activeImages.add(image);
+          const leading = Math.max(0, Math.min(1, (rect.left - focusStart) / Math.max(1, focusEnd - focusStart)));
+          const trailing = 1 - Math.max(0, Math.min(1, (rect.left - holdEnd) / Math.max(1, fadeOutEnd - holdEnd)));
+          const visibleLeft = Math.max(0, Math.min(1, (rect.right - viewportLeft) / Math.max(1, rect.width)));
+          const visibleRight = Math.max(0, Math.min(1, (viewportRight - rect.left) / Math.max(1, rect.width)));
+          const visibility = smoothstep(Math.min(visibleLeft, visibleRight));
+          const strength = Math.max(0, Math.min(1, Math.min(leading, trailing) * visibility));
+          overlay.style.opacity = strength.toFixed(3);
         }
 
-        shadowClearImage.style.opacity = "1";
+        for (const [image, overlay] of autoClearOverlays) {
+          if (!activeImages.has(image)) {
+            overlay.style.opacity = "0";
+          }
+        }
       }
 
-      function switchFocusedProjectImage(image) {
-        if (image === focusedProjectImage) {
-          syncShadowClearImage();
+      function trackFadingClearOverlay(overlay, sourceImage, duration = 2200) {
+        if (!overlay || !sourceImage) {
           return;
         }
 
-        if (!image) {
-          focusedProjectImage = null;
-          shadowClearImage.style.opacity = "0";
-          return;
-        }
-
-        if (previousAutoClearOverlay) {
-          previousAutoClearOverlay.remove();
-        }
-
-        previousAutoClearOverlay = shadowClearImage;
-        previousAutoClearOverlay.style.opacity = "0";
+        const item = { overlay, sourceImage };
+        fadingClearOverlays.push(item);
+        overlay.style.opacity = "0";
         window.setTimeout(() => {
-          if (previousAutoClearOverlay && previousAutoClearOverlay.parentNode) {
-            previousAutoClearOverlay.remove();
+          const index = fadingClearOverlays.indexOf(item);
+          if (index !== -1) {
+            fadingClearOverlays.splice(index, 1);
           }
-          previousAutoClearOverlay = null;
-        }, 260);
+          overlay.remove();
+        }, duration);
+      }
 
-        shadowClearImage = createClearOverlay("shadow-clear-image shadow-clear-image--auto");
-        document.body.appendChild(shadowClearImage);
-        focusedProjectImage = image;
-        if (!positionClearOverlay(shadowClearImage, focusedProjectImage)) {
-          shadowClearImage.style.opacity = "0";
-          return;
+      function syncFadingClearOverlays() {
+        for (const item of fadingClearOverlays) {
+          positionClearOverlay(item.overlay, item.sourceImage);
         }
-
-        requestAnimationFrame(() => {
-          shadowClearImage.style.opacity = "1";
-        });
       }
 
       function releaseHoverOverlay() {
@@ -1924,10 +1978,10 @@
         }
 
         const overlay = hoverClearOverlay;
+        const sourceImage = hoverClearImage;
         hoverClearImage = null;
         hoverClearOverlay = null;
-        overlay.style.opacity = "0";
-        window.setTimeout(() => overlay.remove(), 2200);
+        trackFadingClearOverlay(overlay, sourceImage, 2200);
       }
 
       function showHoverClearImage(image) {
@@ -1953,27 +2007,11 @@
         if (hoverClearOverlay && hoverClearImage) {
           positionClearOverlay(hoverClearOverlay, hoverClearImage);
         }
+        syncFadingClearOverlays();
       }
 
       function syncFocusedProjectImage() {
-        if (!projectsScroll || window.innerWidth <= 960) {
-          switchFocusedProjectImage(null);
-          return;
-        }
-
-        const candidates = [...projectsScroll.querySelectorAll(".project-media img")];
-        let focused = null;
-        let focusedLeft = Infinity;
-        for (const image of candidates) {
-          const rect = image.getBoundingClientRect();
-          const fullyVisible = rect.left >= 24 && rect.right <= window.innerWidth - 24 && rect.width > 0 && rect.height > 0;
-          if (fullyVisible && rect.left < focusedLeft) {
-            focused = image;
-            focusedLeft = rect.left;
-          }
-        }
-
-        switchFocusedProjectImage(focused);
+        syncShadowClearImage();
       }
 
       document.querySelectorAll("img").forEach((image) => {
@@ -2181,6 +2219,8 @@
       function render(now) {
         resize();
         syncButterflySurface();
+        syncShadowClearImage();
+        syncHoverClearImage();
         const delta = state.lastFrameTime ? Math.min((now - state.lastFrameTime) / 1000, 0.1) : 0;
         state.lastFrameTime = now;
         const pointerEase = 0.12;

@@ -5,6 +5,54 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Kapr - detail projektu</title>
     <style>
+      @font-face {
+        font-family: "The Seasons";
+        src: url("assets/font/The Seasons Light.ttf") format("truetype");
+        font-weight: 300;
+        font-style: normal;
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: "The Seasons";
+        src: url("assets/font/The Seasons Regular.ttf") format("truetype");
+        font-weight: 400;
+        font-style: normal;
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: "The Seasons";
+        src: url("assets/font/The Seasons Bold.ttf") format("truetype");
+        font-weight: 700;
+        font-style: normal;
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: "The Seasons";
+        src: url("assets/font/The Seasons Light Italic.ttf") format("truetype");
+        font-weight: 300;
+        font-style: italic;
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: "The Seasons";
+        src: url("assets/font/The Seasons Italic.ttf") format("truetype");
+        font-weight: 400;
+        font-style: italic;
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: "The Seasons";
+        src: url("assets/font/The Seasons Bold Italic.ttf") format("truetype");
+        font-weight: 700;
+        font-style: italic;
+        font-display: swap;
+      }
+
       * {
         box-sizing: border-box;
       }
@@ -44,6 +92,12 @@
       body {
         position: relative;
         overflow-x: hidden;
+      }
+
+      h1,
+      h2,
+      h3 {
+        font-family: "The Seasons", Georgia, serif;
       }
 
       body::before,
@@ -376,7 +430,7 @@
         opacity: 0;
         object-fit: cover;
         object-position: center;
-        transition: opacity 180ms ease;
+        transition: opacity 2s cubic-bezier(0.2, 0, 0.18, 1);
       }
 
       .shadow-panel {
@@ -688,12 +742,9 @@
       const playButton = document.querySelector(".shadow-play");
       const status = document.querySelector(".shadow-status");
       const butterflyLayer = document.querySelector(".window-shadow-butterfly");
-      const shadowClearImage = document.createElement("img");
-      shadowClearImage.className = "shadow-clear-image";
-      shadowClearImage.alt = "";
-      shadowClearImage.setAttribute("aria-hidden", "true");
-      document.body.appendChild(shadowClearImage);
-      let activeClearImage = null;
+      let hoverClearImage = null;
+      let hoverClearOverlay = null;
+      const fadingClearOverlays = [];
       const spotlight = {
         core: 34,
         edge: 220
@@ -1055,75 +1106,138 @@
         root.style.setProperty("--spotlight-y", "-1000px");
       });
 
-      function syncShadowClearImage() {
-        if (!activeClearImage) {
-          shadowClearImage.style.opacity = "0";
+      function createClearOverlay() {
+        const image = document.createElement("img");
+        image.className = "shadow-clear-image";
+        image.alt = "";
+        image.setAttribute("aria-hidden", "true");
+        return image;
+      }
+
+      function positionClearOverlay(overlay, sourceImage) {
+        if (!overlay || !sourceImage) {
+          return false;
+        }
+
+        const rect = sourceImage.getBoundingClientRect();
+        if (rect.width <= 0 || rect.height <= 0 || rect.right < 0 || rect.left > window.innerWidth || rect.bottom < 0 || rect.top > window.innerHeight) {
+          overlay.style.opacity = "0";
+          return false;
+        }
+
+        const styles = getComputedStyle(sourceImage);
+        overlay.src = sourceImage.currentSrc || sourceImage.src;
+        overlay.style.left = `${rect.left}px`;
+        overlay.style.top = `${rect.top}px`;
+        overlay.style.width = `${rect.width}px`;
+        overlay.style.height = `${rect.height}px`;
+        overlay.style.objectFit = styles.objectFit;
+        overlay.style.objectPosition = styles.objectPosition;
+        overlay.style.borderRadius = styles.borderRadius;
+        return true;
+      }
+
+      function trackFadingClearOverlay(overlay, sourceImage, duration = 2200) {
+        if (!overlay || !sourceImage) {
           return;
         }
 
-        const rect = activeClearImage.getBoundingClientRect();
-        if (rect.width <= 0 || rect.height <= 0) {
-          shadowClearImage.style.opacity = "0";
+        const item = { overlay, sourceImage };
+        fadingClearOverlays.push(item);
+        overlay.style.opacity = "0";
+        window.setTimeout(() => {
+          const index = fadingClearOverlays.indexOf(item);
+          if (index !== -1) {
+            fadingClearOverlays.splice(index, 1);
+          }
+          overlay.remove();
+        }, duration);
+      }
+
+      function syncClearOverlays() {
+        if (hoverClearOverlay && hoverClearImage) {
+          positionClearOverlay(hoverClearOverlay, hoverClearImage);
+        }
+        for (const item of fadingClearOverlays) {
+          positionClearOverlay(item.overlay, item.sourceImage);
+        }
+      }
+
+      function releaseHoverOverlay() {
+        if (!hoverClearOverlay) {
+          hoverClearImage = null;
           return;
         }
 
-        const styles = getComputedStyle(activeClearImage);
-        shadowClearImage.src = activeClearImage.currentSrc || activeClearImage.src;
-        shadowClearImage.style.left = `${rect.left}px`;
-        shadowClearImage.style.top = `${rect.top}px`;
-        shadowClearImage.style.width = `${rect.width}px`;
-        shadowClearImage.style.height = `${rect.height}px`;
-        shadowClearImage.style.objectFit = styles.objectFit;
-        shadowClearImage.style.objectPosition = styles.objectPosition;
-        shadowClearImage.style.borderRadius = styles.borderRadius;
-        shadowClearImage.style.opacity = "1";
+        const overlay = hoverClearOverlay;
+        const sourceImage = hoverClearImage;
+        hoverClearImage = null;
+        hoverClearOverlay = null;
+        trackFadingClearOverlay(overlay, sourceImage, 2200);
+      }
+
+      function showHoverClearImage(image) {
+        if (!image || image === hoverClearImage || image.classList.contains("shadow-clear-image")) {
+          return;
+        }
+
+        releaseHoverOverlay();
+        const overlay = createClearOverlay();
+        if (!positionClearOverlay(overlay, image)) {
+          return;
+        }
+
+        hoverClearImage = image;
+        hoverClearOverlay = overlay;
+        document.body.appendChild(overlay);
+        requestAnimationFrame(() => {
+          overlay.style.opacity = "1";
+        });
       }
 
       document.querySelectorAll("img").forEach((image) => {
         image.addEventListener("mouseenter", () => {
-          activeClearImage = image;
-          syncShadowClearImage();
+          showHoverClearImage(image);
         });
-        image.addEventListener("mousemove", syncShadowClearImage);
+        image.addEventListener("mousemove", syncClearOverlays);
         image.addEventListener("mouseleave", () => {
-          if (activeClearImage === image) {
-            activeClearImage = null;
-            syncShadowClearImage();
+          if (hoverClearImage === image) {
+            releaseHoverOverlay();
           }
         });
       });
 
       document.addEventListener("pointerover", (event) => {
         const image = event.target.closest?.("img");
-        if (!image || image === shadowClearImage) {
+        if (!image || image.classList.contains("shadow-clear-image")) {
           return;
         }
 
-        activeClearImage = image;
-        syncShadowClearImage();
+        showHoverClearImage(image);
       }, true);
 
       document.addEventListener("mouseover", (event) => {
         const image = event.target.closest?.("img");
-        if (!image || image === shadowClearImage) {
+        if (!image || image.classList.contains("shadow-clear-image")) {
           return;
         }
 
-        activeClearImage = image;
-        syncShadowClearImage();
+        showHoverClearImage(image);
       }, true);
 
       document.addEventListener("pointerout", (event) => {
-        if (!activeClearImage || event.target !== activeClearImage) {
+        if (!hoverClearImage || event.target !== hoverClearImage) {
           return;
         }
 
-        activeClearImage = null;
-        syncShadowClearImage();
+        releaseHoverOverlay();
       }, true);
 
-      window.addEventListener("resize", updateSpotlightScale);
-      window.addEventListener("scroll", syncShadowClearImage, { passive: true });
+      window.addEventListener("resize", () => {
+        updateSpotlightScale();
+        syncClearOverlays();
+      });
+      window.addEventListener("scroll", syncClearOverlays, { passive: true });
       updateSpotlightScale();
       runIntroAnimation();
     </script>

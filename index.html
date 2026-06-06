@@ -5,15 +5,52 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Projected Shadow Lab</title>
     <style>
-      :root {
-        color-scheme: dark;
-        --bg: #11100f;
-        --panel: #f7170c;
-        --ink: #0b0807;
-        --paper: #f1f0ec;
-        --line: rgba(255, 255, 255, 0.18);
-        --spotlight-x: -1000px;
-        --spotlight-y: -1000px;
+      @font-face {
+        font-family: "The Seasons";
+        src: url("assets/font/The Seasons Light.ttf") format("truetype");
+        font-weight: 300;
+        font-style: normal;
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: "The Seasons";
+        src: url("assets/font/The Seasons Regular.ttf") format("truetype");
+        font-weight: 400;
+        font-style: normal;
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: "The Seasons";
+        src: url("assets/font/The Seasons Bold.ttf") format("truetype");
+        font-weight: 700;
+        font-style: normal;
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: "The Seasons";
+        src: url("assets/font/The Seasons Light Italic.ttf") format("truetype");
+        font-weight: 300;
+        font-style: italic;
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: "The Seasons";
+        src: url("assets/font/The Seasons Italic.ttf") format("truetype");
+        font-weight: 400;
+        font-style: italic;
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: "The Seasons";
+        src: url("assets/font/The Seasons Bold Italic.ttf") format("truetype");
+        font-weight: 700;
+        font-style: italic;
+        font-display: swap;
       }
 
       * {
@@ -33,6 +70,12 @@
       body {
         position: relative;
         overflow: hidden;
+      }
+
+      h1,
+      h2,
+      h3 {
+        font-family: "The Seasons", Georgia, serif;
       }
 
       .app {
