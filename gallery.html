@@ -194,10 +194,12 @@
         content: "";
         position: absolute;
         inset: 0;
-        opacity: 0.42;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.75' numOctaves='5' seed='17' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.72 0 0 0 0 0.72 0 0 0 0 0.68 0 0 0 0.72 0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
-        background-size: 180px 180px;
-        mix-blend-mode: overlay;
+        opacity: 0.18;
+        background-image:
+          url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220' viewBox='0 0 220 220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.55' numOctaves='5' seed='17' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.92 0 0 0 0 0.92 0 0 0 0 0.86 0 0 0 0.62 0'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)'/%3E%3C/svg%3E"),
+          radial-gradient(circle at 50% 50%, rgba(255, 255, 245, 0.08), rgba(255, 255, 245, 0) 68%);
+        background-size: 220px 220px, 100% 100%;
+        mix-blend-mode: screen;
       }
 
       body.gallery-intro-darkening .gallery-light-intro {
@@ -1637,6 +1639,15 @@
       const fadingClearOverlays = [];
       let galleryIntroStart = 0;
       let galleryIntroActive = false;
+      let galleryIntroMotionStart = 0;
+      const userAgent = navigator.userAgent || "";
+      const isIOSWebKit = /iP(ad|hone|od)/.test(userAgent)
+        || navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1;
+      const isSafari = /^((?!chrome|android|crios|fxios|edgios).)*safari/i.test(userAgent);
+      const safariColorFix = isIOSWebKit || isSafari ? 1 : 0;
+      if (safariColorFix) {
+        document.body.classList.add("is-webkit-color-fix");
+      }
       const gl = canvas.getContext("webgl", {
         alpha: true,
         antialias: true,
@@ -1653,11 +1664,13 @@
           document.body.classList.add("gallery-intro-darkening", "gallery-intro-shadows", "gallery-intro-content");
           document.querySelector(".gallery-light-intro")?.remove();
           galleryIntroActive = false;
+          galleryIntroMotionStart = 0;
           return;
         }
 
         galleryIntroStart = performance.now();
         galleryIntroActive = true;
+        galleryIntroMotionStart = 0;
 
         requestAnimationFrame(() => {
           window.setTimeout(() => {
@@ -1681,6 +1694,7 @@
             );
             document.querySelector(".gallery-light-intro")?.remove();
             galleryIntroActive = false;
+            galleryIntroMotionStart = performance.now();
             scheduleButterflyFlight();
           }, 7200);
         });
@@ -1923,6 +1937,7 @@
         uniform vec2 u_viewport_size;
         uniform float u_scroll_y;
         uniform vec4 u_butterfly_prism;
+        uniform float u_safari_fix;
 
         float hash(vec2 p) {
           p = fract(p * vec2(123.34, 456.21));
@@ -2084,7 +2099,8 @@
           float density = contactLayer + bodyLayer + spreadLayer + veilLayer + tailLayer + mistLayer + hazeLayer;
           float shadowBody = max(max(contactFlower, bodyFlower), max(max(spreadFlower, veilFlower), max(tailFlower, mistFlower)));
           vec2 perpendicular = vec2(-direction.y, direction.x);
-          float prismSpread = (0.004 + u_depth * 0.019 + spread * 0.014 + u_blur * 0.006) * (0.35 + u_saturation * 1.85);
+          float safeSaturation = mix(u_saturation, u_saturation * 0.28, u_safari_fix);
+          float prismSpread = (0.004 + u_depth * 0.019 + spread * 0.014 + u_blur * 0.006) * (0.35 + safeSaturation * 1.85);
           vec2 prismStep = metricOffset(direction, prismSpread);
           vec2 prismCross = metricOffset(perpendicular, prismSpread * 0.58);
 
@@ -2099,13 +2115,15 @@
           float blueEdge = max(bluePrism - shadowBody * 0.68, 0.0);
           float brownEdge = max(brownPrism - shadowBody * 0.76, 0.0);
           float creamEdge = max(creamPrism - shadowBody * 0.8, 0.0);
+          creamEdge *= 1.0 - u_safari_fix;
           float innerEdge = smoothstep(0.025, 0.28, shadowBody) * (1.0 - smoothstep(0.34, 0.82, shadowBody));
 
-          redEdge += abs(redPrism - spreadFlower) * innerEdge * 0.42;
-          mintEdge += abs(mintPrism - bodyFlower) * innerEdge * 0.34;
-          blueEdge += abs(bluePrism - spreadFlower) * innerEdge * 0.42;
-          brownEdge += abs(brownPrism - tailFlower) * innerEdge * 0.24;
-          creamEdge += abs(creamPrism - contactFlower) * innerEdge * 0.18;
+          float innerPrismStrength = mix(1.0, 0.38, u_safari_fix);
+          redEdge += abs(redPrism - spreadFlower) * innerEdge * 0.42 * innerPrismStrength;
+          mintEdge += abs(mintPrism - bodyFlower) * innerEdge * 0.34 * innerPrismStrength;
+          blueEdge += abs(bluePrism - spreadFlower) * innerEdge * 0.42 * innerPrismStrength;
+          brownEdge += abs(brownPrism - tailFlower) * innerEdge * 0.24 * innerPrismStrength;
+          creamEdge += abs(creamPrism - contactFlower) * innerEdge * 0.18 * (1.0 - u_safari_fix);
 
           float prismWeight = redEdge + mintEdge + blueEdge + brownEdge + creamEdge;
           vec3 prismInk = inkRed * redEdge;
@@ -2114,11 +2132,13 @@
           prismInk += inkBrown * brownEdge;
           prismInk += inkCream * creamEdge;
           prismInk /= max(prismWeight, 0.001);
+          prismInk = mix(prismInk, min(prismInk, vec3(0.42)), u_safari_fix);
 
-          float prismPresence = smoothstep(0.005, 0.16, prismWeight) * u_saturation;
+          float prismPresence = smoothstep(0.005, 0.16, prismWeight) * safeSaturation;
+          prismPresence *= mix(1.0, 0.48, u_safari_fix);
           prismPresence *= 1.0 - smoothstep(0.62, 1.12, density);
           vec3 ink = mix(paperShadow, prismInk, prismPresence);
-          density += prismWeight * u_saturation * 0.19;
+          density += prismWeight * safeSaturation * mix(0.19, 0.06, u_safari_fix);
 
           float butterflyFade = u_butterfly_prism.z;
           float butterflyFlap = u_butterfly_prism.w;
@@ -2171,9 +2191,9 @@
           float coreSpark = (1.0 - smoothstep(0.0, 0.046, butterflyDistance)) * (0.11 + butterflyFlap * 0.24);
           rayMask = clamp(rayMask + coreSpark, 0.0, 1.22) * contactGate;
           rayInk = mix(rayInk / max(rayMask / max(contactGate, 0.001), 0.001), vec3(0.98, 0.62, 1.0), coreSpark * 0.06);
-          float prismBurst = rayMask * (0.34 + u_saturation * 0.48) * (0.86 + plantEnergy * 0.42);
-          ink = mix(ink, clamp(rayInk, 0.0, 1.0), clamp(prismBurst * 0.4, 0.0, 0.62));
-          density += prismBurst * 0.14;
+          float prismBurst = rayMask * (0.34 + safeSaturation * 0.48) * (0.86 + plantEnergy * 0.42);
+          ink = mix(ink, clamp(rayInk, 0.0, 1.0), clamp(prismBurst * 0.4 * mix(1.0, 0.42, u_safari_fix), 0.0, 0.62));
+          density += prismBurst * mix(0.14, 0.04, u_safari_fix);
 
           float strength = mix(0.18, 0.88, u_contrast);
           float alpha = clamp(pow(density, 0.82) * strength, 0.0, 0.68);
@@ -2181,6 +2201,8 @@
           float spotlightDistance = length(v_uv * u_resolution - u_pointer);
           float spotlight = 1.0 - smoothstep(34.0, 220.0, spotlightDistance);
           alpha *= 1.0 - spotlight * pointerActive * 0.82;
+          ink = mix(ink, min(ink, vec3(0.34)), u_safari_fix * 0.35);
+          alpha *= mix(1.0, 0.94, u_safari_fix);
           gl_FragColor = vec4(ink, alpha);
         }
       `;
@@ -2474,7 +2496,8 @@
         pageSize: gl.getUniformLocation(program, "u_page_size"),
         viewportSize: gl.getUniformLocation(program, "u_viewport_size"),
         scrollY: gl.getUniformLocation(program, "u_scroll_y"),
-        butterflyPrism: gl.getUniformLocation(program, "u_butterfly_prism")
+        butterflyPrism: gl.getUniformLocation(program, "u_butterfly_prism"),
+        safariFix: gl.getUniformLocation(program, "u_safari_fix")
       };
 
       const flowerTexture = gl.createTexture();
@@ -3281,9 +3304,18 @@
         if (state.scrollMotion < 0.002 && state.scrollMotionTarget === 0) {
           state.scrollMotion = 0;
         }
-        const effectiveMotion = galleryIntroActive
-          ? 0
-          : state.motion + (1 - state.motion) * state.scrollMotion;
+        const baseMotion = state.motion + (1 - state.motion) * state.scrollMotion;
+        let motionRamp = 1;
+        if (galleryIntroActive) {
+          motionRamp = 0;
+        } else if (galleryIntroMotionStart) {
+          motionRamp = smoothstep(Math.max(0, Math.min(1, (now - galleryIntroMotionStart) / 2600)));
+          if (motionRamp >= 0.999) {
+            galleryIntroMotionStart = 0;
+            motionRamp = 1;
+          }
+        }
+        const effectiveMotion = baseMotion * motionRamp;
         let introLight = state.smoothMouseLight;
         if (galleryIntroActive && galleryIntroStart) {
           const introProgress = Math.max(0, Math.min(1, (now - galleryIntroStart - 2500) / 3200));
@@ -3316,6 +3348,7 @@
         gl.uniform1f(uniforms.scale, state.scale);
         gl.uniform1f(uniforms.motion, effectiveMotion);
         gl.uniform1f(uniforms.haze, state.haze);
+        gl.uniform1f(uniforms.safariFix, safariColorFix);
         gl.uniform2f(uniforms.pointer, -1000, -1000);
         gl.uniform4f(
           uniforms.butterflyPrism,
