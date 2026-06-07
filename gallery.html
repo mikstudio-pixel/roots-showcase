@@ -212,6 +212,11 @@
       }
 
       .intro-title-line--second {
+        opacity: 1;
+        filter: blur(0);
+      }
+
+      body.gallery-intro-pending .intro-title-line--second {
         opacity: 0;
         filter: blur(14px);
       }
@@ -1058,11 +1063,6 @@
           padding: 18px;
         }
 
-        .gallery-intro-title {
-          left: 18px;
-          top: calc(18px + 48px + clamp(58px, 9vh, 108px));
-        }
-
         .intro,
         .shadow-aperture,
         .gallery,
@@ -1133,11 +1133,6 @@
 
         .content {
           padding: 16px;
-        }
-
-        .gallery-intro-title {
-          left: 16px;
-          top: calc(16px + 110px + clamp(58px, 9vh, 108px));
         }
 
         .project-top {
@@ -1617,7 +1612,6 @@
           document.body.classList.remove("gallery-intro-pending");
           document.body.classList.add("gallery-intro-shadows", "gallery-intro-content");
           document.querySelector(".gallery-light-intro")?.remove();
-          document.querySelector(".gallery-intro-title")?.remove();
           galleryIntroActive = false;
           return;
         }
@@ -1641,7 +1635,6 @@
               "gallery-intro-content"
             );
             document.querySelector(".gallery-light-intro")?.remove();
-            document.querySelector(".gallery-intro-title")?.remove();
             galleryIntroActive = false;
           }, 4600);
         });
