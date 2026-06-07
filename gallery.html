@@ -1666,11 +1666,11 @@
 
           window.setTimeout(() => {
             document.body.classList.add("gallery-intro-shadows");
-          }, 1550);
+          }, 2500);
 
           window.setTimeout(() => {
             document.body.classList.add("gallery-intro-content");
-          }, 2950);
+          }, 4200);
 
           window.setTimeout(() => {
             document.body.classList.remove(
@@ -1681,7 +1681,8 @@
             );
             document.querySelector(".gallery-light-intro")?.remove();
             galleryIntroActive = false;
-          }, 5350);
+            scheduleButterflyFlight();
+          }, 7200);
         });
       }
 
@@ -3209,9 +3210,12 @@
 
       function render(now) {
         resize();
-        syncButterflySurface();
-        syncShadowClearImage();
-        syncHoverClearImage();
+        const introWaitingForLight = galleryIntroActive && !document.body.classList.contains("gallery-intro-shadows");
+        if (!introWaitingForLight) {
+          syncButterflySurface();
+          syncShadowClearImage();
+          syncHoverClearImage();
+        }
         const delta = state.lastFrameTime ? Math.min((now - state.lastFrameTime) / 1000, 0.1) : 0;
         state.lastFrameTime = now;
         const pointerEase = 0.12;
@@ -3226,6 +3230,13 @@
         root.style.setProperty("--ambient-light", (0.12 + ambient * 0.44).toFixed(3));
         root.style.setProperty("--ambient-glow", Math.min(1, 0.3 + ambient * 0.9).toFixed(3));
         root.style.setProperty("--ambient-radial", Math.min(1, 0.56 + ambient * 0.62).toFixed(3));
+
+        if (introWaitingForLight) {
+          gl.clearColor(0, 0, 0, 0);
+          gl.clear(gl.COLOR_BUFFER_BIT);
+          requestAnimationFrame(render);
+          return;
+        }
 
         if (window.innerWidth > 960) {
           if (window.scrollY !== 0) {
@@ -3270,12 +3281,14 @@
         if (state.scrollMotion < 0.002 && state.scrollMotionTarget === 0) {
           state.scrollMotion = 0;
         }
-        const effectiveMotion = state.motion + (1 - state.motion) * state.scrollMotion;
+        const effectiveMotion = galleryIntroActive
+          ? 0
+          : state.motion + (1 - state.motion) * state.scrollMotion;
         let introLight = state.smoothMouseLight;
         if (galleryIntroActive && galleryIntroStart) {
-          const introProgress = Math.max(0, Math.min(1, (now - galleryIntroStart - 1550) / 3000));
+          const introProgress = Math.max(0, Math.min(1, (now - galleryIntroStart - 2500) / 3200));
           const introEase = easeInOutCubic(introProgress);
-          const introFade = 1 - smoothstep(Math.max(0, Math.min(1, (now - galleryIntroStart - 3500) / 1550)));
+          const introFade = 1 - smoothstep(Math.max(0, Math.min(1, (now - galleryIntroStart - 5100) / 1700)));
           const introLightY = 38 + introEase * 50;
           const introLightElement = document.querySelector(".gallery-light-intro");
           if (introLightElement) {
@@ -3319,8 +3332,10 @@
 
       resize();
       syncButterflySurface();
-      scheduleButterflyFlight();
       runGalleryIntro();
+      if (!galleryIntroActive) {
+        scheduleButterflyFlight();
+      }
       requestAnimationFrame(render);
     </script>
   </body>
