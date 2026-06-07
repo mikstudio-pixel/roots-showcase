@@ -194,8 +194,16 @@
       }
 
       .brand {
-        font-size: 16px;
-        font-weight: 680;
+        display: inline-flex;
+        align-items: center;
+        height: 48px;
+      }
+
+      .brand-logo {
+        display: block;
+        width: clamp(96px, 8vw, 118px);
+        max-height: 26px;
+        height: auto;
       }
 
       .nav {
@@ -217,13 +225,36 @@
         padding: clamp(58px, 9vh, 108px) 0 36px;
       }
 
-      h1 {
+      .intro-title {
+        position: relative;
+        min-height: calc(clamp(42px, 6.7vw, 86px) * 1.86);
+      }
+
+      .intro-title-text {
+        position: absolute;
+        inset: 0 auto auto 0;
         max-width: 680px;
         margin: 0;
         font-size: clamp(42px, 6.7vw, 86px);
         line-height: 0.93;
         font-weight: 690;
         letter-spacing: 0;
+        transition:
+          opacity 620ms cubic-bezier(0.2, 0, 0.18, 1),
+          filter 620ms cubic-bezier(0.2, 0, 0.18, 1),
+          transform 620ms cubic-bezier(0.2, 0, 0.18, 1);
+      }
+
+      .intro-title-text.is-hidden-left {
+        opacity: 0;
+        filter: blur(12px);
+        transform: translate3d(-44px, 0, 0);
+      }
+
+      .intro-title-text.is-hidden-right {
+        opacity: 0;
+        filter: blur(12px);
+        transform: translate3d(44px, 0, 0);
       }
 
       .meta {
@@ -422,6 +453,37 @@
         width: 100%;
         height: 100%;
         object-fit: cover;
+      }
+
+      .project-media--placeholder {
+        display: grid;
+        place-items: end start;
+        padding: 18px;
+      }
+
+      .project-placeholder {
+        position: absolute;
+        inset: 0;
+        background:
+          radial-gradient(circle at 24% 18%, rgba(255, 255, 255, 0.72), transparent 34%),
+          linear-gradient(135deg, var(--placeholder-a), var(--placeholder-b));
+      }
+
+      .project-placeholder::after {
+        content: "";
+        position: absolute;
+        inset: 18%;
+        border: 1px solid rgba(51, 32, 16, 0.13);
+        transform: rotate(var(--placeholder-angle, -7deg));
+      }
+
+      .project-media--placeholder span {
+        position: relative;
+        z-index: 1;
+        max-width: 220px;
+        color: rgba(51, 32, 16, 0.46);
+        font-size: 13px;
+        line-height: 1.35;
       }
 
       .shadow-clear-image {
@@ -753,7 +815,7 @@
     <main class="page">
       <div class="content">
         <header class="topbar">
-          <div class="brand">KOŘENY</div>
+          <div class="brand"><img class="brand-logo" src="assets/Logo_mono_dark.svg" alt="Kořeny"></div>
           <nav class="nav" aria-label="Pages">
             <a href="index.html">Laboratoř</a>
             <a href="gallery.html">Projekty</a>
@@ -761,7 +823,11 @@
         </header>
 
         <section class="intro">
-          <h1>Současné rituály v porcelánu</h1>
+          <div class="intro-title" aria-live="polite">
+            <h1 class="intro-title-text" data-gallery-title="default">Současné rituály v porcelánu</h1>
+            <h1 class="intro-title-text is-hidden-right" data-gallery-title="apd">Ateliér průmyslového designu</h1>
+            <h1 class="intro-title-text is-hidden-right" data-gallery-title="space">Teorie prostoru</h1>
+          </div>
           <p class="meta">Studentské práce převádějí české, moravské a slovanské tradice do současného produktového designu. Spojuje je porcelán, rodinné rituály, sezónnost a tichá symbolika předmětů.</p>
         </section>
 
@@ -791,9 +857,9 @@
         <section class="projects-scroll" aria-label="Project gallery">
           <div class="projects-pin">
             <div class="gallery">
-              <a class="project featured" href="project-pramen.html" aria-label="Detail projektu Pramen">
+          <a class="project featured" href="project-pramen.html" data-gallery-section="apd" aria-label="Detail projektu Pramen">
             <div class="project-media">
-              <img src="data/Produkty/Otvírání Studánek/Jagošová_Jana_4.ročník_APD_Pramen/Projekt/render1.png" alt="Pramen, porcelánová miska na vodu">
+              <img src="data/Produkty/Otvírání Studánek/Jagošová_Jana_4.ročník_APD_Pramen/Projekt/render1.png" alt="Pramen, porcelánová miska na vodu">
             </div>
             <div class="project-body">
               <div class="project-top">
@@ -810,9 +876,9 @@
             </div>
           </a>
 
-          <a class="project" href="project-ovo.html" aria-label="Detail projektu OVO">
+          <a class="project" href="project-ovo.html" data-gallery-section="apd" aria-label="Detail projektu OVO">
             <div class="project-media">
-              <img src="data/Produkty/Stojánek na vajíčko/Šmoldasová_Sabina_2r_APD_OVO/Projekt/1OVO.jpg" alt="OVO, stojánek na vajíčko">
+              <img src="data/Produkty/Stojánek na vajíčko/Šmoldasová_Sabina_2r_APD_OVO/Projekt/1OVO.jpg" alt="OVO, stojánek na vajíčko">
             </div>
             <div class="project-body">
               <div class="project-top">
@@ -829,9 +895,9 @@
             </div>
           </a>
 
-          <a class="project" href="project-posledni-sousto.html" aria-label="Detail projektu Poslední sousto">
+          <a class="project" href="project-posledni-sousto.html" data-gallery-section="apd" aria-label="Detail projektu Poslední sousto">
             <div class="project-media">
-              <img src="data/Produkty/Masopust/Keprta_Adam_4.ročník_APD_Poslední_sousto/Projekt/Poslední_sousto2.png" alt="Poslední sousto, porcelánový talíř">
+              <img src="data/Produkty/Masopust/Keprta_Adam_4.ročník_APD_Poslední_sousto/Projekt/Poslední_sousto2.png" alt="Poslední sousto, porcelánový talíř">
             </div>
             <div class="project-body">
               <div class="project-top">
@@ -848,9 +914,9 @@
             </div>
           </a>
 
-          <a class="project" href="project-tac-hojnosti.html" aria-label="Detail projektu Tác hojnosti">
+          <a class="project" href="project-tac-hojnosti.html" data-gallery-section="apd" aria-label="Detail projektu Tác hojnosti">
             <div class="project-media">
-              <img src="data/Produkty/Tác na masopustní koblížky/Tereza_Kolaříková_II. ročník_2026/Foto/5057c281-404e-498f-80a1-93ef1603af4b.JPEG" alt="Tác hojnosti, tác na masopustní kobližky">
+              <img src="data/Produkty/Tác na masopustní koblížky/Tereza_Kolaříková_II. ročník_2026/Foto/5057c281-404e-498f-80a1-93ef1603af4b.JPEG" alt="Tác hojnosti, tác na masopustní kobližky">
             </div>
             <div class="project-body">
               <div class="project-top">
@@ -867,9 +933,9 @@
             </div>
           </a>
 
-          <a class="project" href="project-na-chlebicek.html" aria-label="Detail projektu Na Chlebíček">
+          <a class="project" href="project-na-chlebicek.html" data-gallery-section="apd" aria-label="Detail projektu Na Chlebíček">
             <div class="project-media">
-              <img src="data/Produkty/Na Chlebíček/Barabasova_Adela_2r_APD_Na_Chlebicek/Foto/Na_Chlebicek_Hneda.png" alt="Na Chlebíček, talířek na obložený chlebíček">
+              <img src="data/Produkty/Na Chlebíček/Barabasova_Adela_2r_APD_Na_Chlebicek/Foto/Na_Chlebicek_Hneda.png" alt="Na Chlebíček, talířek na obložený chlebíček">
             </div>
             <div class="project-body">
               <div class="project-top">
@@ -886,9 +952,9 @@
             </div>
           </a>
 
-          <a class="project" href="project-prach.html" aria-label="Detail projektu Prach">
+          <a class="project" href="project-prach.html" data-gallery-section="apd" aria-label="Detail projektu Prach">
             <div class="project-media">
-              <img src="data/Produkty/Dušičky/Metzová_Gabriela_4r_APD_Prach/Foto/vizcom 10-1.png" alt="Prach, porcelánový svícen">
+              <img src="data/Produkty/Dušičky/Metzová_Gabriela_4r_APD_Prach/Foto/vizcom 10-1.png" alt="Prach, porcelánový svícen">
             </div>
             <div class="project-body">
               <div class="project-top">
@@ -905,9 +971,9 @@
             </div>
           </a>
 
-          <a class="project" href="project-ulej.html" aria-label="Detail projektu Ulej!">
+          <a class="project" href="project-ulej.html" data-gallery-section="apd" aria-label="Detail projektu Ulej!">
             <div class="project-media">
-              <img src="data/Produkty/Koštování slivovice/Špendlík_Ondřej_2r_APD_Ulej!/Foto/Špendlík_Ondřej_2r_APD_Ulej!_01.png" alt="Ulej!, porcelánová čutora na slivovici">
+              <img src="data/Produkty/Koštování slivovice/Špendlík_Ondřej_2r_APD_Ulej!/Foto/Špendlík_Ondřej_2r_APD_Ulej!_01.png" alt="Ulej!, porcelánová čutora na slivovici">
             </div>
             <div class="project-body">
               <div class="project-top">
@@ -924,9 +990,9 @@
             </div>
           </a>
 
-          <a class="project" href="project-luno.html" aria-label="Detail projektu Lůno">
+          <a class="project" href="project-luno.html" data-gallery-section="apd" aria-label="Detail projektu Lůno">
             <div class="project-media">
-              <img src="data/Produkty/Barborky/Ondřej_Muroň_2r_APD_Lůno/Foto/lůno01.png" alt="Lůno, váza na jednu větvičku">
+              <img src="data/Produkty/Barborky/Ondřej_Muroň_2r_APD_Lůno/Foto/lůno01.png" alt="Lůno, váza na jednu větvičku">
             </div>
             <div class="project-body">
               <div class="project-top">
@@ -943,9 +1009,9 @@
             </div>
           </a>
 
-          <a class="project" href="project-kapr.html" aria-label="Detail projektu Kapr">
+          <a class="project" href="project-kapr.html" data-gallery-section="apd" aria-label="Detail projektu Kapr">
             <div class="project-media">
-              <img src="data/Produkty/Kapří šupina/Konecna_Veronika_1r_APD_StojanNaSperky/Foto/Veronika_Konecna_1r_APD_Kapr_01.jpg" alt="Kapr, stojan na šperky">
+              <img src="data/Produkty/Kapří šupina/Konecna_Veronika_1r_APD_StojanNaSperky/Foto/Veronika_Konecna_1r_APD_Kapr_01.jpg" alt="Kapr, stojan na šperky">
             </div>
             <div class="project-body">
               <div class="project-top">
@@ -962,9 +1028,9 @@
             </div>
           </a>
 
-          <a class="project" href="project-talir-na-vdolecky.html" aria-label="Detail projektu Talíř na vdolečky">
+          <a class="project" href="project-talir-na-vdolecky.html" data-gallery-section="apd" aria-label="Detail projektu Talíř na vdolečky">
             <div class="project-media">
-              <img src="data/Produkty/Talíř na vdolečky/Boryskova_Karolina_4.rocnik_APD_talir_na_vdolecky/Foto/untitled.28.jpg" alt="Talíř na vdolečky">
+              <img src="data/Produkty/Talíř na vdolečky/Boryskova_Karolina_4.rocnik_APD_talir_na_vdolecky/Foto/untitled.28.jpg" alt="Talíř na vdolečky">
             </div>
             <div class="project-body">
               <div class="project-top">
@@ -981,9 +1047,9 @@
             </div>
           </a>
 
-              <a class="project" href="project-pernicek.html" aria-label="Detail projektu Perníček">
+              <a class="project" href="project-pernicek.html" data-gallery-section="apd" aria-label="Detail projektu Perníček">
             <div class="project-media">
-              <img src="data/Produkty/Vánoce (VZOR)/Vzorovy_Jan_4r_APD_Pernicek/Foto/Vzorovy_Jan_4r_APD_Pernicek_01.jpg" alt="Perníček, forma na vykrajování perníku">
+              <img src="data/Produkty/Vánoce (VZOR)/Vzorovy_Jan_4r_APD_Pernicek/Foto/Vzorovy_Jan_4r_APD_Pernicek_01.jpg" alt="Perníček, forma na vykrajování perníku">
             </div>
             <div class="project-body">
               <div class="project-top">
@@ -999,6 +1065,66 @@
               </div>
             </div>
               </a>
+
+              <article class="project" data-gallery-section="space" aria-label="Fiktivní projekt Prahy ticha">
+                <div class="project-media project-media--placeholder" style="--placeholder-a: rgba(175, 213, 196, 0.42); --placeholder-b: rgba(246, 236, 209, 0.72); --placeholder-angle: -8deg;">
+                  <div class="project-placeholder" aria-hidden="true"></div>
+                  <span>světlý prostorový model</span>
+                </div>
+                <div class="project-body">
+                  <div class="project-top">
+                    <span class="project-index">12</span>
+                    <span class="project-ritual">Teorie prostoru</span>
+                  </div>
+                  <h2>Prahy ticha</h2>
+                  <p>Fiktivní studie pracuje s hranicí mezi veřejným a soukromým místem, průchodem světla a tichou orientací v prostoru.</p>
+                  <div class="project-meta">
+                    <span>prostor</span>
+                    <span>hranice</span>
+                    <span>světlo</span>
+                  </div>
+                </div>
+              </article>
+
+              <article class="project" data-gallery-section="space" aria-label="Fiktivní projekt Měkký rastr">
+                <div class="project-media project-media--placeholder" style="--placeholder-a: rgba(246, 236, 209, 0.86); --placeholder-b: rgba(51, 32, 16, 0.10); --placeholder-angle: 6deg;">
+                  <div class="project-placeholder" aria-hidden="true"></div>
+                  <span>světlý rastr v měřítku místnosti</span>
+                </div>
+                <div class="project-body">
+                  <div class="project-top">
+                    <span class="project-index">13</span>
+                    <span class="project-ritual">Teorie prostoru</span>
+                  </div>
+                  <h2>Měkký rastr</h2>
+                  <p>Kompozice ověřuje, jak opakování prvků mění vnímání klidu, vzdálenosti a měřítka v pomalu se otevírajícím prostoru.</p>
+                  <div class="project-meta">
+                    <span>měřítko</span>
+                    <span>rastr</span>
+                    <span>klid</span>
+                  </div>
+                </div>
+              </article>
+
+              <article class="project" data-gallery-section="space" aria-label="Fiktivní projekt Světlý dvůr">
+                <div class="project-media project-media--placeholder" style="--placeholder-a: rgba(175, 213, 196, 0.34); --placeholder-b: rgba(246, 236, 209, 0.92); --placeholder-angle: 12deg;">
+                  <div class="project-placeholder" aria-hidden="true"></div>
+                  <span>světelný dvůr a průhledy</span>
+                </div>
+                <div class="project-body">
+                  <div class="project-top">
+                    <span class="project-index">14</span>
+                    <span class="project-ritual">Teorie prostoru</span>
+                  </div>
+                  <h2>Světlý dvůr</h2>
+                  <p>Návrh sleduje vrstvení průhledů a jemné zastínění jako nástroj pro vedení pohybu a soustředění v interiéru.</p>
+                  <div class="project-meta">
+                    <span>průhled</span>
+                    <span>dvůr</span>
+                    <span>orientace</span>
+                  </div>
+                </div>
+              </article>
             </div>
           </div>
         </section>
@@ -1095,6 +1221,11 @@
       const projectsTrack = document.querySelector(".projects-scroll .gallery");
       const shadowAperture = document.querySelector(".shadow-aperture");
       const butterflyLayer = document.querySelector(".gallery-butterfly-shadow");
+      const galleryTitles = {
+        default: document.querySelector('[data-gallery-title="default"]'),
+        apd: document.querySelector('[data-gallery-title="apd"]'),
+        space: document.querySelector('[data-gallery-title="space"]')
+      };
       const shadowDprCap = 1.25;
       const autoClearOverlays = new Map();
       let hoverClearImage = null;
@@ -1294,6 +1425,11 @@
         butterflyOpacity: 0,
         butterflyFlap: 0,
         butterflyPrismEnabled: butterflyPrismToggle.checked ? 1 : 0,
+        galleryTitleMode: "default",
+        galleryTitleSection: "apd",
+        galleryTitleSectionActive: false,
+        galleryTitleDirection: 1,
+        lastGalleryVirtualScroll: 0,
         dpr: 1,
         pageWidth: 1,
         pageHeight: 1,
@@ -1971,6 +2107,9 @@
           projectsScroll.style.setProperty("--gallery-start", "0px");
           root.style.setProperty("--gallery-distance-page", "0px");
           root.style.setProperty("--project-track-top", "52vh");
+          state.galleryTitleSectionActive = false;
+          state.galleryTitleDirection = -1;
+          updateGalleryTitle("default");
           resetProjectFlight();
           return;
         }
@@ -2147,6 +2286,17 @@
         const holdEnd = viewportLeft + window.innerWidth * 0.42;
         const fadeOutEnd = viewportLeft + window.innerWidth * 0.64;
         const activeImages = new Set();
+        let strongestSectionProject = null;
+        let strongestSectionValue = 0;
+
+        for (const project of projectsScroll.querySelectorAll(".project")) {
+          const rect = project.getBoundingClientRect();
+          const strength = focusedRectStrength(rect, viewportLeft, viewportRight, focusStart, focusEnd, holdEnd, fadeOutEnd);
+          if (strength > strongestSectionValue) {
+            strongestSectionValue = strength;
+            strongestSectionProject = project;
+          }
+        }
 
         for (const image of projectsScroll.querySelectorAll(".project-media img")) {
           let overlay = autoClearOverlays.get(image);
@@ -2164,18 +2314,63 @@
           }
 
           activeImages.add(image);
-          const leading = Math.max(0, Math.min(1, (rect.left - focusStart) / Math.max(1, focusEnd - focusStart)));
-          const trailing = 1 - Math.max(0, Math.min(1, (rect.left - holdEnd) / Math.max(1, fadeOutEnd - holdEnd)));
-          const visibleLeft = Math.max(0, Math.min(1, (rect.right - viewportLeft) / Math.max(1, rect.width)));
-          const visibleRight = Math.max(0, Math.min(1, (viewportRight - rect.left) / Math.max(1, rect.width)));
-          const visibility = smoothstep(Math.min(visibleLeft, visibleRight));
-          const strength = Math.max(0, Math.min(1, Math.min(leading, trailing) * visibility));
+          const strength = focusedRectStrength(rect, viewportLeft, viewportRight, focusStart, focusEnd, holdEnd, fadeOutEnd);
           overlay.style.opacity = strength.toFixed(3);
         }
 
         for (const [image, overlay] of autoClearOverlays) {
           if (!activeImages.has(image)) {
             overlay.style.opacity = "0";
+          }
+        }
+
+        syncGallerySectionTitle(strongestSectionProject, strongestSectionValue);
+      }
+
+      function focusedRectStrength(rect, viewportLeft, viewportRight, focusStart, focusEnd, holdEnd, fadeOutEnd) {
+        if (rect.width <= 0 || rect.height <= 0 || rect.right <= viewportLeft || rect.left >= viewportRight) {
+          return 0;
+        }
+
+        const leading = Math.max(0, Math.min(1, (rect.left - focusStart) / Math.max(1, focusEnd - focusStart)));
+        const trailing = 1 - Math.max(0, Math.min(1, (rect.left - holdEnd) / Math.max(1, fadeOutEnd - holdEnd)));
+        const visibleLeft = Math.max(0, Math.min(1, (rect.right - viewportLeft) / Math.max(1, rect.width)));
+        const visibleRight = Math.max(0, Math.min(1, (viewportRight - rect.left) / Math.max(1, rect.width)));
+        const visibility = smoothstep(Math.min(visibleLeft, visibleRight));
+        return Math.max(0, Math.min(1, Math.min(leading, trailing) * visibility));
+      }
+
+      function syncGallerySectionTitle(strongestSectionProject, strongestSectionValue) {
+        const introReturnPoint = Math.max(1, window.innerWidth * 0.38);
+        if (strongestSectionProject && strongestSectionValue > 0.985) {
+          state.galleryTitleSection = strongestSectionProject.dataset.gallerySection || "apd";
+          state.galleryTitleSectionActive = true;
+        } else if (state.galleryVirtualScroll < introReturnPoint) {
+          state.galleryTitleDirection = -1;
+          state.galleryTitleSectionActive = false;
+        }
+
+        updateGalleryTitle(state.galleryTitleSectionActive ? state.galleryTitleSection : "default");
+      }
+
+      function updateGalleryTitle(mode) {
+        if (state.galleryTitleMode === mode || !galleryTitles.default || !galleryTitles[mode]) {
+          return;
+        }
+
+        const previousMode = state.galleryTitleMode;
+        state.galleryTitleMode = mode;
+        const movingForward = state.galleryTitleDirection >= 0;
+        for (const [titleMode, title] of Object.entries(galleryTitles)) {
+          const active = titleMode === mode;
+          if (active) {
+            title.classList.remove("is-hidden-left", "is-hidden-right");
+          } else if (titleMode === previousMode) {
+            title.classList.toggle("is-hidden-left", movingForward);
+            title.classList.toggle("is-hidden-right", !movingForward);
+          } else {
+            title.classList.toggle("is-hidden-left", !movingForward);
+            title.classList.toggle("is-hidden-right", movingForward);
           }
         }
       }
@@ -2318,6 +2513,9 @@
 
         if (window.innerWidth > 960) {
           event.preventDefault();
+          if (Math.abs(wheelDelta) > 0.5) {
+            state.galleryTitleDirection = wheelDelta >= 0 ? 1 : -1;
+          }
           state.galleryVirtualTarget = Math.max(
             0,
             Math.min(state.galleryScrollLength, state.galleryVirtualTarget + wheelDelta)
@@ -2503,12 +2701,16 @@
           const nextVirtualScroll = state.galleryVirtualScroll
             + (state.galleryVirtualTarget - state.galleryVirtualScroll) * galleryEase;
           if (Math.abs(nextVirtualScroll - state.galleryVirtualScroll) > 0.01) {
+            state.galleryTitleDirection = nextVirtualScroll >= state.galleryVirtualScroll ? 1 : -1;
+            state.lastGalleryVirtualScroll = state.galleryVirtualScroll;
             state.galleryVirtualScroll = nextVirtualScroll;
             syncHorizontalGallery();
             syncProjectFlight();
             syncShadowClearImage();
             syncHoverClearImage();
           } else if (Math.abs(state.galleryVirtualTarget - state.galleryVirtualScroll) > 0.01) {
+            state.galleryTitleDirection = state.galleryVirtualTarget >= state.galleryVirtualScroll ? 1 : -1;
+            state.lastGalleryVirtualScroll = state.galleryVirtualScroll;
             state.galleryVirtualScroll = state.galleryVirtualTarget;
             syncHorizontalGallery();
             syncProjectFlight();

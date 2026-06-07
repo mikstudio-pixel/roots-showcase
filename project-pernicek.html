@@ -238,8 +238,16 @@
       }
 
       .brand {
-        font-size: 16px;
-        font-weight: 680;
+        display: inline-flex;
+        align-items: center;
+        height: 48px;
+      }
+
+      .brand-logo {
+        display: block;
+        width: clamp(96px, 8vw, 118px);
+        max-height: 26px;
+        height: auto;
       }
 
       .nav {
@@ -635,7 +643,7 @@
     </div>
     <main class="page">
       <header class="topbar">
-        <div class="brand">KOŘENY</div>
+        <div class="brand"><img class="brand-logo" src="assets/Logo_mono_dark.svg" alt="Kořeny"></div>
         <nav class="nav" aria-label="Pages">
           <a href="index.html">Laboratoř</a>
           <a href="gallery.html">Projekty</a>
@@ -673,7 +681,7 @@
 
         <aside class="hero-media">
           <figure class="image-stage">
-            <img src="data/Produkty/Vánoce (VZOR)/Vzorovy_Jan_4r_APD_Pernicek/Foto/Vzorovy_Jan_4r_APD_Pernicek_01.jpg" alt="Perníček, forma na vykrajování perníku">
+            <img src="data/Produkty/Vánoce (VZOR)/Vzorovy_Jan_4r_APD_Pernicek/Foto/Vzorovy_Jan_4r_APD_Pernicek_01.jpg" alt="Perníček, forma na vykrajování perníku">
           </figure>
         </aside>
       </section>
@@ -683,7 +691,7 @@
           <p>Projekt nechává vánoční pečení vystoupit jako opakované rodinné gesto. Forma drží paměť tvaru, doteku i společné práce u stolu.</p>
         </div>
         <div class="story-image">
-          <img src="data/Produkty/Vánoce (VZOR)/Vzorovy_Jan_4r_APD_Pernicek/Foto/Vzorovy_Jan_4r_APD_Pernicek_02.jpg" alt="Druhý pohled na projekt Perníček">
+          <img src="data/Produkty/Vánoce (VZOR)/Vzorovy_Jan_4r_APD_Pernicek/Foto/Vzorovy_Jan_4r_APD_Pernicek_02.jpg" alt="Druhý pohled na projekt Perníček">
         </div>
       </section>
     </main>

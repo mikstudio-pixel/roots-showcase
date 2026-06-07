@@ -238,8 +238,16 @@
       }
 
       .brand {
-        font-size: 16px;
-        font-weight: 680;
+        display: inline-flex;
+        align-items: center;
+        height: 48px;
+      }
+
+      .brand-logo {
+        display: block;
+        width: clamp(96px, 8vw, 118px);
+        max-height: 26px;
+        height: auto;
       }
 
       .nav {
@@ -635,7 +643,7 @@
     </div>
     <main class="page">
       <header class="topbar">
-        <div class="brand">KOŘENY</div>
+        <div class="brand"><img class="brand-logo" src="assets/Logo_mono_dark.svg" alt="Kořeny"></div>
         <nav class="nav" aria-label="Pages">
           <a href="index.html">Laboratoř</a>
           <a href="gallery.html">Projekty</a>
@@ -673,7 +681,7 @@
 
         <aside class="hero-media">
           <figure class="image-stage">
-            <img src="data/Produkty/Kapří šupina/Konecna_Veronika_1r_APD_StojanNaSperky/Foto/Veronika_Konecna_1r_APD_Kapr_01.jpg" alt="Kapr, stojan na šperky">
+            <img src="data/Produkty/Kapří šupina/Konecna_Veronika_1r_APD_StojanNaSperky/Foto/Veronika_Konecna_1r_APD_Kapr_01.jpg" alt="Kapr, stojan na šperky">
           </figure>
         </aside>
       </section>
@@ -683,7 +691,7 @@
           <p>Projekt převádí drobný vánoční zvyk do předmětu, který může zůstat přítomný po celý rok. Motiv šupiny se mění v tichý osobní talisman.</p>
         </div>
         <div class="story-image">
-          <img src="data/Produkty/Kapří šupina/Konecna_Veronika_1r_APD_StojanNaSperky/Foto/Veronika_Konecna_1r_APD_Kapr_02.jpg" alt="Detail stojanu na šperky Kapr">
+          <img src="data/Produkty/Kapří šupina/Konecna_Veronika_1r_APD_StojanNaSperky/Foto/Veronika_Konecna_1r_APD_Kapr_02.jpg" alt="Detail stojanu na šperky Kapr">
         </div>
       </section>
     </main>
