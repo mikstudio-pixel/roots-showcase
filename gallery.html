@@ -1204,6 +1204,10 @@
         lastFrameTime: 0,
         butterflyFrame: 0,
         butterflyTimeout: 0,
+        butterflyX: -1000,
+        butterflyY: -1000,
+        butterflyOpacity: 0,
+        butterflyFlap: 0,
         dpr: 1,
         pageWidth: 1,
         pageHeight: 1,
@@ -1247,6 +1251,7 @@
         uniform vec2 u_page_size;
         uniform vec2 u_viewport_size;
         uniform float u_scroll_y;
+        uniform vec4 u_butterfly_prism;
 
         float hash(vec2 p) {
           p = fract(p * vec2(123.34, 456.21));
@@ -1290,8 +1295,7 @@
           gust += sin(t * 0.73 + maskUv.y * 10.4 + maskUv.x * 1.8) * 0.45;
           float bladeHeight = smoothstep(0.12, 0.62, maskUv.y);
           bladeHeight *= smoothstep(0.02, 0.11, maskUv.y);
-          float localFlutter = 0.68 + 0.32 * sin(maskUv.x * 38.0 + maskUv.y * 17.0 + t * 0.9);
-          float bend = gust * u_motion * 0.028 * bladeHeight * localFlutter;
+          float bend = gust * u_motion * 0.028 * bladeHeight;
           float lift = sin(t * 0.82 + maskUv.x * 5.8) * u_motion * 0.004 * bladeHeight / pageAspect;
           return maskUv + vec2(bend, lift);
         }
@@ -1355,6 +1359,7 @@
           float pageX = v_uv.x * u_viewport_size.x;
           float pageY = (1.0 - v_uv.y) * u_viewport_size.y;
           vec2 uv = vec2(pageX / u_page_size.x, 1.0 - pageY / u_page_size.y);
+          float pageAspect = u_page_size.y / max(u_page_size.x, 1.0);
           float t = u_time;
           float angle = mix(-1.15, 1.15, u_light * 0.5 + 0.5);
           vec2 direction = normalize(vec2(cos(angle), sin(angle) * 0.72 - 0.32));
@@ -1443,6 +1448,61 @@
           prismPresence *= 1.0 - smoothstep(0.62, 1.12, density);
           vec3 ink = mix(paperShadow, prismInk, prismPresence);
           density += prismWeight * u_saturation * 0.19;
+
+          float butterflyFade = u_butterfly_prism.z;
+          float butterflyFlap = u_butterfly_prism.w;
+          vec2 butterflyCenter = vec2(u_butterfly_prism.x, 1.0 - u_butterfly_prism.y);
+          vec2 butterflyDelta = vec2(uv.x - butterflyCenter.x, (uv.y - butterflyCenter.y) * pageAspect);
+          float butterflyDistance = length(butterflyDelta);
+          float butterflyAngle = atan(butterflyDelta.y, butterflyDelta.x);
+          vec2 contactX = vec2(0.026, 0.0);
+          vec2 contactY = vec2(0.0, 0.026 / pageAspect);
+          float plantContact = maskAt(butterflyCenter);
+          plantContact = max(plantContact, maskAt(butterflyCenter + contactX));
+          plantContact = max(plantContact, maskAt(butterflyCenter - contactX));
+          plantContact = max(plantContact, maskAt(butterflyCenter + contactY));
+          plantContact = max(plantContact, maskAt(butterflyCenter - contactY));
+          plantContact = max(plantContact, maskAt(butterflyCenter + contactX * 0.72 + contactY * 0.72));
+          plantContact = max(plantContact, maskAt(butterflyCenter - contactX * 0.72 - contactY * 0.72));
+          float contactGate = smoothstep(0.025, 0.22, plantContact) * butterflyFade;
+          float plantEnergy = smoothstep(0.08, 0.5, plantContact);
+          float flashClock = t * 9.5 + butterflyFlap * 2.2;
+          float flashBeat = floor(flashClock);
+          float flashAge = fract(flashClock);
+          float flashChance = step(0.58, hash(vec2(flashBeat * 1.37, floor(t * 0.43) + 9.1)));
+          float flashFade = 1.0 - smoothstep(0.0, 0.92, flashAge);
+          contactGate *= flashChance * flashFade;
+          float beat = floor(t * 8.0 + butterflyFlap * 5.0);
+          float beatPulse = 0.28 + butterflyFlap * 0.48 + plantEnergy * 0.34;
+          float rayMask = 0.0;
+          vec3 rayInk = vec3(0.0);
+          for (int i = 0; i < 10; i++) {
+            float fi = float(i);
+            float seed = hash(vec2(fi * 13.7 + beat, beat * 0.37 + fi));
+            float seedB = hash(vec2(fi * 31.1 - beat * 0.19, seed * 17.0));
+            float rayAngle = fi * 0.6283 + seed * 0.92 + sin(t * (0.42 + seed * 1.2) + fi) * 0.18;
+            float angleDiff = abs(atan(sin(butterflyAngle - rayAngle), cos(butterflyAngle - rayAngle)));
+            float rayWidth = mix(0.014, 0.055, seedB) * (1.0 + butterflyFlap * 0.38);
+            float rayLength = mix(0.075, 0.34, seed) * (0.72 + butterflyFlap * 0.52 + plantEnergy * 0.52);
+            float rayIntensity = mix(0.34, 0.92, seedB) * beatPulse;
+            float angular = 1.0 - smoothstep(rayWidth * 0.22, rayWidth, angleDiff);
+            float radial = 1.0 - smoothstep(rayLength * 0.24, rayLength, butterflyDistance);
+            float originCut = smoothstep(0.004, 0.032, butterflyDistance);
+            float ray = angular * radial * originCut * rayIntensity;
+            vec3 spectral = 0.5 + 0.5 * cos(vec3(0.0, 2.35, 4.65) + seed * 6.283 + butterflyAngle * 1.7 + butterflyDistance * (62.0 + seedB * 82.0) - t * (4.2 + seed * 6.2));
+            spectral = smoothstep(vec3(0.16), vec3(0.86), spectral);
+            spectral = clamp((spectral - 0.5) * 2.35 + 0.5, 0.0, 1.0);
+            spectral = mix(spectral, vec3(spectral.r * 1.18, spectral.g * 0.96, spectral.b * 1.28), 0.55);
+            rayMask += ray;
+            rayInk += spectral * ray;
+          }
+
+          float coreSpark = (1.0 - smoothstep(0.0, 0.046, butterflyDistance)) * (0.11 + butterflyFlap * 0.24);
+          rayMask = clamp(rayMask + coreSpark, 0.0, 1.22) * contactGate;
+          rayInk = mix(rayInk / max(rayMask / max(contactGate, 0.001), 0.001), vec3(0.98, 0.62, 1.0), coreSpark * 0.06);
+          float prismBurst = rayMask * (0.34 + u_saturation * 0.48) * (0.86 + plantEnergy * 0.42);
+          ink = mix(ink, clamp(rayInk, 0.0, 1.0), clamp(prismBurst * 0.4, 0.0, 0.62));
+          density += prismBurst * 0.14;
 
           float strength = mix(0.18, 0.88, u_contrast);
           float alpha = clamp(pow(density, 0.82) * strength, 0.0, 0.68);
@@ -1739,7 +1799,8 @@
         flowerMask: gl.getUniformLocation(program, "u_flowerMask"),
         pageSize: gl.getUniformLocation(program, "u_page_size"),
         viewportSize: gl.getUniformLocation(program, "u_viewport_size"),
-        scrollY: gl.getUniformLocation(program, "u_scroll_y")
+        scrollY: gl.getUniformLocation(program, "u_scroll_y"),
+        butterflyPrism: gl.getUniformLocation(program, "u_butterfly_prism")
       };
 
       const flowerTexture = gl.createTexture();
@@ -2126,6 +2187,8 @@
         }
 
         root.style.setProperty("--gallery-butterfly-opacity", "0");
+        state.butterflyOpacity = 0;
+        state.butterflyFlap = 0;
       }
 
       function smoothstep(value) {
@@ -2196,12 +2259,18 @@
           root.style.setProperty("--gallery-butterfly-wing-spread", wingSpread.toFixed(3));
           root.style.setProperty("--gallery-butterfly-rotate", `${rotation.toFixed(3)}deg`);
           root.style.setProperty("--gallery-butterfly-scale", scale.toFixed(3));
+          state.butterflyX = x;
+          state.butterflyY = y;
+          state.butterflyOpacity = fade * 0.9;
+          state.butterflyFlap = flap;
 
           if (progress < 1) {
             state.butterflyFrame = requestAnimationFrame(tick);
           } else {
             state.butterflyFrame = 0;
             root.style.setProperty("--gallery-butterfly-opacity", "0");
+            state.butterflyOpacity = 0;
+            state.butterflyFlap = 0;
             scheduleButterflyFlight();
           }
         }
@@ -2274,6 +2343,13 @@
         gl.uniform1f(uniforms.motion, effectiveMotion);
         gl.uniform1f(uniforms.haze, state.haze);
         gl.uniform2f(uniforms.pointer, -1000, -1000);
+        gl.uniform4f(
+          uniforms.butterflyPrism,
+          state.butterflyX / Math.max(state.viewportWidth, 1),
+          state.butterflyY / Math.max(state.viewportHeight, 1),
+          state.butterflyOpacity,
+          state.butterflyFlap
+        );
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, flowerTexture);
         gl.drawArrays(gl.TRIANGLES, 0, 6);
