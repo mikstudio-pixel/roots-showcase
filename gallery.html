@@ -117,6 +117,122 @@
         mix-blend-mode: multiply;
       }
 
+      body.gallery-intro-pending #page-shadow,
+      body.gallery-intro-pending .gallery-butterfly-shadow,
+      body.gallery-intro-pending .topbar,
+      body.gallery-intro-pending .intro .meta,
+      body.gallery-intro-pending .shadow-aperture,
+      body.gallery-intro-pending .overview,
+      body.gallery-intro-pending .projects-scroll,
+      body.gallery-intro-pending .controls {
+        opacity: 0;
+      }
+
+      body.gallery-intro-pending .topbar,
+      body.gallery-intro-pending .intro .meta,
+      body.gallery-intro-pending .shadow-aperture,
+      body.gallery-intro-pending .overview,
+      body.gallery-intro-pending .projects-scroll,
+      body.gallery-intro-pending .controls {
+        filter: blur(8px);
+      }
+
+      body.gallery-intro-shadows #page-shadow {
+        opacity: 1;
+        transition:
+          opacity 1800ms cubic-bezier(0.22, 0, 0.18, 1),
+          filter 1800ms cubic-bezier(0.22, 0, 0.18, 1);
+      }
+
+      body.gallery-intro-content .topbar,
+      body.gallery-intro-content .intro .meta,
+      body.gallery-intro-content .shadow-aperture,
+      body.gallery-intro-content .overview,
+      body.gallery-intro-content .projects-scroll,
+      body.gallery-intro-content .controls {
+        opacity: 1;
+        filter: blur(0);
+        transition:
+          opacity 1250ms cubic-bezier(0.22, 0, 0.18, 1),
+          filter 1250ms cubic-bezier(0.22, 0, 0.18, 1);
+      }
+
+      .gallery-light-intro {
+        position: fixed;
+        inset: 0;
+        z-index: 90;
+        pointer-events: none;
+        opacity: 0;
+        --intro-light-x: 82%;
+        --intro-light-y: 38%;
+        background:
+          radial-gradient(circle at var(--intro-light-x) var(--intro-light-y), rgba(245, 245, 238, 0.035), rgba(62, 60, 54, 0.035) 18%, rgba(18, 17, 16, 0.62) 52%, rgba(13, 12, 11, 0.92) 100%),
+          linear-gradient(135deg, rgba(17, 16, 14, 0.96), rgba(30, 28, 24, 0.9));
+      }
+
+      .gallery-light-intro::before {
+        content: "";
+        position: absolute;
+        inset: -26vw;
+        opacity: 0;
+        background: radial-gradient(circle at var(--intro-light-x) var(--intro-light-y), rgba(255, 255, 245, 0.92), rgba(247, 247, 239, 0.42) 14%, rgba(245, 245, 238, 0.14) 28%, rgba(245, 245, 238, 0) 52%);
+        transform: scale(0.08);
+        transform-origin: var(--intro-light-x) var(--intro-light-y);
+      }
+
+      .gallery-light-intro::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        opacity: 0.42;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.75' numOctaves='5' seed='17' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.72 0 0 0 0 0.72 0 0 0 0 0.68 0 0 0 0.72 0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+        background-size: 180px 180px;
+        mix-blend-mode: overlay;
+      }
+
+      body.gallery-intro-pending .gallery-light-intro {
+        opacity: 1;
+      }
+
+      body.gallery-intro-shadows .gallery-light-intro {
+        opacity: 0;
+        transition: opacity 2800ms cubic-bezier(0.32, 0, 0.12, 1);
+      }
+
+      body.gallery-intro-shadows .gallery-light-intro::before {
+        opacity: 1;
+        transform: scale(1);
+        transition:
+          opacity 1850ms cubic-bezier(0.34, 0, 0.12, 1),
+          transform 3000ms cubic-bezier(0.34, 0, 0.12, 1);
+      }
+
+      .intro-title-line {
+        display: block;
+      }
+
+      .intro-title-line--second {
+        opacity: 0;
+        filter: blur(14px);
+      }
+
+      body.gallery-intro-pending .intro-title-text[data-gallery-title="default"] {
+        color: rgba(247, 247, 242, 0.94);
+      }
+
+      body.gallery-intro-shadows .intro-title-text[data-gallery-title="default"] {
+        color: #111;
+        transition: color 1450ms cubic-bezier(0.26, 0, 0.18, 1);
+      }
+
+      body.gallery-intro-shadows .intro-title-line--second {
+        opacity: 1;
+        filter: blur(0);
+        transition:
+          opacity 1200ms cubic-bezier(0.22, 0, 0.18, 1),
+          filter 1200ms cubic-bezier(0.22, 0, 0.18, 1);
+      }
+
       .gallery-butterfly-shadow {
         position: fixed;
         inset: 0;
@@ -197,6 +313,8 @@
         display: inline-flex;
         align-items: center;
         height: 48px;
+        color: inherit;
+        text-decoration: none;
       }
 
       .brand-logo {
@@ -215,6 +333,22 @@
       .nav a {
         color: #111;
         text-decoration: none;
+      }
+
+      .lang-switch {
+        display: inline-flex;
+        align-items: baseline;
+        gap: 5px;
+        color: #777;
+        white-space: nowrap;
+      }
+
+      .lang-switch a {
+        color: #777;
+      }
+
+      .lang-switch a.is-active {
+        color: #111;
       }
 
       .intro {
@@ -274,6 +408,7 @@
       }
 
       .shadow-aperture {
+        position: relative;
         display: grid;
         grid-template-columns: minmax(0, 1fr) minmax(220px, 320px);
         gap: 32px;
@@ -283,14 +418,194 @@
         border-bottom: 1px solid #dedede;
       }
 
-      .shadow-aperture span {
+      .shadow-aperture > span {
         align-self: end;
         color: #666;
         font-size: 13px;
       }
 
+      body:not(.show-shadow-ui) .shadow-caption,
+      body:not(.show-shadow-ui) .controls {
+        display: none;
+      }
+
       .shadow-aperture::before {
         content: "";
+      }
+
+      .category-index {
+        --category-gap: 18px;
+        --category-apd-open: 148px;
+        --category-space-open: 88px;
+        --tick-1-x: 0px;
+        --tick-2-x: var(--category-gap);
+        --tick-3-x: calc(var(--category-gap) * 2);
+        position: absolute;
+        left: 0;
+        top: -28px;
+        z-index: 8;
+        display: grid;
+        grid-template-columns: repeat(2, var(--category-gap));
+        align-items: center;
+        height: 22px;
+        pointer-events: auto;
+      }
+
+      .category-tick {
+        position: absolute;
+        top: 0;
+        width: 1px;
+        height: 18px;
+        background: #dedede;
+        transform: translateX(var(--tick-x));
+        transition:
+          transform 420ms cubic-bezier(0.2, 0, 0.18, 1),
+          background-color 260ms cubic-bezier(0.2, 0, 0.18, 1);
+        pointer-events: none;
+      }
+
+      .category-tick:nth-of-type(1) {
+        left: 0;
+        --tick-x: var(--tick-1-x);
+      }
+
+      .category-tick:nth-of-type(2) {
+        left: 0;
+        --tick-x: var(--tick-2-x);
+      }
+
+      .category-tick:nth-of-type(3) {
+        left: 0;
+        --tick-x: var(--tick-3-x);
+      }
+
+      .category-index:has([data-gallery-jump="apd"]:hover),
+      .category-index:has([data-gallery-jump="apd"]:focus-visible),
+      .category-index:has([data-gallery-jump="apd"].is-active) {
+        grid-template-columns: calc(var(--category-gap) + var(--category-apd-open)) var(--category-gap);
+        --tick-1-x: 0px;
+        --tick-2-x: calc(var(--category-gap) + var(--category-apd-open));
+        --tick-3-x: calc(var(--category-gap) * 2 + var(--category-apd-open));
+      }
+
+      .category-index:has([data-gallery-jump="space"]:hover),
+      .category-index:has([data-gallery-jump="space"]:focus-visible),
+      .category-index:has([data-gallery-jump="space"].is-active) {
+        grid-template-columns: var(--category-gap) calc(var(--category-gap) + var(--category-space-open));
+        --tick-1-x: 0px;
+        --tick-2-x: var(--category-gap);
+        --tick-3-x: calc(var(--category-gap) * 2 + var(--category-space-open));
+      }
+
+      .category-marker {
+        position: relative;
+        display: grid;
+        place-items: center;
+        width: 100%;
+        height: 22px;
+        min-height: 0;
+        padding: 0;
+        border: 0;
+        border-radius: 0;
+        background: transparent;
+        color: #1c1915;
+        cursor: pointer;
+        font: inherit;
+        line-height: 1;
+      }
+
+      .category-marker:hover,
+      .category-marker:focus-visible {
+        border-color: transparent;
+        background: transparent;
+      }
+
+      .category-marker span {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: max-content;
+        color: #332010;
+        font-size: 10px;
+        line-height: 1.1;
+        opacity: 0;
+        filter: blur(5px);
+        pointer-events: none;
+        text-align: center;
+        translate: -50% calc(-50% + 7px);
+        transform-origin: 50% 50%;
+        transition:
+          opacity 0ms linear,
+          filter 0ms linear,
+          translate 0ms linear;
+        transition-delay: 0ms;
+        white-space: nowrap;
+      }
+
+      .category-marker:hover span,
+      .category-marker:focus-visible span,
+      .category-marker.is-active span {
+        opacity: 1;
+        filter: blur(0);
+        translate: -50% -50%;
+        transition:
+          opacity 260ms cubic-bezier(0.2, 0, 0.18, 1),
+          filter 360ms cubic-bezier(0.2, 0, 0.18, 1),
+          translate 360ms cubic-bezier(0.2, 0, 0.18, 1);
+        transition-delay: 60ms;
+      }
+
+      .student-projects-link {
+        position: absolute;
+        left: 0;
+        bottom: clamp(18px, 6vh, 58px);
+        z-index: 8;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        width: auto;
+        min-height: 0;
+        padding: 0;
+        border: 0;
+        border-radius: 0;
+        background: transparent;
+        color: #332010;
+        font: inherit;
+        font-size: 13px;
+        line-height: 1;
+        opacity: 0.62;
+        cursor: pointer;
+        transform: translateY(0);
+        transition:
+          opacity 220ms cubic-bezier(0.2, 0, 0.18, 1),
+          transform 260ms cubic-bezier(0.2, 0, 0.18, 1);
+      }
+
+      .student-projects-link:hover,
+      .student-projects-link:focus-visible {
+        opacity: 1;
+      }
+
+      .student-projects-link.is-hidden {
+        opacity: 0;
+        pointer-events: none;
+        transform: translateY(12px);
+      }
+
+      .student-projects-link span {
+        color: inherit;
+        font-size: inherit;
+      }
+
+      .student-projects-link-arrow {
+        font-size: 16px;
+        line-height: 0.8;
+        transition: transform 220ms cubic-bezier(0.2, 0, 0.18, 1);
+      }
+
+      .student-projects-link:hover .student-projects-link-arrow,
+      .student-projects-link:focus-visible .student-projects-link-arrow {
+        transform: translateX(4px);
       }
 
       .overview-item {
@@ -691,6 +1006,19 @@
         background: #fff;
       }
 
+      button.category-marker:hover,
+      button.category-marker:focus-visible {
+        border-color: transparent;
+        background: transparent;
+      }
+
+      button.student-projects-link,
+      button.student-projects-link:hover,
+      button.student-projects-link:focus-visible {
+        border-color: transparent;
+        background: transparent;
+      }
+
       .page-link {
         display: block;
         margin-top: 10px;
@@ -728,6 +1056,11 @@
 
         .content {
           padding: 18px;
+        }
+
+        .gallery-intro-title {
+          left: 18px;
+          top: calc(18px + 48px + clamp(58px, 9vh, 108px));
         }
 
         .intro,
@@ -772,6 +1105,14 @@
           min-height: 32vh;
         }
 
+        .category-index {
+          display: none;
+        }
+
+        .student-projects-link {
+          display: none;
+        }
+
         .project.featured {
           grid-column: auto;
         }
@@ -794,6 +1135,11 @@
           padding: 16px;
         }
 
+        .gallery-intro-title {
+          left: 16px;
+          top: calc(16px + 110px + clamp(58px, 9vh, 108px));
+        }
+
         .project-top {
           display: grid;
           gap: 8px;
@@ -802,8 +1148,9 @@
     </style>
     <link rel="stylesheet" href="assets/koreny-transitions.css">
   </head>
-  <body class="gallery-page">
+  <body class="gallery-page gallery-intro-pending">
     <canvas id="grain-canvas" aria-hidden="true"></canvas>
+    <div class="gallery-light-intro" aria-hidden="true"></div>
     <script src="assets/koreny-transitions.js"></script>
     <canvas id="page-shadow"></canvas>
     <div class="gallery-butterfly-shadow" aria-hidden="true">
@@ -815,24 +1162,45 @@
     <main class="page">
       <div class="content">
         <header class="topbar">
-          <div class="brand"><img class="brand-logo" src="assets/Logo_mono_dark.svg" alt="Kořeny"></div>
+          <a class="brand" href="gallery.html" aria-label="Projekty">
+            <img class="brand-logo" src="assets/Logo_mono_dark.svg" alt="Kořeny">
+          </a>
           <nav class="nav" aria-label="Pages">
-            <a href="index.html">Laboratoř</a>
-            <a href="gallery.html">Projekty</a>
+            <a href="gallery.html#o-projektu">O projektu</a>
+            <span class="lang-switch" aria-label="Přepnutí jazyka">
+              <a class="is-active" href="gallery.html" lang="cs" aria-current="true">CZ</a>
+              <span aria-hidden="true">/</span>
+              <a href="gallery.html?lang=en" lang="en">EN</a>
+            </span>
           </nav>
         </header>
 
-        <section class="intro">
+        <section class="intro" id="o-projektu">
           <div class="intro-title" aria-live="polite">
-            <h1 class="intro-title-text" data-gallery-title="default">Současné rituály v porcelánu</h1>
-            <h1 class="intro-title-text is-hidden-right" data-gallery-title="apd">Ateliér průmyslového designu</h1>
-            <h1 class="intro-title-text is-hidden-right" data-gallery-title="space">Teorie prostoru</h1>
+            <h1 class="intro-title-text" data-gallery-title="default"><span class="intro-title-line">Moravské tradice</span><span class="intro-title-line intro-title-line--second">v&nbsp;novém světle</span></h1>
+            <h1 class="intro-title-text is-hidden-right" data-gallery-title="apd">Současné rituály v&nbsp;porcelánu</h1>
+            <h1 class="intro-title-text is-hidden-right" data-gallery-title="space">Prostor<br>pro tradici</h1>
           </div>
           <p class="meta">Studentské práce převádějí české, moravské a slovanské tradice do současného produktového designu. Spojuje je porcelán, rodinné rituály, sezónnost a tichá symbolika předmětů.</p>
         </section>
 
         <section class="shadow-aperture" aria-label="Shadow study surface">
-          <span>Stínová plocha pro promítání motivů</span>
+          <nav class="category-index" aria-label="Navigace kategorií projektů">
+            <span class="category-tick" aria-hidden="true"></span>
+            <span class="category-tick" aria-hidden="true"></span>
+            <span class="category-tick" aria-hidden="true"></span>
+            <button class="category-marker" type="button" data-gallery-jump="apd" aria-label="Přejít na Ateliér průmyslového designu">
+              <span>Ateliér průmyslového designu</span>
+            </button>
+            <button class="category-marker" type="button" data-gallery-jump="space" aria-label="Přejít na Teorii prostoru">
+              <span>Teorie prostoru</span>
+            </button>
+          </nav>
+          <button class="student-projects-link" type="button">
+            <span>Projekty studentů</span>
+            <span class="student-projects-link-arrow" aria-hidden="true">→</span>
+          </button>
+          <span class="shadow-caption">Stínová plocha pro promítání motivů</span>
         </section>
 
         <section class="overview" aria-label="Project overview">
@@ -1200,7 +1568,6 @@
             <button type="button" id="still">Still</button>
             <button type="button" id="reference">Reference-ish</button>
           </div>
-          <a class="page-link" href="index.html">Open dark lab</a>
           <div class="hint">
             Depth offset moves and lengthens the cast shadow, like lowering the light near the SVG source.
           </div>
@@ -1226,16 +1593,59 @@
         apd: document.querySelector('[data-gallery-title="apd"]'),
         space: document.querySelector('[data-gallery-title="space"]')
       };
+      const categoryMarkers = Array.from(document.querySelectorAll("[data-gallery-jump]"));
+      const studentProjectsLink = document.querySelector(".student-projects-link");
       const shadowDprCap = 1.25;
       const autoClearOverlays = new Map();
       let hoverClearImage = null;
       let hoverClearOverlay = null;
       const fadingClearOverlays = [];
+      let galleryIntroStart = 0;
+      let galleryIntroActive = false;
       const gl = canvas.getContext("webgl", {
         alpha: true,
         antialias: true,
         premultipliedAlpha: false
       });
+
+      function runGalleryIntro() {
+        if (!document.body.classList.contains("gallery-intro-pending")) {
+          return;
+        }
+
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+          document.body.classList.remove("gallery-intro-pending");
+          document.body.classList.add("gallery-intro-shadows", "gallery-intro-content");
+          document.querySelector(".gallery-light-intro")?.remove();
+          document.querySelector(".gallery-intro-title")?.remove();
+          galleryIntroActive = false;
+          return;
+        }
+
+        galleryIntroStart = performance.now();
+        galleryIntroActive = true;
+
+        requestAnimationFrame(() => {
+          window.setTimeout(() => {
+            document.body.classList.add("gallery-intro-shadows");
+          }, 520);
+
+          window.setTimeout(() => {
+            document.body.classList.add("gallery-intro-content");
+          }, 2200);
+
+          window.setTimeout(() => {
+            document.body.classList.remove(
+              "gallery-intro-pending",
+              "gallery-intro-shadows",
+              "gallery-intro-content"
+            );
+            document.querySelector(".gallery-light-intro")?.remove();
+            document.querySelector(".gallery-intro-title")?.remove();
+            galleryIntroActive = false;
+          }, 4600);
+        });
+      }
 
       function createClearOverlay(className = "shadow-clear-image") {
         const image = document.createElement("img");
@@ -2110,6 +2520,7 @@
           state.galleryTitleSectionActive = false;
           state.galleryTitleDirection = -1;
           updateGalleryTitle("default");
+          updateCategoryIndex("default");
           resetProjectFlight();
           return;
         }
@@ -2345,7 +2756,7 @@
         if (strongestSectionProject && strongestSectionValue > 0.985) {
           state.galleryTitleSection = strongestSectionProject.dataset.gallerySection || "apd";
           state.galleryTitleSectionActive = true;
-        } else if (state.galleryVirtualScroll < introReturnPoint) {
+        } else if (state.galleryVirtualScroll < introReturnPoint && state.galleryVirtualTarget < introReturnPoint) {
           state.galleryTitleDirection = -1;
           state.galleryTitleSectionActive = false;
         }
@@ -2353,13 +2764,31 @@
         updateGalleryTitle(state.galleryTitleSectionActive ? state.galleryTitleSection : "default");
       }
 
+      function updateCategoryIndex(mode) {
+        categoryMarkers.forEach((marker) => {
+          marker.classList.toggle("is-active", mode !== "default" && marker.dataset.galleryJump === mode);
+        });
+      }
+
+      function updateStudentProjectsLink(mode) {
+        if (!studentProjectsLink) {
+          return;
+        }
+
+        studentProjectsLink.classList.toggle("is-hidden", mode !== "default");
+      }
+
       function updateGalleryTitle(mode) {
         if (state.galleryTitleMode === mode || !galleryTitles.default || !galleryTitles[mode]) {
+          updateCategoryIndex(mode);
+          updateStudentProjectsLink(mode);
           return;
         }
 
         const previousMode = state.galleryTitleMode;
         state.galleryTitleMode = mode;
+        updateCategoryIndex(mode);
+        updateStudentProjectsLink(mode);
         const movingForward = state.galleryTitleDirection >= 0;
         for (const [titleMode, title] of Object.entries(galleryTitles)) {
           const active = titleMode === mode;
@@ -2373,6 +2802,67 @@
             title.classList.toggle("is-hidden-right", movingForward);
           }
         }
+      }
+
+      function gallerySectionTarget(section) {
+        if (!projectsScroll || !projectsTrack || section === "default" || window.innerWidth <= 960) {
+          return 0;
+        }
+
+        const project = projectsTrack.querySelector(`[data-gallery-section="${section}"]`);
+        if (!project) {
+          return 0;
+        }
+
+        const focusStart = window.innerWidth * 0.02;
+        const target = window.innerWidth + project.offsetLeft - focusStart;
+        return Math.max(0, Math.min(state.galleryScrollLength, target));
+      }
+
+      categoryMarkers.forEach((marker) => {
+        marker.addEventListener("click", () => {
+          const section = marker.dataset.galleryJump || "default";
+          if (window.innerWidth <= 960) {
+            const target = section === "default"
+              ? 0
+              : (projectsTrack.querySelector(`[data-gallery-section="${section}"]`)?.offsetTop || 0);
+            window.scrollTo({ top: target, behavior: "smooth" });
+            return;
+          }
+
+          const nextTarget = gallerySectionTarget(section);
+          state.galleryTitleDirection = nextTarget >= state.galleryVirtualTarget ? 1 : -1;
+          state.galleryVirtualTarget = nextTarget;
+          state.galleryTitleSection = section === "default" ? state.galleryTitleSection : section;
+          state.galleryTitleSectionActive = section !== "default";
+          state.scrollMotionTarget = 1;
+          state.scrollRestUntil = performance.now() + 900;
+          updateGalleryTitle(section);
+          updateCategoryIndex(section);
+        });
+      });
+
+      if (studentProjectsLink) {
+        studentProjectsLink.addEventListener("click", () => {
+          const section = "apd";
+          studentProjectsLink.classList.add("is-hidden");
+
+          if (window.innerWidth <= 960) {
+            const target = projectsTrack?.querySelector(`[data-gallery-section="${section}"]`)?.offsetTop || 0;
+            window.scrollTo({ top: target, behavior: "smooth" });
+            return;
+          }
+
+          const nextTarget = gallerySectionTarget(section);
+          state.galleryTitleDirection = nextTarget >= state.galleryVirtualTarget ? 1 : -1;
+          state.galleryVirtualTarget = nextTarget;
+          state.galleryTitleSection = section;
+          state.galleryTitleSectionActive = true;
+          state.scrollMotionTarget = 1;
+          state.scrollRestUntil = performance.now() + 900;
+          updateGalleryTitle(section);
+          updateCategoryIndex(section);
+        });
       }
 
       function trackFadingClearOverlay(overlay, sourceImage, duration = 2200) {
@@ -2583,6 +3073,12 @@
         return value * value * (3 - 2 * value);
       }
 
+      function easeInOutCubic(value) {
+        return value < 0.5
+          ? 4 * value * value * value
+          : 1 - Math.pow(-2 * value + 2, 3) / 2;
+      }
+
       function cubicBezier(a, b, c, d, t) {
         const mt = 1 - t;
         return mt * mt * mt * a + 3 * mt * mt * t * b + 3 * mt * t * t * c + t * t * t * d;
@@ -2737,6 +3233,21 @@
           state.scrollMotion = 0;
         }
         const effectiveMotion = state.motion + (1 - state.motion) * state.scrollMotion;
+        let introLight = state.smoothMouseLight;
+        if (galleryIntroActive && galleryIntroStart) {
+          const introProgress = Math.max(0, Math.min(1, (now - galleryIntroStart - 460) / 3000));
+          const introEase = easeInOutCubic(introProgress);
+          const introFade = 1 - smoothstep(Math.max(0, Math.min(1, (now - galleryIntroStart - 2450) / 1550)));
+          const introLightY = 38 + introEase * 50;
+          const introLightElement = document.querySelector(".gallery-light-intro");
+          if (introLightElement) {
+            introLightElement.style.setProperty("--intro-light-y", `${introLightY.toFixed(2)}%`);
+          }
+          const introLightStart = Math.max(-1, Math.min(1, state.light + 0.62));
+          const introLightTarget = state.smoothMouseLight;
+          introLight = introLightStart + (introLightTarget - introLightStart) * introEase;
+          introLight = introLight * introFade + state.smoothMouseLight * (1 - introFade);
+        }
         gl.clearColor(0, 0, 0, 0);
         gl.clear(gl.COLOR_BUFFER_BIT);
         gl.uniform2f(uniforms.resolution, canvas.width, canvas.height);
@@ -2749,7 +3260,7 @@
         gl.uniform1f(uniforms.blur, state.blur);
         gl.uniform1f(uniforms.contrast, state.contrast);
         gl.uniform1f(uniforms.saturation, state.saturation);
-        gl.uniform1f(uniforms.light, state.smoothMouseLight);
+        gl.uniform1f(uniforms.light, introLight);
         gl.uniform2f(uniforms.pattern, state.patternX, state.smoothMousePatternY);
         gl.uniform1f(uniforms.scale, state.scale);
         gl.uniform1f(uniforms.motion, effectiveMotion);
@@ -2771,6 +3282,7 @@
       resize();
       syncButterflySurface();
       scheduleButterflyFlight();
+      runGalleryIntro();
       requestAnimationFrame(render);
     </script>
   </body>

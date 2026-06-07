@@ -66,12 +66,6 @@
         --window-shadow-scale: 0.74;
         --window-shadow-stretch: 2.05;
         --window-light-opacity: 0.46;
-        --spotlight-x: -1000px;
-        --spotlight-y: -1000px;
-        --spotlight-core: 17px;
-        --spotlight-mid: 56px;
-        --spotlight-falloff: 90px;
-        --spotlight-edge: 110px;
       }
 
       html {
@@ -129,8 +123,6 @@
         inset: 0;
         z-index: 34;
         pointer-events: none;
-        -webkit-mask-image: radial-gradient(circle at var(--spotlight-x) var(--spotlight-y), rgba(0, 0, 0, 0.18) 0 var(--spotlight-core), rgba(0, 0, 0, 0.43) var(--spotlight-mid), rgba(0, 0, 0, 0.82) var(--spotlight-falloff), #000 var(--spotlight-edge));
-        mask-image: radial-gradient(circle at var(--spotlight-x) var(--spotlight-y), rgba(0, 0, 0, 0.18) 0 var(--spotlight-core), rgba(0, 0, 0, 0.43) var(--spotlight-mid), rgba(0, 0, 0, 0.82) var(--spotlight-falloff), #000 var(--spotlight-edge));
       }
 
       .window-shadow-layer {
@@ -241,6 +233,8 @@
         display: inline-flex;
         align-items: center;
         height: 48px;
+        color: inherit;
+        text-decoration: none;
       }
 
       .brand-logo {
@@ -261,6 +255,22 @@
         text-decoration: none;
       }
 
+      .lang-switch {
+        display: inline-flex;
+        align-items: baseline;
+        gap: 5px;
+        color: #777;
+        white-space: nowrap;
+      }
+
+      .lang-switch a {
+        color: #777;
+      }
+
+      .lang-switch a.is-active {
+        color: #111;
+      }
+
       .hero {
         display: block;
         padding-top: 24px;
@@ -269,7 +279,6 @@
       .project-copy {
         display: grid;
         grid-template-columns: minmax(360px, 0.56fr) minmax(360px, 0.44fr);
-        grid-template-rows: 1fr auto;
         gap: 24px;
         min-height: calc(100vh - 112px);
         padding: 28px 0 0;
@@ -281,8 +290,10 @@
 
       .shadow-field {
         position: relative;
+        display: grid;
+        align-content: center;
         grid-column: 2;
-        grid-row: 1 / 3;
+        grid-row: 1;
         min-height: calc(100vh - 160px);
         overflow: hidden;
         border-left: 1px solid rgba(0, 0, 0, 0.1);
@@ -297,6 +308,7 @@
         inset: 0;
         background: linear-gradient(135deg, rgba(0, 0, 0, 0.035), rgba(255, 255, 255, 0.18));
         mix-blend-mode: multiply;
+        pointer-events: none;
       }
 
       .eyebrow {
@@ -327,31 +339,30 @@
       }
 
       .project-facts {
+        position: relative;
+        z-index: 2;
         display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 1px;
-        align-self: end;
-        margin-top: 44px;
-        background: rgba(0, 0, 0, 0.13);
+        grid-template-columns: 1fr;
+        gap: clamp(22px, 3vh, 38px);
+        width: min(360px, calc(100% - 72px));
+        margin: 0 auto;
       }
 
       .fact {
-        min-height: 126px;
-        padding: 16px;
-        background: rgba(247, 247, 245, 0.78);
-        backdrop-filter: blur(1px);
+        min-height: 0;
+        padding: 0;
       }
 
       .fact span {
         display: block;
-        margin-bottom: 28px;
+        margin-bottom: 10px;
         color: #666;
         font-size: 13px;
       }
 
       .fact strong {
         display: block;
-        font-size: clamp(22px, 2.4vw, 38px);
+        font-size: clamp(24px, 2.4vw, 38px);
         line-height: 1;
         font-weight: 680;
       }
@@ -359,7 +370,7 @@
       .hero-media {
         display: grid;
         min-height: 74vh;
-        margin-top: 24px;
+        margin-top: clamp(-190px, -15vh, -96px);
       }
 
       .image-stage {
@@ -389,45 +400,64 @@
         object-fit: cover;
       }
 
-      .story {
+      .project-gallery {
         display: grid;
-        grid-template-columns: minmax(0, 0.9fr) minmax(300px, 0.62fr);
-        gap: 1px;
-        margin-top: 24px;
-        background: rgba(0, 0, 0, 0.13);
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 24px;
+        width: calc(100% - clamp(96px, 11vw, 160px));
+        margin: clamp(56px, 8vw, 128px) auto 0;
       }
 
-      .story-text,
-      .story-image {
-        background: rgba(247, 247, 245, 0.8);
-      }
-
-      .story-text {
-        display: grid;
-        align-content: center;
-        min-height: 430px;
-        padding: clamp(24px, 5vw, 72px);
-      }
-
-      .story-text p {
-        max-width: 760px;
+      .project-gallery-item {
         margin: 0;
-        color: #222;
-        font-size: clamp(24px, 3vw, 48px);
-        line-height: 1.08;
-        font-weight: 620;
-      }
-
-      .story-image {
-        min-height: 430px;
+        min-height: clamp(360px, 48vw, 720px);
         overflow: hidden;
+        background: rgba(232, 227, 218, 0.76);
       }
 
-      .story-image img {
+      .project-gallery-item:nth-child(3n + 1) {
+        grid-column: span 2;
+      }
+
+      .project-gallery-item img {
         display: block;
         width: 100%;
         height: 100%;
+        min-height: clamp(360px, 48vw, 720px);
         object-fit: cover;
+      }
+
+      .project-annotation,
+      .author-medallion {
+        display: grid;
+        grid-template-columns: minmax(180px, 0.36fr) minmax(0, 0.64fr);
+        gap: clamp(24px, 6vw, 96px);
+        margin-top: clamp(72px, 10vw, 150px);
+        padding-top: 24px;
+        border-top: 1px solid rgba(0, 0, 0, 0.13);
+      }
+
+      .section-kicker {
+        color: #666;
+        font-size: 13px;
+      }
+
+      .project-annotation p,
+      .author-medallion p {
+        max-width: 880px;
+        margin: 0;
+        color: #222;
+        font-size: clamp(22px, 2.6vw, 42px);
+        line-height: 1.12;
+        font-weight: 560;
+      }
+
+      .author-medallion h2 {
+        max-width: 420px;
+        margin: 14px 0 0;
+        font-size: clamp(34px, 5vw, 76px);
+        line-height: 0.96;
+        font-weight: 690;
       }
 
       .shadow-clear-image {
@@ -557,17 +587,14 @@
       }
 
       @media (max-width: 980px) {
-        .story {
+        .project-copy,
+        .project-gallery,
+        .project-annotation,
+        .author-medallion {
           grid-template-columns: 1fr;
-        }
-
-        .project-copy {
-          grid-template-columns: 1fr;
-          min-height: auto;
         }
 
         .title-block,
-        .project-facts,
         .shadow-field {
           grid-column: auto;
           grid-row: auto;
@@ -577,6 +604,13 @@
           min-height: 44vh;
           border-left: 0;
           border-top: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .project-facts {
+          width: calc(100% - 48px);
+          grid-template-columns: 1fr;
+          align-self: end;
+          padding: 24px 0;
         }
 
         .project-copy,
@@ -589,6 +623,7 @@
         .hero-media {
           position: relative;
           top: auto;
+          margin-top: 24px;
         }
 
         .image-stage {
@@ -599,8 +634,13 @@
           min-height: 0;
         }
 
-        .project-facts {
-          grid-template-columns: 1fr;
+        .project-gallery {
+          width: 100%;
+        }
+
+        .project-gallery-item,
+        .project-gallery-item:nth-child(3n + 1) {
+          grid-column: auto;
         }
       }
 
@@ -643,10 +683,14 @@
     </div>
     <main class="page">
       <header class="topbar">
-        <div class="brand"><img class="brand-logo" src="assets/Logo_mono_dark.svg" alt="Kořeny"></div>
+        <a class="brand" href="gallery.html" aria-label="Projekty"><img class="brand-logo" src="assets/Logo_mono_dark.svg" alt="Kořeny"></a>
         <nav class="nav" aria-label="Pages">
-          <a href="index.html">Laboratoř</a>
-          <a href="gallery.html">Projekty</a>
+          <a href="gallery.html#o-projektu">O projektu</a>
+          <span class="lang-switch" aria-label="Přepnutí jazyka">
+            <a class="is-active" href="gallery.html" lang="cs" aria-current="true">CZ</a>
+            <span aria-hidden="true">/</span>
+            <a href="gallery.html?lang=en" lang="en">EN</a>
+          </span>
         </nav>
       </header>
 
@@ -661,9 +705,8 @@
             <p class="lead">Miska na vodu převádí rituál otevírání studánek do porcelánového objektu, ve kterém se voda stává nositelkou obnovy, čistoty a vztahu ke krajině.</p>
           </div>
 
-          <div class="shadow-field" aria-hidden="true"></div>
-
-          <div class="project-facts" aria-label="Project facts">
+          <div class="shadow-field">
+            <div class="project-facts" aria-label="Project facts">
             <div class="fact">
               <span>Objekt</span>
               <strong>miska na vodu</strong>
@@ -674,7 +717,8 @@
             </div>
             <div class="fact">
               <span>Motiv</span>
-              <strong>obnova a čistota</strong>
+              <strong>obnova vody</strong>
+            </div>
             </div>
           </div>
         </div>
@@ -686,13 +730,41 @@
         </aside>
       </section>
 
-      <section class="story">
-        <div class="story-text">
-          <p>Jemná porcelánová nádoba pracuje s klidem vodní hladiny a s představou prvního jarního očištění. Objekt nechává rituál existovat v jednoduchém gestu nalití vody.</p>
+      <section class="project-gallery" aria-label="Všechny obrázky projektu">
+        <figure class="project-gallery-item">
+          <img src="data/Produkty/Otvírání Studánek/Jagošová_Jana_4.ročník_APD_Pramen/Projekt/pramen3.jpg" alt="Pramen, obraz 1">
+        </figure>
+        <figure class="project-gallery-item">
+          <img src="data/Produkty/Otvírání Studánek/Jagošová_Jana_4.ročník_APD_Pramen/Projekt/pramenn.jpg" alt="Pramen, obraz 2">
+        </figure>
+        <figure class="project-gallery-item">
+          <img src="data/Produkty/Otvírání Studánek/Jagošová_Jana_4.ročník_APD_Pramen/Projekt/render1.png" alt="Pramen, obraz 3">
+        </figure>
+        <figure class="project-gallery-item">
+          <img src="data/Produkty/Otvírání Studánek/Jagošová_Jana_4.ročník_APD_Pramen/Projekt/render2.png" alt="Pramen, obraz 4">
+        </figure>
+        <figure class="project-gallery-item">
+          <img src="data/Produkty/Otvírání Studánek/Jagošová_Jana_4.ročník_APD_Pramen/Projekt/renderP_1 1.png" alt="Pramen, obraz 5">
+        </figure>
+        <figure class="project-gallery-item">
+          <img src="data/Produkty/Otvírání Studánek/Jagošová_Jana_4.ročník_APD_Pramen/Projekt/renderP_5 1.png" alt="Pramen, obraz 6">
+        </figure>
+        <figure class="project-gallery-item">
+          <img src="data/Produkty/Otvírání Studánek/Jagošová_Jana_4.ročník_APD_Pramen/Projekt/renderP_6 1.png" alt="Pramen, obraz 7">
+        </figure>
+      </section>
+
+      <section class="project-annotation">
+        <div class="section-kicker">Originál anotace autora</div>
+        <p>Projekt Pramen vychází z motivu vody jako nositele života a obnovy, inspirovaného tradicí otevírání studánek. Návrh pracuje s jemností, čistotou a křehkostí porcelánu, které odkazují na přirozený tok vody i její proměnlivost. Tvarosloví i detaily reflektují moment dotyku - nabírání vody do dlaní, její plynutí a návrat zpět do krajiny. Charakteristickým prvkem je struktura jemných vlnek na dně produktu, připomínající rozvlněnou kapku dopadající na vodní hladinu. Tento detail vizuálně i hapticky posiluje vnímání pohybu vody a propojuje funkční a symbolickou rovinu objektu, kdy se každodenní užívání stává připomínkou vztahu člověka k přírodě a nutnosti její ochrany.</p>
+      </section>
+
+      <section class="author-medallion">
+        <div>
+          <div class="section-kicker">Medailonek autora</div>
+          <h2>Jana Jagošová</h2>
         </div>
-        <div class="story-image">
-          <img src="data/Produkty/Otvírání Studánek/Jagošová_Jana_4.ročník_APD_Pramen/Projekt/pramen3.jpg" alt="Detail porcelánové misky Pramen">
-        </div>
+        <p>Jsem studentka 4.ročníku na ateliéru Průmyslovém designu. Tradičně se pohybují mezi motorsportem a designem. Ve své tvorbě propojuji funkčnost, přesnost a cit pro detail a ráda navrhuji produkty, které lidem usnadňují práci i každodenní život. Design vnímám jako nástroj, který má smysl a reálný dopad.</p>
       </section>
     </main>
 
@@ -756,10 +828,6 @@
       let hoverClearImage = null;
       let hoverClearOverlay = null;
       const fadingClearOverlays = [];
-      const spotlight = {
-        core: 34,
-        edge: 220
-      };
       const storageKey = "koreny.windowShadow.pramen";
       const shadowDefaults = {
         0: {
@@ -789,15 +857,6 @@
       let butterflyTimeout = 0;
       let activeShadowState = "1";
 
-      function updateSpotlightScale() {
-        const dpr = Math.min(window.devicePixelRatio || 1, 2);
-        const core = spotlight.core / dpr;
-        const edge = spotlight.edge / dpr;
-        root.style.setProperty("--spotlight-core", `${core.toFixed(1)}px`);
-        root.style.setProperty("--spotlight-mid", `${(core + (edge - core) * 0.35).toFixed(1)}px`);
-        root.style.setProperty("--spotlight-falloff", `${(core + (edge - core) * 0.74).toFixed(1)}px`);
-        root.style.setProperty("--spotlight-edge", `${edge.toFixed(1)}px`);
-      }
 
       const shadowControls = {
         intensity: {
@@ -1108,15 +1167,6 @@
         );
       });
 
-      window.addEventListener("pointermove", (event) => {
-        root.style.setProperty("--spotlight-x", `${event.clientX}px`);
-        root.style.setProperty("--spotlight-y", `${event.clientY}px`);
-      });
-
-      window.addEventListener("pointerleave", () => {
-        root.style.setProperty("--spotlight-x", "-1000px");
-        root.style.setProperty("--spotlight-y", "-1000px");
-      });
 
       function createClearOverlay() {
         const image = document.createElement("img");
@@ -1246,11 +1296,9 @@
       }, true);
 
       window.addEventListener("resize", () => {
-        updateSpotlightScale();
         syncClearOverlays();
       });
       window.addEventListener("scroll", syncClearOverlays, { passive: true });
-      updateSpotlightScale();
       if (window.KorenyTransitions) {
         window.KorenyTransitions.runProjectIntro(runIntroAnimation);
       } else {
