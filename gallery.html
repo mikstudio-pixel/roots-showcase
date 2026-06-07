@@ -128,6 +128,11 @@
         opacity: 0;
       }
 
+      body.gallery-intro-pending .page {
+        z-index: 91;
+        pointer-events: none;
+      }
+
       body.gallery-intro-pending .topbar,
       body.gallery-intro-pending .intro .meta,
       body.gallery-intro-pending .shadow-aperture,
@@ -155,6 +160,11 @@
         transition:
           opacity 1250ms cubic-bezier(0.22, 0, 0.18, 1),
           filter 1250ms cubic-bezier(0.22, 0, 0.18, 1);
+      }
+
+      body.gallery-intro-content .page {
+        z-index: 2;
+        pointer-events: auto;
       }
 
       .gallery-light-intro {
@@ -190,8 +200,9 @@
         mix-blend-mode: overlay;
       }
 
-      body.gallery-intro-pending .gallery-light-intro {
+      body.gallery-intro-darkening .gallery-light-intro {
         opacity: 1;
+        transition: opacity 1100ms cubic-bezier(0.26, 0, 0.18, 1);
       }
 
       body.gallery-intro-shadows .gallery-light-intro {
@@ -211,6 +222,24 @@
         display: block;
       }
 
+      body.gallery-intro-pending .intro-title-text[data-gallery-title="default"] {
+        opacity: 0;
+        filter: blur(8px);
+      }
+
+      body.gallery-intro-darkening .intro-title-text[data-gallery-title="default"] {
+        opacity: 1;
+        filter: blur(0);
+        transition:
+          opacity 900ms cubic-bezier(0.22, 0, 0.18, 1),
+          filter 900ms cubic-bezier(0.22, 0, 0.18, 1);
+      }
+
+      body.gallery-intro-pending .intro-title-text[data-gallery-title="default"] .intro-title-line:first-child {
+        color: rgba(247, 247, 242, 0.96);
+        transition: color 1650ms cubic-bezier(0.26, 0, 0.18, 1);
+      }
+
       .intro-title-line--second {
         opacity: 1;
         filter: blur(0);
@@ -221,11 +250,13 @@
         filter: blur(14px);
       }
 
-      body.gallery-intro-pending .intro-title-text[data-gallery-title="default"] {
-        color: rgba(247, 247, 242, 0.94);
+      body.gallery-intro-darkening .intro-title-line--second {
+        opacity: 0;
+        filter: blur(14px);
       }
 
-      body.gallery-intro-shadows .intro-title-text[data-gallery-title="default"] {
+      body.gallery-intro-shadows .intro-title-text[data-gallery-title="default"],
+      body.gallery-intro-shadows .intro-title-text[data-gallery-title="default"] .intro-title-line:first-child {
         color: #111;
         transition: color 1450ms cubic-bezier(0.26, 0, 0.18, 1);
       }
@@ -367,6 +398,7 @@
       .intro-title {
         position: relative;
         min-height: calc(clamp(42px, 6.7vw, 86px) * 1.86);
+        padding-left: clamp(18px, 4.2vw, 78px);
       }
 
       .intro-title-text {
@@ -1101,6 +1133,10 @@
           min-height: 52vh;
         }
 
+        .intro-title {
+          padding-left: clamp(10px, 3vw, 28px);
+        }
+
         .shadow-aperture {
           min-height: 32vh;
         }
@@ -1133,6 +1169,10 @@
 
         .content {
           padding: 16px;
+        }
+
+        .intro-title {
+          padding-left: 0;
         }
 
         .project-top {
@@ -1610,7 +1650,7 @@
 
         if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
           document.body.classList.remove("gallery-intro-pending");
-          document.body.classList.add("gallery-intro-shadows", "gallery-intro-content");
+          document.body.classList.add("gallery-intro-darkening", "gallery-intro-shadows", "gallery-intro-content");
           document.querySelector(".gallery-light-intro")?.remove();
           galleryIntroActive = false;
           return;
@@ -1621,22 +1661,27 @@
 
         requestAnimationFrame(() => {
           window.setTimeout(() => {
+            document.body.classList.add("gallery-intro-darkening");
+          }, 320);
+
+          window.setTimeout(() => {
             document.body.classList.add("gallery-intro-shadows");
-          }, 520);
+          }, 1550);
 
           window.setTimeout(() => {
             document.body.classList.add("gallery-intro-content");
-          }, 2200);
+          }, 2950);
 
           window.setTimeout(() => {
             document.body.classList.remove(
               "gallery-intro-pending",
+              "gallery-intro-darkening",
               "gallery-intro-shadows",
               "gallery-intro-content"
             );
             document.querySelector(".gallery-light-intro")?.remove();
             galleryIntroActive = false;
-          }, 4600);
+          }, 5350);
         });
       }
 
@@ -3228,9 +3273,9 @@
         const effectiveMotion = state.motion + (1 - state.motion) * state.scrollMotion;
         let introLight = state.smoothMouseLight;
         if (galleryIntroActive && galleryIntroStart) {
-          const introProgress = Math.max(0, Math.min(1, (now - galleryIntroStart - 460) / 3000));
+          const introProgress = Math.max(0, Math.min(1, (now - galleryIntroStart - 1550) / 3000));
           const introEase = easeInOutCubic(introProgress);
-          const introFade = 1 - smoothstep(Math.max(0, Math.min(1, (now - galleryIntroStart - 2450) / 1550)));
+          const introFade = 1 - smoothstep(Math.max(0, Math.min(1, (now - galleryIntroStart - 3500) / 1550)));
           const introLightY = 38 + introEase * 50;
           const introLightElement = document.querySelector(".gallery-light-intro");
           if (introLightElement) {
