@@ -122,21 +122,21 @@
         inset: 0;
         z-index: 21;
         pointer-events: none;
-        opacity: calc(var(--gallery-butterfly-opacity) * var(--gallery-butterfly-strength));
-        filter: blur(var(--gallery-butterfly-blur));
+        opacity: calc(var(--gallery-butterfly-opacity, 0) * var(--gallery-butterfly-strength, 0));
+        filter: blur(var(--gallery-butterfly-blur, 0px));
         mix-blend-mode: multiply;
       }
 
       .gallery-butterfly {
         position: absolute;
-        left: var(--gallery-butterfly-x);
-        top: var(--gallery-butterfly-y);
+        left: var(--gallery-butterfly-x, -1000px);
+        top: var(--gallery-butterfly-y, -1000px);
         width: 78px;
         height: 54px;
         transform:
           translate(-50%, -50%)
-          rotate(var(--gallery-butterfly-rotate))
-          scale(var(--gallery-butterfly-scale));
+          rotate(var(--gallery-butterfly-rotate, 0deg))
+          scale(var(--gallery-butterfly-scale, 1));
         transform-origin: 50% 50%;
       }
 
@@ -162,14 +162,14 @@
       .gallery-butterfly-wing--left {
         right: 39px;
         border-radius: 88% 36% 76% 42%;
-        transform: rotate(calc(-10deg - var(--gallery-butterfly-wing))) scaleX(var(--gallery-butterfly-wing-spread)) scaleY(1.08);
+        transform: rotate(calc(-10deg - var(--gallery-butterfly-wing, 18deg))) scaleX(var(--gallery-butterfly-wing-spread, 0.9)) scaleY(1.08);
         transform-origin: 100% 55%;
       }
 
       .gallery-butterfly-wing--right {
         left: 39px;
         border-radius: 36% 88% 42% 76%;
-        transform: rotate(calc(10deg + var(--gallery-butterfly-wing))) scaleX(var(--gallery-butterfly-wing-spread)) scaleY(1.08);
+        transform: rotate(calc(10deg + var(--gallery-butterfly-wing, 18deg))) scaleX(var(--gallery-butterfly-wing-spread, 0.9)) scaleY(1.08);
         transform-origin: 0 55%;
       }
 
@@ -318,11 +318,21 @@
       }
 
       .project {
+        --project-fly-x: 0px;
+        --project-fly-y: 0px;
+        --project-fly-rotate: 0deg;
+        --project-fly-scale: 1;
         display: grid;
         grid-template-rows: auto 1fr;
         flex: 0 0 clamp(320px, 31vw, 520px);
         background: rgba(250, 250, 250, 0.82);
         backdrop-filter: blur(1px);
+        transform:
+          translate3d(var(--project-fly-x), var(--project-fly-y), 0)
+          rotate(var(--project-fly-rotate))
+          scale(var(--project-fly-scale));
+        transform-origin: 50% 46%;
+        will-change: transform;
       }
 
       a.project {
@@ -335,8 +345,18 @@
       }
 
       @media (min-width: 961px) {
+        html {
+          height: 100vh;
+          overflow: hidden;
+        }
+
+        body.gallery-page {
+          height: 100vh;
+          overflow: hidden;
+        }
+
         .page {
-          min-height: calc(100vh + var(--gallery-distance-page));
+          min-height: 100vh;
         }
 
         .content {
@@ -718,9 +738,11 @@
         }
       }
     </style>
+    <link rel="stylesheet" href="assets/koreny-transitions.css">
   </head>
-  <body>
+  <body class="gallery-page">
     <canvas id="grain-canvas" aria-hidden="true"></canvas>
+    <script src="assets/koreny-transitions.js"></script>
     <canvas id="page-shadow"></canvas>
     <div class="gallery-butterfly-shadow" aria-hidden="true">
       <div class="gallery-butterfly">
@@ -1061,6 +1083,10 @@
     </main>
 
     <script>
+      if ("scrollRestoration" in history) {
+        history.scrollRestoration = "manual";
+      }
+
       const root = document.documentElement;
       const grainCanvas = document.getElementById("grain-canvas");
       const grainCtx = grainCanvas.getContext("2d", { alpha: true });
@@ -1100,15 +1126,60 @@
         }
 
         const styles = getComputedStyle(sourceImage);
+        const project = sourceImage.closest(".project");
+        const projectStyles = project ? getComputedStyle(project) : null;
+        const projectRect = project ? project.getBoundingClientRect() : null;
+        const sourceOffsetLeft = project ? sourceImage.offsetLeft : 0;
+        const sourceOffsetTop = project ? sourceImage.offsetTop : 0;
         overlay.src = sourceImage.currentSrc || sourceImage.src;
-        overlay.style.left = `${rect.left}px`;
-        overlay.style.top = `${rect.top}px`;
-        overlay.style.width = `${rect.width}px`;
-        overlay.style.height = `${rect.height}px`;
+        if (project && projectRect && projectStyles) {
+          const projectWidth = Math.max(1, project.offsetWidth);
+          const projectHeight = Math.max(1, project.offsetHeight);
+          const originParts = projectStyles.transformOrigin.split(" ");
+          const originX = Number.parseFloat(originParts[0]) || projectWidth * 0.5;
+          const originY = Number.parseFloat(originParts[1]) || projectHeight * 0.5;
+          const Matrix = window.DOMMatrix || window.WebKitCSSMatrix;
+          const Point = window.DOMPoint || window.WebKitPoint;
+          const matrix = projectStyles.transform === "none" ? new Matrix() : new Matrix(projectStyles.transform);
+          const transformedCorners = [
+            transformProjectPoint(matrix, Point, originX, originY, 0, 0),
+            transformProjectPoint(matrix, Point, originX, originY, projectWidth, 0),
+            transformProjectPoint(matrix, Point, originX, originY, projectWidth, projectHeight),
+            transformProjectPoint(matrix, Point, originX, originY, 0, projectHeight)
+          ];
+          const minX = Math.min(...transformedCorners.map((point) => point.x));
+          const minY = Math.min(...transformedCorners.map((point) => point.y));
+          const baseLeft = projectRect.left - minX;
+          const baseTop = projectRect.top - minY;
+
+          overlay.style.left = `${baseLeft + sourceOffsetLeft}px`;
+          overlay.style.top = `${baseTop + sourceOffsetTop}px`;
+          overlay.style.width = `${sourceImage.offsetWidth}px`;
+          overlay.style.height = `${sourceImage.offsetHeight}px`;
+          overlay.style.transform = projectStyles.transform === "none" ? "none" : projectStyles.transform;
+          overlay.style.transformOrigin = `${originX - sourceOffsetLeft}px ${originY - sourceOffsetTop}px`;
+        } else {
+          overlay.style.left = `${rect.left}px`;
+          overlay.style.top = `${rect.top}px`;
+          overlay.style.width = `${rect.width}px`;
+          overlay.style.height = `${rect.height}px`;
+          overlay.style.transform = "none";
+          overlay.style.transformOrigin = "50% 50%";
+        }
         overlay.style.objectFit = styles.objectFit;
         overlay.style.objectPosition = styles.objectPosition;
         overlay.style.borderRadius = styles.borderRadius;
         return true;
+      }
+
+      function transformProjectPoint(matrix, Point, originX, originY, x, y) {
+        const point = Point
+          ? new Point(x - originX, y - originY).matrixTransform(matrix)
+          : { x: matrix.a * (x - originX) + matrix.c * (y - originY) + matrix.e, y: matrix.b * (x - originX) + matrix.d * (y - originY) + matrix.f };
+        return {
+          x: point.x + originX,
+          y: point.y + originY
+        };
       }
 
       function grainRandom(seed) {
@@ -1129,6 +1200,10 @@
 
         const grainWidth = Math.max(1, Math.round(width));
         const grainHeight = Math.max(1, Math.round(height));
+        if (grainCanvas.dataset.renderedSize === `${grainWidth}x${grainHeight}`) {
+          return;
+        }
+
         if (grainCanvas.width !== grainWidth || grainCanvas.height !== grainHeight) {
           grainCanvas.width = grainWidth;
           grainCanvas.height = grainHeight;
@@ -1148,6 +1223,7 @@
           data[i + 3] = alpha;
         }
         grainCtx.putImageData(image, 0, 0);
+        grainCanvas.dataset.renderedSize = `${grainWidth}x${grainHeight}`;
         document.body.dataset.grainSize = `${grainWidth}x${grainHeight}`;
       }
 
@@ -1206,6 +1282,10 @@
         scrollRestUntil: 0,
         smoothScrollTarget: window.scrollY,
         isSmoothScrolling: false,
+        galleryVirtualScroll: 0,
+        galleryVirtualTarget: 0,
+        galleryScrollLength: 1,
+        galleryDesktopMode: window.innerWidth > 960,
         lastFrameTime: 0,
         butterflyFrame: 0,
         butterflyTimeout: 0,
@@ -1882,11 +1962,16 @@
         }
 
         if (window.innerWidth <= 960) {
+          state.galleryDesktopMode = false;
+          state.galleryVirtualScroll = 0;
+          state.galleryVirtualTarget = 0;
+          state.galleryScrollLength = 1;
           projectsScroll.style.setProperty("--gallery-progress", "0");
           projectsScroll.style.setProperty("--gallery-distance", "0px");
           projectsScroll.style.setProperty("--gallery-start", "0px");
           root.style.setProperty("--gallery-distance-page", "0px");
           root.style.setProperty("--project-track-top", "52vh");
+          resetProjectFlight();
           return;
         }
 
@@ -1897,7 +1982,7 @@
         const start = Math.max(0, window.innerWidth);
         projectsScroll.style.setProperty("--gallery-distance", `${distance}px`);
         projectsScroll.style.setProperty("--gallery-start", `${start}px`);
-        root.style.setProperty("--gallery-distance-page", `${distance + start}px`);
+        root.style.setProperty("--gallery-distance-page", "0px");
 
         if (shadowAperture) {
           const trackTop = Math.max(96, Math.min(window.innerHeight - 220, shadowAperture.offsetTop));
@@ -1905,10 +1990,82 @@
         }
 
         const scrollLength = Math.max(1, distance + start);
-        const progress = Math.max(0, Math.min(1, window.scrollY / scrollLength));
+        state.galleryDesktopMode = true;
+        state.galleryScrollLength = scrollLength;
+        state.galleryVirtualScroll = Math.max(0, Math.min(scrollLength, state.galleryVirtualScroll));
+        state.galleryVirtualTarget = Math.max(0, Math.min(scrollLength, state.galleryVirtualTarget));
+        const progress = Math.max(0, Math.min(1, state.galleryVirtualScroll / scrollLength));
 
         projectsScroll.style.setProperty("--gallery-progress", progress.toFixed(4));
+        syncProjectFlight();
         requestAnimationFrame(syncFocusedProjectImage);
+      }
+
+      function projectFlightProfile(project, index) {
+        if (!project.dataset.flyInTilt) {
+          const randomA = seededProjectValue(index, 91.73);
+          const randomB = seededProjectValue(index, 47.31);
+          const randomC = seededProjectValue(index, 137.19);
+          const randomD = seededProjectValue(index, 19.83);
+          project.dataset.flyInTilt = ((randomA > 0.5 ? 1 : -1) * (3.8 + randomB * 7.2)).toFixed(3);
+          project.dataset.flyOutTilt = ((randomC > 0.5 ? 1 : -1) * (3.2 + randomD * 6.4)).toFixed(3);
+          project.dataset.flyInLift = (-8 - randomC * 34).toFixed(3);
+          project.dataset.flyOutLift = (-4 - randomA * 24).toFixed(3);
+          project.dataset.flyInDrift = (8 + randomD * 28).toFixed(3);
+          project.dataset.flyOutDrift = (4 + randomB * 18).toFixed(3);
+        }
+        return {
+          inTilt: Number(project.dataset.flyInTilt),
+          outTilt: Number(project.dataset.flyOutTilt),
+          inLift: Number(project.dataset.flyInLift),
+          outLift: Number(project.dataset.flyOutLift),
+          inDrift: Number(project.dataset.flyInDrift),
+          outDrift: Number(project.dataset.flyOutDrift)
+        };
+      }
+
+      function seededProjectValue(index, salt) {
+        const value = Math.sin((index + 1) * salt) * 10000;
+        return value - Math.floor(value);
+      }
+
+      function resetProjectFlight() {
+        document.querySelectorAll(".project").forEach((project) => {
+          project.style.setProperty("--project-fly-x", "0px");
+          project.style.setProperty("--project-fly-y", "0px");
+          project.style.setProperty("--project-fly-rotate", "0deg");
+          project.style.setProperty("--project-fly-scale", "1");
+        });
+      }
+
+      function syncProjectFlight() {
+        if (!projectsScroll || window.innerWidth <= 960) {
+          resetProjectFlight();
+          return;
+        }
+
+        const viewportWidth = Math.max(1, window.innerWidth);
+        const settleStart = viewportWidth * 0.06;
+        const settleEnd = viewportWidth * 0.72;
+        projectsScroll.querySelectorAll(".project").forEach((project, index) => {
+          const rect = project.getBoundingClientRect();
+          const center = rect.left + rect.width * 0.5;
+          const profile = projectFlightProfile(project, index);
+          const enter = Math.max(0, Math.min(1, (center - settleEnd) / (viewportWidth * 0.46)));
+          const exit = Math.max(0, Math.min(1, (settleStart - center) / (viewportWidth * 0.26)));
+          const enterAir = smoothstep(enter);
+          const exitAir = smoothstep(exit);
+          const air = Math.max(enterAir, exitAir);
+          const tilt = profile.inTilt * enterAir + profile.outTilt * exitAir;
+          const lift = profile.inLift * enterAir + profile.outLift * exitAir;
+          const drift = profile.inDrift * enterAir - profile.outDrift * exitAir;
+          const scale = 1 - air * 0.018;
+
+          project.style.setProperty("--project-fly-x", `${drift.toFixed(2)}px`);
+          project.style.setProperty("--project-fly-y", `${lift.toFixed(2)}px`);
+          project.style.setProperty("--project-fly-rotate", `${tilt.toFixed(3)}deg`);
+          project.style.setProperty("--project-fly-scale", scale.toFixed(4));
+        });
       }
 
       function resize() {
@@ -1952,12 +2109,17 @@
 
       window.addEventListener("resize", resize);
       window.addEventListener("scroll", () => {
+        if (window.innerWidth > 960 && window.scrollY !== 0) {
+          jumpScrollTo(0);
+          return;
+        }
         syncShadowClearImage();
         syncHorizontalGallery();
       }, { passive: true });
       window.addEventListener("load", () => {
         refreshFlowerMask(true);
         syncHorizontalGallery();
+        syncProjectFlight();
         syncFocusedProjectImage();
       });
       document.querySelectorAll("img").forEach((image) => {
@@ -2147,17 +2309,30 @@
           return;
         }
 
+        const wheelAxis = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
+        const wheelDelta = event.deltaMode === 1
+          ? wheelAxis * 16
+          : event.deltaMode === 2
+            ? wheelAxis * window.innerHeight
+            : wheelAxis;
+
+        if (window.innerWidth > 960) {
+          event.preventDefault();
+          state.galleryVirtualTarget = Math.max(
+            0,
+            Math.min(state.galleryScrollLength, state.galleryVirtualTarget + wheelDelta)
+          );
+          state.scrollMotionTarget = 1;
+          state.scrollRestUntil = performance.now() + 1200;
+          return;
+        }
+
         const maxScroll = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
         if (maxScroll <= 0) {
           return;
         }
 
         event.preventDefault();
-        const wheelDelta = event.deltaMode === 1
-          ? event.deltaY * 16
-          : event.deltaMode === 2
-            ? event.deltaY * window.innerHeight
-            : event.deltaY;
         state.smoothScrollTarget = Math.min(maxScroll, Math.max(0, state.smoothScrollTarget + wheelDelta));
         state.isSmoothScrolling = true;
         state.scrollMotionTarget = 1;
@@ -2165,6 +2340,12 @@
       }, { passive: false });
 
       window.addEventListener("scroll", () => {
+        if (window.innerWidth > 960) {
+          if (window.scrollY !== 0) {
+            jumpScrollTo(0);
+          }
+          return;
+        }
         if (!state.isSmoothScrolling) {
           state.smoothScrollTarget = window.scrollY;
         }
@@ -2314,7 +2495,27 @@
         root.style.setProperty("--ambient-glow", Math.min(1, 0.3 + ambient * 0.9).toFixed(3));
         root.style.setProperty("--ambient-radial", Math.min(1, 0.56 + ambient * 0.62).toFixed(3));
 
-        if (Math.abs(window.scrollY - state.smoothScrollTarget) > 0.5) {
+        if (window.innerWidth > 960) {
+          if (window.scrollY !== 0) {
+            jumpScrollTo(0);
+          }
+          const galleryEase = 1 - Math.pow(0.018, delta);
+          const nextVirtualScroll = state.galleryVirtualScroll
+            + (state.galleryVirtualTarget - state.galleryVirtualScroll) * galleryEase;
+          if (Math.abs(nextVirtualScroll - state.galleryVirtualScroll) > 0.01) {
+            state.galleryVirtualScroll = nextVirtualScroll;
+            syncHorizontalGallery();
+            syncProjectFlight();
+            syncShadowClearImage();
+            syncHoverClearImage();
+          } else if (Math.abs(state.galleryVirtualTarget - state.galleryVirtualScroll) > 0.01) {
+            state.galleryVirtualScroll = state.galleryVirtualTarget;
+            syncHorizontalGallery();
+            syncProjectFlight();
+            syncShadowClearImage();
+            syncHoverClearImage();
+          }
+        } else if (Math.abs(window.scrollY - state.smoothScrollTarget) > 0.5) {
           const scrollEase = 1 - Math.pow(0.012, delta);
           jumpScrollTo(window.scrollY + (state.smoothScrollTarget - window.scrollY) * scrollEase);
         } else if (state.isSmoothScrolling) {

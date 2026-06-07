@@ -618,8 +618,11 @@
         }
       }
     </style>
+    <link rel="stylesheet" href="assets/koreny-transitions.css">
   </head>
   <body>
+    <canvas id="grain-canvas" aria-hidden="true"></canvas>
+    <script src="assets/koreny-transitions.js"></script>
     <div class="window-shadow" aria-hidden="true">
       <div class="window-shadow-layer window-shadow-frame"></div>
       <div class="window-shadow-layer window-shadow-glass"></div>
@@ -999,6 +1002,7 @@
           } else {
             butterflyAnimationFrame = 0;
             butterflyLayer.style.setProperty("--butterfly-opacity", "0");
+            scheduleButterflyFlight();
           }
         }
 
@@ -1007,7 +1011,7 @@
 
       function scheduleButterflyFlight() {
         cancelButterflyFlight();
-        butterflyTimeout = setTimeout(runButterflyFlight, 450 + Math.random() * 1100);
+        butterflyTimeout = setTimeout(runButterflyFlight, 2400 + Math.random() * 5200);
       }
 
       function runIntroAnimation() {
@@ -1021,7 +1025,7 @@
 
         const startState = shadowStates[0];
         const endState = shadowStates[1];
-        const duration = 2200;
+        const duration = 1650;
         const start = performance.now();
 
         function easeInOutQuad(value) {
@@ -1239,7 +1243,11 @@
       });
       window.addEventListener("scroll", syncClearOverlays, { passive: true });
       updateSpotlightScale();
-      runIntroAnimation();
+      if (window.KorenyTransitions) {
+        window.KorenyTransitions.runProjectIntro(runIntroAnimation);
+      } else {
+        runIntroAnimation();
+      }
     </script>
   </body>
 </html>
