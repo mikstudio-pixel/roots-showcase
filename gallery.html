@@ -1036,6 +1036,10 @@
               <span>Haze texture</span>
               <input id="haze" type="checkbox" checked>
             </label>
+            <label class="toggle-control" for="butterfly-prism">
+              <span>Butterfly prism</span>
+              <input id="butterfly-prism" type="checkbox">
+            </label>
           </div>
           <div class="palette" aria-label="Shadow palette">
             <span class="swatch" style="background:#AFD5C4"></span>
@@ -1160,6 +1164,7 @@
         motion: document.getElementById("motion"),
         haze: document.getElementById("haze")
       };
+      const butterflyPrismToggle = document.getElementById("butterfly-prism");
 
       const values = {
         depth: document.getElementById("depth-value"),
@@ -1208,6 +1213,7 @@
         butterflyY: -1000,
         butterflyOpacity: 0,
         butterflyFlap: 0,
+        butterflyPrismEnabled: butterflyPrismToggle.checked ? 1 : 0,
         dpr: 1,
         pageWidth: 1,
         pageHeight: 1,
@@ -1553,6 +1559,9 @@
         controls[name].addEventListener("input", (event) => {
           setControl(name, event.target.value);
         });
+      });
+      butterflyPrismToggle.addEventListener("change", (event) => {
+        state.butterflyPrismEnabled = event.target.checked ? 1 : 0;
       });
 
       document.getElementById("still").addEventListener("click", () => {
@@ -2347,7 +2356,7 @@
           uniforms.butterflyPrism,
           state.butterflyX / Math.max(state.viewportWidth, 1),
           state.butterflyY / Math.max(state.viewportHeight, 1),
-          state.butterflyOpacity,
+          state.butterflyOpacity * state.butterflyPrismEnabled,
           state.butterflyFlap
         );
         gl.activeTexture(gl.TEXTURE0);
