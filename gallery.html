@@ -492,8 +492,9 @@
 
       .category-index {
         --category-gap: 18px;
-        --category-apd-open: 148px;
-        --category-space-open: 88px;
+        --category-apd-open: 206px;
+        --category-space-open: 136px;
+        --category-width: calc(var(--category-gap) * 2 + var(--category-apd-open) + var(--category-space-open));
         --tick-1-x: 0px;
         --tick-2-x: var(--category-gap);
         --tick-3-x: calc(var(--category-gap) * 2);
@@ -502,8 +503,10 @@
         top: -28px;
         z-index: 8;
         display: grid;
-        grid-template-columns: repeat(2, var(--category-gap));
+        grid-template-columns: var(--category-apd-open) var(--category-space-open);
         align-items: center;
+        gap: var(--category-gap);
+        width: var(--category-width);
         height: 22px;
         pointer-events: auto;
       }
@@ -537,18 +540,14 @@
       }
 
       .category-index:has([data-gallery-jump="apd"]:hover),
-      .category-index:has([data-gallery-jump="apd"]:focus-visible),
-      .category-index:has([data-gallery-jump="apd"].is-active) {
-        grid-template-columns: calc(var(--category-gap) + var(--category-apd-open)) var(--category-gap);
+      .category-index:has([data-gallery-jump="apd"]:focus-visible) {
         --tick-1-x: 0px;
         --tick-2-x: calc(var(--category-gap) + var(--category-apd-open));
         --tick-3-x: calc(var(--category-gap) * 2 + var(--category-apd-open));
       }
 
       .category-index:has([data-gallery-jump="space"]:hover),
-      .category-index:has([data-gallery-jump="space"]:focus-visible),
-      .category-index:has([data-gallery-jump="space"].is-active) {
-        grid-template-columns: var(--category-gap) calc(var(--category-gap) + var(--category-space-open));
+      .category-index:has([data-gallery-jump="space"]:focus-visible) {
         --tick-1-x: 0px;
         --tick-2-x: var(--category-gap);
         --tick-3-x: calc(var(--category-gap) * 2 + var(--category-space-open));
@@ -582,10 +581,11 @@
         left: 50%;
         top: 50%;
         width: max-content;
-        color: #332010;
-        font-size: 10px;
-        line-height: 1.1;
+        color: rgba(51, 32, 16, 0.62);
+        font-size: 13px;
+        line-height: 1;
         opacity: 0;
+        font-weight: 400;
         filter: blur(5px);
         pointer-events: none;
         text-align: center;
@@ -602,7 +602,7 @@
       .category-marker:hover span,
       .category-marker:focus-visible span,
       .category-marker.is-active span {
-        opacity: 1;
+        opacity: 0.62;
         filter: blur(0);
         translate: -50% -50%;
         transition:
@@ -610,6 +610,11 @@
           filter 360ms cubic-bezier(0.2, 0, 0.18, 1),
           translate 360ms cubic-bezier(0.2, 0, 0.18, 1);
         transition-delay: 60ms;
+      }
+
+      .category-marker:hover span,
+      .category-marker:focus-visible span {
+        opacity: 1;
       }
 
       .student-projects-link {
@@ -1219,7 +1224,7 @@
             <img class="brand-logo" src="assets/Logo_mono_dark.svg" alt="Kořeny">
           </a>
           <nav class="nav" aria-label="Pages">
-            <a href="gallery.html#o-projektu">O projektu</a>
+            <a href="o-projektu.html">O projektu</a>
             <span class="lang-switch" aria-label="Přepnutí jazyka">
               <a class="is-active" href="gallery.html" lang="cs" aria-current="true">CZ</a>
               <span aria-hidden="true">/</span>
@@ -1681,6 +1686,8 @@
           document.querySelector(".gallery-light-intro")?.remove();
           galleryIntroActive = false;
           galleryIntroMotionStart = 0;
+          resetGalleryTitleState();
+          updateGalleryTitle(state.galleryTitleSectionActive ? state.galleryTitleSection : "default");
           return;
         }
 
@@ -1711,6 +1718,8 @@
             document.querySelector(".gallery-light-intro")?.remove();
             galleryIntroActive = false;
             galleryIntroMotionStart = performance.now();
+            resetGalleryTitleState();
+            updateGalleryTitle(state.galleryTitleSectionActive ? state.galleryTitleSection : "default");
             scheduleButterflyFlight();
           }, 7200);
         });
@@ -2879,6 +2888,13 @@
             title.classList.toggle("is-hidden-left", !movingForward);
             title.classList.toggle("is-hidden-right", movingForward);
           }
+        }
+      }
+
+      function resetGalleryTitleState() {
+        state.galleryTitleMode = null;
+        for (const title of Object.values(galleryTitles)) {
+          title?.classList.remove("is-hidden-left", "is-hidden-right");
         }
       }
 

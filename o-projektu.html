@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Kořeny — o projektu</title>
+    <style>
+      @font-face {
+        font-family: "The Seasons";
+        src: url("assets/font/The Seasons Light.ttf") format("truetype");
+        font-weight: 300;
+        font-style: normal;
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: "The Seasons";
+        src: url("assets/font/The Seasons Regular.ttf") format("truetype");
+        font-weight: 400;
+        font-style: normal;
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: "The Seasons";
+        src: url("assets/font/The Seasons Bold.ttf") format("truetype");
+        font-weight: 700;
+        font-style: normal;
+        font-display: swap;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        min-height: 100%;
+        background: #11100e;
+        color: #f2efe8;
+        font-family:
+          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", sans-serif;
+      }
+
+      body {
+        position: relative;
+        overflow-x: hidden;
+      }
+
+      body::before,
+      body::after {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+      }
+
+      body::before {
+        z-index: 0;
+        background:
+          radial-gradient(circle at 84% 34%, rgba(245, 241, 226, 0.16), rgba(245, 241, 226, 0.04) 24%, rgba(245, 241, 226, 0) 52%),
+          radial-gradient(circle at 12% 86%, rgba(83, 119, 173, 0.18), rgba(83, 119, 173, 0) 38%),
+          linear-gradient(135deg, rgba(2, 2, 2, 0.94) 0%, rgba(21, 20, 18, 0.98) 42%, rgba(34, 33, 29, 0.92) 100%);
+      }
+
+      body::after {
+        z-index: 4;
+        opacity: 0.42;
+        mix-blend-mode: screen;
+        background-image:
+          url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220' viewBox='0 0 220 220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.8' numOctaves='6' seed='19' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.92 0 0 0 0 0.9 0 0 0 0 0.84 0 0 0 0.7 0'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)'/%3E%3C/svg%3E");
+        background-size: 220px 220px;
+        animation: grainDrift 860ms steps(4, end) infinite;
+      }
+
+      @keyframes grainDrift {
+        0% { background-position: 0 0; }
+        25% { background-position: 91px -37px; }
+        50% { background-position: -53px 82px; }
+        75% { background-position: 127px 54px; }
+        100% { background-position: 0 0; }
+      }
+
+      h1,
+      h2 {
+        font-family: "The Seasons", Georgia, serif;
+      }
+
+      .negative-shadow {
+        position: fixed;
+        inset: 0;
+        z-index: 1;
+        pointer-events: none;
+        overflow: hidden;
+        filter: blur(7px) contrast(1.24);
+        mix-blend-mode: screen;
+        opacity: 0.72;
+      }
+
+      .negative-shadow img {
+        position: absolute;
+        width: clamp(260px, 36vw, 620px);
+        height: auto;
+        opacity: var(--shadow-opacity, 0.22);
+        filter: invert(1) brightness(1.85) sepia(0.22) saturate(0.72);
+        transform:
+          translate3d(var(--shadow-x, 0), var(--shadow-y, 0), 0)
+          rotate(var(--shadow-rotate, 0deg))
+          scale(var(--shadow-scale, 1));
+        transform-origin: 50% 90%;
+      }
+
+      .negative-shadow img:nth-child(1) {
+        left: -8vw;
+        top: 34vh;
+        --shadow-x: 0;
+        --shadow-y: 0;
+        --shadow-rotate: -8deg;
+        --shadow-scale: 1.34;
+        --shadow-opacity: 0.26;
+      }
+
+      .negative-shadow img:nth-child(2) {
+        left: 34vw;
+        top: 28vh;
+        --shadow-rotate: 6deg;
+        --shadow-scale: 1.12;
+        --shadow-opacity: 0.19;
+      }
+
+      .negative-shadow img:nth-child(3) {
+        right: -10vw;
+        top: 42vh;
+        --shadow-rotate: 13deg;
+        --shadow-scale: 1.26;
+        --shadow-opacity: 0.28;
+      }
+
+      .negative-shadow img:nth-child(4) {
+        right: 16vw;
+        bottom: -12vh;
+        --shadow-rotate: -18deg;
+        --shadow-scale: 1.58;
+        --shadow-opacity: 0.18;
+      }
+
+      .page {
+        position: relative;
+        z-index: 2;
+        min-height: 100vh;
+      }
+
+      .content {
+        padding: 24px;
+      }
+
+      .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+        min-height: 48px;
+        border-bottom: 1px solid rgba(242, 239, 232, 0.18);
+      }
+
+      .brand {
+        display: inline-flex;
+        align-items: center;
+        height: 48px;
+        color: inherit;
+        text-decoration: none;
+      }
+
+      .brand-logo {
+        display: block;
+        width: clamp(96px, 8vw, 118px);
+        max-height: 26px;
+        height: auto;
+        filter: invert(1) brightness(1.14);
+      }
+
+      .nav {
+        display: flex;
+        gap: 18px;
+        font-size: 13px;
+      }
+
+      .nav a {
+        color: #f2efe8;
+        text-decoration: none;
+      }
+
+      .nav a[aria-current="page"] {
+        color: rgba(242, 239, 232, 0.58);
+      }
+
+      .lang-switch {
+        display: inline-flex;
+        align-items: baseline;
+        gap: 5px;
+        color: rgba(242, 239, 232, 0.42);
+        white-space: nowrap;
+      }
+
+      .lang-switch a {
+        color: rgba(242, 239, 232, 0.48);
+      }
+
+      .lang-switch a.is-active {
+        color: #f2efe8;
+      }
+
+      .about-hero {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(260px, 390px);
+        gap: 32px;
+        min-height: calc(100vh - 72px);
+        padding: clamp(74px, 11vh, 132px) 0 34px;
+      }
+
+      .about-title {
+        max-width: 780px;
+        margin: 0;
+        padding-left: clamp(18px, 4.2vw, 78px);
+        color: #f8f4ea;
+        font-size: clamp(48px, 7.2vw, 106px);
+        font-weight: 690;
+        line-height: 0.92;
+        letter-spacing: 0;
+      }
+
+      .about-meta {
+        align-self: end;
+        margin: 0;
+        color: rgba(242, 239, 232, 0.76);
+        font-size: 14px;
+        line-height: 1.48;
+      }
+
+      .about-body {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(260px, 390px);
+        gap: 32px;
+        padding: 22px 0 80px;
+        border-top: 1px solid rgba(242, 239, 232, 0.16);
+      }
+
+      .about-kicker {
+        margin: 0;
+        color: rgba(242, 239, 232, 0.42);
+        font-size: 12px;
+      }
+
+      .about-text {
+        display: grid;
+        gap: 18px;
+        max-width: 700px;
+      }
+
+      .about-text p {
+        margin: 0;
+        color: rgba(242, 239, 232, 0.78);
+        font-size: clamp(18px, 2.1vw, 28px);
+        line-height: 1.22;
+      }
+
+      .about-text p:first-child {
+        color: #f8f4ea;
+      }
+
+      @media (max-width: 960px) {
+        .about-hero,
+        .about-body {
+          grid-template-columns: 1fr;
+        }
+
+        .about-title {
+          padding-left: 0;
+        }
+      }
+
+      @media (max-width: 560px) {
+        .content {
+          padding: 16px;
+        }
+
+        .topbar {
+          align-items: flex-start;
+          flex-direction: column;
+          padding-bottom: 14px;
+        }
+
+        .negative-shadow img {
+          width: 520px;
+        }
+      }
+    </style>
+    <link rel="stylesheet" href="assets/koreny-transitions.css">
+  </head>
+  <body>
+    <div class="negative-shadow" aria-hidden="true">
+      <img src="assets/flower-stacked-stem.svg" alt="">
+      <img src="assets/flower-diagonal-pair.svg" alt="">
+      <img src="assets/flower-horizontal-bloom.svg" alt="">
+      <img src="assets/flower-rosette-cross.svg" alt="">
+    </div>
+    <script src="assets/koreny-transitions.js"></script>
+    <main class="page">
+      <div class="content">
+        <header class="topbar">
+          <a class="brand" href="gallery.html" aria-label="Projekty">
+            <img class="brand-logo" src="assets/Logo_mono_dark.svg" alt="Kořeny">
+          </a>
+          <nav class="nav" aria-label="Pages">
+            <a href="o-projektu.html" aria-current="page">O projektu</a>
+            <span class="lang-switch" aria-label="Přepnutí jazyka">
+              <a class="is-active" href="o-projektu.html" lang="cs" aria-current="true">CZ</a>
+              <span aria-hidden="true">/</span>
+              <a href="o-projektu.html?lang=en" lang="en">EN</a>
+            </span>
+          </nav>
+        </header>
+
+        <section class="about-hero" aria-labelledby="about-title">
+          <h1 class="about-title" id="about-title">Kořeny<br>v novém světle</h1>
+          <p class="about-meta">Výstava sleduje, jak mohou současné studentské práce převést lidové a rodinné rituály do nových předmětů, materiálů a prostorových situací.</p>
+        </section>
+
+        <section class="about-body" aria-label="Text o projektu">
+          <p class="about-kicker">O projektu</p>
+          <div class="about-text">
+            <p>Kořeny jsou společnou studií tradice, paměti a současného designu.</p>
+            <p>Projekt propojuje porcelánové objekty, prostorové návrhy a stínovou vizualitu do jedné proměnlivé krajiny. Místo doslovné rekonstrukce zvyků hledá tiché principy, které v nich zůstávají živé: sdílení, péči, očekávání, slavnost a opakování.</p>
+            <p>Temné pozadí této stránky obrací galerijní světlo do negativu. Stín se zde nechová jako doprovodný efekt, ale jako prostředí, ve kterém se motivy tradice znovu objevují.</p>
+          </div>
+        </section>
+      </div>
+    </main>
+  </body>
+</html>
