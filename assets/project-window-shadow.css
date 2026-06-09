@@ -142,17 +142,17 @@
     transform: translate(-50%, calc(-1 * var(--drop-size)));
   }
 
-  3% {
+  2% {
     opacity: 1;
     transform: translate(-50%, calc(-1 * var(--drop-size)));
   }
 
-  26% {
+  18% {
     opacity: 1;
     transform: translate(-50%, var(--drop-fall));
   }
 
-  29%,
+  21%,
   100% {
     opacity: 0;
     transform: translate(-50%, var(--drop-fall));

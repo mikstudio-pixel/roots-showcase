@@ -218,6 +218,7 @@
       h1 {
         max-width: 780px;
         margin: 0;
+        padding-left: calc(clamp(18px, 4.2vw, 78px) + 20px);
         font-size: clamp(56px, 8.8vw, 138px);
         line-height: 0.9;
         font-weight: 690;
@@ -227,6 +228,7 @@
       .lead {
         max-width: 510px;
         margin: 28px 0 0;
+        padding-left: calc(clamp(18px, 4.2vw, 78px) + 20px);
         color: #333;
         font-size: clamp(18px, 1.6vw, 25px);
         line-height: 1.32;
@@ -267,6 +269,13 @@
         margin-top: clamp(-190px, -15vh, -96px);
       }
 
+      .hero-media,
+      .project-gallery {
+        width: calc(100% - clamp(96px, 11vw, 160px));
+        margin-left: auto;
+        margin-right: auto;
+      }
+
       .image-stage {
         position: relative;
         min-height: 74vh;
@@ -298,8 +307,7 @@
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 24px;
-        width: calc(100% - clamp(96px, 11vw, 160px));
-        margin: clamp(56px, 8vw, 128px) auto 0;
+        margin-top: clamp(56px, 8vw, 128px);
       }
 
       .project-gallery-item {
@@ -394,6 +402,10 @@
           margin-top: 24px;
         }
 
+        .hero-media,
+        .project-gallery {
+                  }
+
         .image-stage {
           aspect-ratio: 1;
         }
@@ -403,8 +415,7 @@
         }
 
         .project-gallery {
-          width: 100%;
-        }
+                  }
 
         .project-gallery-item,
         .project-gallery-item:nth-child(3n + 1) {
