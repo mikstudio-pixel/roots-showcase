@@ -85,6 +85,7 @@
   const status = panel.querySelector(".shadow-status");
   let hoverClearImage = null;
   let hoverClearOverlay = null;
+  const autoClearOverlays = new Map();
   const fadingClearOverlays = [];
   let introAnimationFrame = 0;
   let butterflyAnimationFrame = 0;
@@ -226,8 +227,13 @@
 
   window.addEventListener("resize", () => {
     syncClearOverlays();
+    syncAutoClearImages();
   });
-  window.addEventListener("scroll", syncClearOverlays, { passive: true });
+  window.addEventListener("scroll", () => {
+    syncClearOverlays();
+    syncAutoClearImages();
+  }, { passive: true });
+  syncAutoClearImages();
 
   showShadowState("1");
   if (window.KorenyTransitions) {
@@ -564,9 +570,9 @@
     introAnimationFrame = requestAnimationFrame(tick);
   }
 
-  function createClearOverlay() {
+  function createClearOverlay(className = "shadow-clear-image") {
     const image = document.createElement("img");
-    image.className = "shadow-clear-image";
+    image.className = className;
     image.alt = "";
     image.setAttribute("aria-hidden", "true");
     return image;
@@ -616,9 +622,67 @@
     if (hoverClearOverlay && hoverClearImage) {
       positionClearOverlay(hoverClearOverlay, hoverClearImage);
     }
+    for (const [image, overlay] of autoClearOverlays) {
+      if (!image.isConnected || !positionClearOverlay(overlay, image)) {
+        overlay.style.opacity = "0";
+      }
+    }
     for (const item of fadingClearOverlays) {
       positionClearOverlay(item.overlay, item.sourceImage);
     }
+  }
+
+  function syncAutoClearImages() {
+    const focusStart = window.innerHeight * 0.08;
+    const focusEnd = window.innerHeight * 0.32;
+    const holdEnd = window.innerHeight * 0.58;
+    const fadeOutEnd = window.innerHeight * 0.88;
+    const activeImages = new Set();
+
+    document.querySelectorAll(".image-stage img, .project-gallery-item img").forEach((image) => {
+      if (image.classList.contains("shadow-clear-image")) {
+        return;
+      }
+
+      let overlay = autoClearOverlays.get(image);
+      if (!overlay) {
+        overlay = createClearOverlay("shadow-clear-image shadow-clear-image--auto");
+        autoClearOverlays.set(image, overlay);
+        document.body.appendChild(overlay);
+      }
+
+      activeImages.add(image);
+      const rect = image.getBoundingClientRect();
+      const visible = rect.bottom > 0 && rect.top < window.innerHeight && rect.width > 0 && rect.height > 0;
+      if (!visible || !positionClearOverlay(overlay, image)) {
+        overlay.style.opacity = "0";
+        return;
+      }
+
+      overlay.style.opacity = focusedImageStrength(rect, focusStart, focusEnd, holdEnd, fadeOutEnd).toFixed(3);
+    });
+
+    for (const [image, overlay] of autoClearOverlays) {
+      if (!activeImages.has(image)) {
+        overlay.style.opacity = "0";
+      }
+    }
+  }
+
+  function focusedImageStrength(rect, focusStart, focusEnd, holdEnd, fadeOutEnd) {
+    if (rect.width <= 0 || rect.height <= 0 || rect.bottom <= 0 || rect.top >= window.innerHeight) {
+      return 0;
+    }
+
+    const leading = rect.top <= focusEnd
+      ? 1
+      : 1 - Math.max(0, Math.min(1, (rect.top - focusEnd) / Math.max(1, focusEnd - focusStart)));
+    const trailing = rect.top <= holdEnd
+      ? 1
+      : 1 - Math.max(0, Math.min(1, (rect.top - holdEnd) / Math.max(1, fadeOutEnd - holdEnd)));
+    const viewportCoverage = Math.max(0, Math.min(rect.bottom, window.innerHeight) - Math.max(rect.top, 0)) / Math.max(1, Math.min(rect.height, window.innerHeight));
+
+    return Math.max(0, Math.min(1, Math.min(leading, trailing) * viewportCoverage));
   }
 
   function releaseHoverOverlay() {

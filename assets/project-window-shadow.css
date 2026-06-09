@@ -354,6 +354,10 @@ body[data-shadow-variant="cave"]::after {
   transition: opacity 2s cubic-bezier(0.2, 0, 0.18, 1);
 }
 
+.shadow-clear-image--auto {
+  transition: none;
+}
+
 .shadow-panel {
   position: fixed;
   right: 18px;
