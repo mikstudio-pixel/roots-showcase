@@ -279,11 +279,11 @@
     }
 
     const drops = [
-      { x: "55.5%", size: "15px", fall: "106vh", duration: "6.2s", delay: "0.7s" },
-      { x: "58.5%", size: "13px", fall: "106vh", duration: "7.1s", delay: "4.1s" }
+      { x: "55.5%", size: "18px", fall: "106vh", duration: "6.2s", delay: "0.7s" },
+      { x: "58.5%", size: "16px", fall: "106vh", duration: "7.1s", delay: "4.1s" }
     ];
 
-    waterLayer.replaceChildren(...drops.map((drop) => {
+    const dropElements = drops.map((drop) => {
       const element = document.createElement("span");
       element.className = "cave-drop-shadow";
       element.style.setProperty("--drop-x", drop.x);
@@ -292,7 +292,27 @@
       element.style.setProperty("--drop-duration", drop.duration);
       element.style.setProperty("--drop-delay", drop.delay);
       return element;
-    }));
+    });
+    waterLayer.replaceChildren(...dropElements);
+
+    let isMuted = false;
+    const syncDropFrequency = () => {
+      const nextMuted = window.scrollY > 80;
+      if (nextMuted === isMuted) {
+        return;
+      }
+
+      isMuted = nextMuted;
+      waterLayer.classList.toggle("is-scroll-muted", isMuted);
+      dropElements.forEach((element, index) => {
+        const drop = drops[index];
+        element.style.setProperty("--drop-duration", isMuted ? "20s" : drop.duration);
+        element.style.setProperty("--drop-delay", isMuted ? "0s" : drop.delay);
+      });
+    };
+
+    syncDropFrequency();
+    window.addEventListener("scroll", syncDropFrequency, { passive: true });
   }
 
   function ensureShadowPanel() {
@@ -633,13 +653,9 @@
   }
 
   function syncAutoClearImages() {
-    const focusStart = window.innerHeight * 0.08;
-    const focusEnd = window.innerHeight * 0.32;
-    const holdEnd = window.innerHeight * 0.58;
-    const fadeOutEnd = window.innerHeight * 0.88;
     const activeImages = new Set();
 
-    document.querySelectorAll(".image-stage img, .project-gallery-item img").forEach((image) => {
+    document.querySelectorAll(".image-stage img").forEach((image) => {
       if (image.classList.contains("shadow-clear-image")) {
         return;
       }
@@ -659,7 +675,7 @@
         return;
       }
 
-      overlay.style.opacity = focusedImageStrength(rect, focusStart, focusEnd, holdEnd, fadeOutEnd).toFixed(3);
+      overlay.style.opacity = "1";
     });
 
     for (const [image, overlay] of autoClearOverlays) {
@@ -667,22 +683,6 @@
         overlay.style.opacity = "0";
       }
     }
-  }
-
-  function focusedImageStrength(rect, focusStart, focusEnd, holdEnd, fadeOutEnd) {
-    if (rect.width <= 0 || rect.height <= 0 || rect.bottom <= 0 || rect.top >= window.innerHeight) {
-      return 0;
-    }
-
-    const leading = rect.top <= focusEnd
-      ? 1
-      : 1 - Math.max(0, Math.min(1, (rect.top - focusEnd) / Math.max(1, focusEnd - focusStart)));
-    const trailing = rect.top <= holdEnd
-      ? 1
-      : 1 - Math.max(0, Math.min(1, (rect.top - holdEnd) / Math.max(1, fadeOutEnd - holdEnd)));
-    const viewportCoverage = Math.max(0, Math.min(rect.bottom, window.innerHeight) - Math.max(rect.top, 0)) / Math.max(1, Math.min(rect.height, window.innerHeight));
-
-    return Math.max(0, Math.min(1, Math.min(leading, trailing) * viewportCoverage));
   }
 
   function releaseHoverOverlay() {

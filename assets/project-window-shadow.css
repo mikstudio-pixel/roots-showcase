@@ -127,13 +127,17 @@
   width: var(--drop-size);
   height: var(--drop-size);
   border-radius: 50%;
-  background: rgba(48, 42, 36, var(--window-shadow-opacity));
-  filter: blur(4px);
+  background: rgba(48, 42, 36, calc(var(--window-shadow-opacity) * 0.62));
+  filter: blur(5.5px);
   mix-blend-mode: normal;
   opacity: 0;
   transform: translate(-50%, calc(-1 * var(--drop-size)));
   animation: cave-drop-fall var(--drop-duration) linear var(--drop-delay) infinite;
   will-change: transform, opacity;
+}
+
+.cave-water-shadows.is-scroll-muted .cave-drop-shadow:nth-child(n + 2) {
+  display: none;
 }
 
 @keyframes cave-drop-fall {

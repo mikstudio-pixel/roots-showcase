@@ -1,0 +1,1901 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Kořeny - GIF náhled úvodní animace</title>
+    <style>
+      @font-face {
+        font-family: "The Seasons";
+        src: url("assets/font/The Seasons Light.ttf") format("truetype");
+        font-weight: 300;
+        font-style: normal;
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: "The Seasons";
+        src: url("assets/font/The Seasons Bold.ttf") format("truetype");
+        font-weight: 700;
+        font-style: normal;
+        font-display: swap;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        min-height: 100%;
+        background: #141412;
+        color: rgba(248, 246, 236, 0.92);
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      body {
+        overflow-x: hidden;
+      }
+
+      h1,
+      h2,
+      h3 {
+        font-family: "The Seasons", Georgia, serif;
+      }
+
+      button,
+      input {
+        font: inherit;
+      }
+
+      .gif-lab {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 340px;
+        gap: 24px;
+        min-height: 100vh;
+        padding: 24px;
+      }
+
+      .preview-area {
+        display: grid;
+        align-content: start;
+        gap: 24px;
+      }
+
+      .preview-row {
+        display: grid;
+        gap: 10px;
+      }
+
+      .preview-label {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 16px;
+        max-width: 700px;
+        color: rgba(248, 246, 236, 0.62);
+        font-size: 12px;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+      }
+
+      .preview-label strong {
+        color: rgba(248, 246, 236, 0.92);
+        font-weight: 600;
+      }
+
+      .preview-canvas {
+        display: block;
+        width: auto;
+        height: auto;
+        max-width: 100%;
+        background: #fafafa;
+        border: 1px solid rgba(248, 246, 236, 0.16);
+        box-shadow: 0 20px 64px rgba(0, 0, 0, 0.28);
+        image-rendering: auto;
+      }
+
+      .panel {
+        position: sticky;
+        top: 18px;
+        align-self: start;
+        max-height: calc(100vh - 36px);
+        overflow: auto;
+        padding: 18px;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        border-radius: 8px;
+        background:
+          linear-gradient(180deg, rgba(18, 18, 16, 0.94), rgba(10, 10, 9, 0.88)),
+          #10100f;
+        box-shadow: 0 20px 54px rgba(0, 0, 0, 0.32);
+        backdrop-filter: blur(18px);
+        scrollbar-width: thin;
+        scrollbar-color: rgba(248, 246, 236, 0.32) transparent;
+      }
+
+      .panel h1 {
+        margin: 0 0 6px;
+        font-size: 30px;
+        line-height: 1;
+        font-weight: 400;
+      }
+
+      .panel p {
+        margin: 0 0 18px;
+        color: rgba(248, 246, 236, 0.58);
+        font-size: 13px;
+        line-height: 1.42;
+      }
+
+      .control-group {
+        display: grid;
+        gap: 13px;
+      }
+
+      .control-group + .control-group {
+        margin-top: 18px;
+        padding-top: 16px;
+        border-top: 1px solid rgba(255, 255, 255, 0.14);
+      }
+
+      .control-heading {
+        margin: 4px 0 -2px;
+        color: rgba(248, 246, 236, 0.72);
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+
+      .control {
+        display: grid;
+        gap: 7px;
+      }
+
+      .control label {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 12px;
+        font-size: 13px;
+      }
+
+      .control output {
+        color: rgba(248, 246, 236, 0.48);
+        font-variant-numeric: tabular-nums;
+      }
+
+      .control input[type="range"] {
+        width: 100%;
+        accent-color: #ff321f;
+      }
+
+      .toggle-control {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        min-height: 28px;
+        color: rgba(248, 246, 236, 0.86);
+        font-size: 13px;
+      }
+
+      .toggle-control input {
+        width: 34px;
+        height: 18px;
+        margin: 0;
+        accent-color: #ff321f;
+      }
+
+      .button-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+
+      .button-grid button,
+      .wide-button {
+        min-height: 38px;
+        border: 1px solid rgba(248, 246, 236, 0.26);
+        border-radius: 6px;
+        background: rgba(248, 246, 236, 0.07);
+        color: rgba(248, 246, 236, 0.92);
+        cursor: pointer;
+      }
+
+      .button-grid button:hover,
+      .wide-button:hover,
+      .button-grid button:focus-visible,
+      .wide-button:focus-visible {
+        border-color: rgba(248, 246, 236, 0.54);
+        background: rgba(248, 246, 236, 0.13);
+      }
+
+      .wide-button {
+        width: 100%;
+      }
+
+      .wide-button + .wide-button {
+        margin-top: 8px;
+      }
+
+      button:disabled {
+        cursor: wait;
+        opacity: 0.56;
+      }
+
+      .status {
+        min-height: 34px;
+        margin: 10px 0 0;
+        color: rgba(248, 246, 236, 0.52);
+        font-size: 12px;
+        line-height: 1.4;
+      }
+
+      .snapshots {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+        margin-top: 10px;
+      }
+
+      .snapshot {
+        min-height: 34px;
+        border: 1px solid rgba(248, 246, 236, 0.26);
+        border-radius: 6px;
+        background: rgba(248, 246, 236, 0.06);
+        color: rgba(248, 246, 236, 0.86);
+        cursor: pointer;
+        font-size: 12px;
+      }
+
+      .snapshot.is-active {
+        border-color: #ff321f;
+      }
+
+      .hidden-rendering {
+        position: fixed;
+        left: -9999px;
+        top: -9999px;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+      }
+
+      @media (max-width: 980px) {
+        .gif-lab {
+          grid-template-columns: 1fr;
+        }
+
+        .panel {
+          position: static;
+          max-height: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="gif-lab">
+      <section class="preview-area" aria-label="GIF náhledy">
+        <div class="preview-row">
+          <div class="preview-label"><strong>Čtverec</strong><span>350 x 350 px</span></div>
+          <canvas id="preview-square" class="preview-canvas" width="350" height="350"></canvas>
+        </div>
+        <div class="preview-row">
+          <div class="preview-label"><strong>Na šířku</strong><span>700 x 350 px</span></div>
+          <canvas id="preview-wide" class="preview-canvas" width="700" height="350"></canvas>
+        </div>
+      </section>
+
+      <aside class="panel" aria-label="Nastavení GIF náhledů">
+        <h1>GIF lab</h1>
+        <p>Export úvodní animace galerie ve dvou prezentačních formátech.</p>
+
+        <div class="control-group">
+          <div class="button-grid">
+            <button id="play" type="button">Play</button>
+            <button id="restart" type="button">Restart</button>
+          </div>
+          <div class="control">
+            <label for="time">Čas <output>0.00</output></label>
+            <input id="time" type="range" min="0" max="5780" step="1" value="0">
+          </div>
+          <button id="save-snapshot" class="wide-button" type="button">Uložit snapshot</button>
+          <div id="snapshots" class="snapshots" aria-label="Snapshoty nastavení"></div>
+        </div>
+
+        <div class="control-group">
+          <div class="control">
+            <label for="depth">Depth offset <output>0.00</output></label>
+            <input id="depth" type="range" min="0" max="1" step="0.01" value="0" data-state="depth">
+          </div>
+          <div class="control">
+            <label for="softness">Softness <output>0.65</output></label>
+            <input id="softness" type="range" min="0" max="1" step="0.01" value="0.65" data-state="softness">
+          </div>
+          <div class="control">
+            <label for="blur">Blur <output>0.00</output></label>
+            <input id="blur" type="range" min="0" max="1" step="0.01" value="0" data-state="blur">
+          </div>
+          <div class="control">
+            <label for="contrast">Contrast <output>1.00</output></label>
+            <input id="contrast" type="range" min="0" max="1" step="0.01" value="1" data-state="contrast">
+          </div>
+          <div class="control">
+            <label for="saturation">Saturation <output>0.66</output></label>
+            <input id="saturation" type="range" min="0" max="1" step="0.01" value="0.66" data-state="saturation">
+          </div>
+          <div class="control">
+            <label for="light">Light angle <output>0.02</output></label>
+            <input id="light" type="range" min="-1" max="1" step="0.01" value="0.02" data-state="light">
+          </div>
+          <div class="control">
+            <label for="pattern-x">Pattern X <output>0.45</output></label>
+            <input id="pattern-x" type="range" min="0" max="1" step="0.01" value="0.45" data-state="patternX">
+          </div>
+          <div class="control">
+            <label for="pattern-y">Pattern Y <output>0.34</output></label>
+            <input id="pattern-y" type="range" min="0" max="1" step="0.01" value="0.34" data-state="patternY">
+          </div>
+          <div class="control">
+            <label for="scale">Scale <output>1.80</output></label>
+            <input id="scale" type="range" min="0.65" max="1.8" step="0.01" value="1.8" data-state="scale">
+          </div>
+          <div class="control">
+            <label for="motion">Motion <output>0.27</output></label>
+            <input id="motion" type="range" min="0" max="1" step="0.01" value="0.27" data-state="motion">
+          </div>
+          <label class="toggle-control" for="haze">
+            <span>Haze texture</span>
+            <input id="haze" type="checkbox" checked>
+          </label>
+        </div>
+
+        <div class="control-group">
+          <div class="control">
+            <label for="grain-opacity">Grain opacity <output>0.72</output></label>
+            <input id="grain-opacity" type="range" min="0" max="1" step="0.01" value="0.72" data-state="grainOpacity">
+          </div>
+          <div class="control">
+            <label for="title-color">Title black <output>1.00</output></label>
+            <input id="title-color" type="range" min="0" max="1" step="0.01" value="1" data-state="titleBlack">
+          </div>
+          <div class="control-heading">Text čtverec</div>
+          <div class="control">
+            <label for="square-title-x">Blok X <output>18.00</output></label>
+            <input id="square-title-x" type="range" min="-220" max="220" step="1" value="18" data-state="squareTitleX">
+          </div>
+          <div class="control">
+            <label for="square-title-y">Blok Y <output>104.00</output></label>
+            <input id="square-title-y" type="range" min="-80" max="260" step="1" value="104" data-state="squareTitleY">
+          </div>
+          <div class="control">
+            <label for="square-title-size">Velikost <output>39.00</output></label>
+            <input id="square-title-size" type="range" min="24" max="96" step="1" value="39" data-state="squareTitleSize">
+          </div>
+          <div class="control-heading">Text na šířku</div>
+          <div class="control">
+            <label for="wide-title-x">Blok X <output>58.00</output></label>
+            <input id="wide-title-x" type="range" min="-260" max="320" step="1" value="58" data-state="wideTitleX">
+          </div>
+          <div class="control">
+            <label for="wide-title-y">Blok Y <output>94.00</output></label>
+            <input id="wide-title-y" type="range" min="-80" max="260" step="1" value="94" data-state="wideTitleY">
+          </div>
+          <div class="control">
+            <label for="wide-title-size">Velikost <output>72.00</output></label>
+            <input id="wide-title-size" type="range" min="28" max="128" step="1" value="72" data-state="wideTitleSize">
+          </div>
+        </div>
+
+        <div class="control-group">
+          <button id="export-square" class="wide-button" type="button">Export 350x350 GIF</button>
+          <button id="export-wide" class="wide-button" type="button">Export 700x350 GIF</button>
+          <p id="status" class="status" aria-live="polite"></p>
+        </div>
+      </aside>
+    </main>
+
+    <div class="hidden-rendering" aria-hidden="true">
+      <canvas id="shadow-render"></canvas>
+      <canvas id="grain-render"></canvas>
+      <canvas id="frame-render"></canvas>
+    </div>
+
+    <script>
+      const SOURCE_DURATION = 7200;
+      const CAPTURE_START = 1420;
+      const CAPTURE_SPAN = SOURCE_DURATION - CAPTURE_START;
+      const START_DARK_HOLD = 1000;
+      const LOOP_HOLD = 1320;
+      const LOOP_DARKEN = 1600;
+      const DURATION = START_DARK_HOLD + CAPTURE_SPAN + LOOP_HOLD + LOOP_DARKEN;
+      const FPS = 12;
+      const FRAME_DELAY = Math.round(100 / FPS);
+      const BRIGHTEN_DURATION = 1900;
+      const LIGHT_MOVE_DURATION = 2400;
+      const SHADOW_REVEAL_DURATION = 2600;
+      const MOTION_RAMP_DURATION = 2600;
+      const GIF_FLAP_RATE = 0.045;
+      const GIF_WING_RATE = 0.084;
+      const GIF_BUTTERFLY_FADE_IN = 520;
+      const INTRO = {
+        darkening: 320,
+        butterfly: 460,
+        shadows: 2500,
+        content: 4200,
+        end: 7200
+      };
+      const formats = {
+        square: { width: 350, height: 350, canvas: document.getElementById("preview-square"), titleX: "squareTitleX", titleY: "squareTitleY", titleSize: "squareTitleSize", filename: "koreny-gallery-intro-350x350.gif" },
+        wide: { width: 700, height: 350, canvas: document.getElementById("preview-wide"), titleX: "wideTitleX", titleY: "wideTitleY", titleSize: "wideTitleSize", filename: "koreny-gallery-intro-700x350.gif" }
+      };
+      const shadowCanvas = document.getElementById("shadow-render");
+      const grainCanvas = document.getElementById("grain-render");
+      const frameCanvas = document.getElementById("frame-render");
+      const statusElement = document.getElementById("status");
+      const controls = Array.from(document.querySelectorAll("[data-state]"));
+      document.getElementById("time").max = String(DURATION);
+      const state = {
+        depth: 0,
+        softness: 0.65,
+        blur: 0,
+        contrast: 1,
+        saturation: 0.66,
+        light: 0.02,
+        patternX: 0.45,
+        patternY: 0.34,
+        scale: 1.8,
+        motion: 0.27,
+        haze: 1,
+        grainOpacity: 0.72,
+        titleBlack: 1,
+        squareTitleX: 18,
+        squareTitleY: 104,
+        squareTitleSize: 39,
+        wideTitleX: 58,
+        wideTitleY: 94,
+        wideTitleSize: 72,
+        time: 0,
+        playing: false,
+        playStartedAt: 0,
+        playStartedTime: 0
+      };
+      const userAgent = navigator.userAgent || "";
+      const isIOSWebKit = /iP(ad|hone|od)/.test(userAgent) || navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1;
+      const isSafari = /^((?!chrome|android|crios|fxios|edgios).)*safari/i.test(userAgent);
+      const safariColorFix = isIOSWebKit || isSafari ? 1 : 0;
+      const flowerAssets = [
+        "assets/flower-rosette-cross.svg",
+        "assets/flower-diagonal-pair.svg",
+        "assets/flower-side-bloom.svg",
+        "assets/flower-horizontal-bloom.svg",
+        "assets/flower-stacked-stem.svg"
+      ];
+      const gl = shadowCanvas.getContext("webgl", {
+        alpha: true,
+        antialias: true,
+        premultipliedAlpha: false,
+        preserveDrawingBuffer: true
+      });
+      if (!gl) {
+        throw new Error("WebGL is not supported in this browser.");
+      }
+
+      const vertexSource = `
+        attribute vec2 a_position;
+        varying vec2 v_uv;
+        void main() {
+          v_uv = a_position * 0.5 + 0.5;
+          gl_Position = vec4(a_position, 0.0, 1.0);
+        }
+      `;
+
+      const fragmentSource = `
+        precision highp float;
+        varying vec2 v_uv;
+        uniform vec2 u_resolution;
+        uniform float u_time;
+        uniform float u_depth;
+        uniform float u_softness;
+        uniform float u_blur;
+        uniform float u_contrast;
+        uniform float u_saturation;
+        uniform float u_light;
+        uniform vec2 u_pattern;
+        uniform float u_scale;
+        uniform float u_motion;
+        uniform float u_haze;
+        uniform vec2 u_pointer;
+        uniform sampler2D u_flowerMask;
+        uniform vec2 u_page_size;
+        uniform vec2 u_viewport_size;
+        uniform float u_scroll_y;
+        uniform vec4 u_butterfly_prism;
+        uniform float u_safari_fix;
+
+        float hash(vec2 p) {
+          p = fract(p * vec2(123.34, 456.21));
+          p += dot(p, p + 45.32);
+          return fract(p.x * p.y);
+        }
+
+        float noise(vec2 p) {
+          vec2 i = floor(p);
+          vec2 f = fract(p);
+          vec2 u = f * f * (3.0 - 2.0 * f);
+          return mix(mix(hash(i), hash(i + vec2(1.0, 0.0)), u.x), mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), u.x), u.y);
+        }
+
+        float fbm(vec2 p) {
+          float v = 0.0;
+          float a = 0.5;
+          mat2 r = mat2(0.82, -0.58, 0.58, 0.82);
+          for (int i = 0; i < 5; i++) {
+            v += a * noise(p);
+            p = r * p * 2.02 + 13.1;
+            a *= 0.52;
+          }
+          return v;
+        }
+
+        float maskAt(vec2 uv) {
+          if (uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0) {
+            return 0.0;
+          }
+          return texture2D(u_flowerMask, uv).a;
+        }
+
+        vec2 windWarp(vec2 maskUv, float t) {
+          float pageAspect = u_page_size.y / max(u_page_size.x, 1.0);
+          float gust = sin(t * 1.15 + maskUv.y * 6.2);
+          gust += sin(t * 0.73 + maskUv.y * 10.4 + maskUv.x * 1.8) * 0.45;
+          float bladeHeight = smoothstep(0.12, 0.62, maskUv.y);
+          bladeHeight *= smoothstep(0.02, 0.11, maskUv.y);
+          float bend = gust * u_motion * 0.028 * bladeHeight;
+          float lift = sin(t * 0.82 + maskUv.x * 5.8) * u_motion * 0.004 * bladeHeight / pageAspect;
+          return maskUv + vec2(bend, lift);
+        }
+
+        float blurredMask(vec2 uv, float radius, float t) {
+          uv = windWarp(uv, t);
+          float pageAspect = u_page_size.y / max(u_page_size.x, 1.0);
+          vec2 radiusX = vec2(radius, 0.0);
+          vec2 radiusY = vec2(0.0, radius / pageAspect);
+          vec2 radiusDiagonal = vec2(radius, radius / pageAspect);
+          float m = maskAt(uv) * 0.18;
+          m += maskAt(uv + radiusX) * 0.105;
+          m += maskAt(uv - radiusX) * 0.105;
+          m += maskAt(uv + radiusY) * 0.105;
+          m += maskAt(uv - radiusY) * 0.105;
+          m += maskAt(uv + radiusDiagonal * 0.72) * 0.085;
+          m += maskAt(uv + vec2(-radiusDiagonal.x, radiusDiagonal.y) * 0.72) * 0.085;
+          m += maskAt(uv + vec2(radiusDiagonal.x, -radiusDiagonal.y) * 0.72) * 0.085;
+          m += maskAt(uv - radiusDiagonal * 0.72) * 0.085;
+          m += maskAt(uv + radiusX * 1.75) * 0.055;
+          m += maskAt(uv - radiusX * 1.75) * 0.055;
+          m += maskAt(uv + radiusY * 1.75) * 0.055;
+          m += maskAt(uv - radiusY * 1.75) * 0.055;
+          return clamp(m, 0.0, 1.0);
+        }
+
+        float prismMask(vec2 uv, float radius, float t) {
+          uv = windWarp(uv, t);
+          float pageAspect = u_page_size.y / max(u_page_size.x, 1.0);
+          vec2 radiusX = vec2(radius, 0.0);
+          vec2 radiusY = vec2(0.0, radius / pageAspect);
+          float m = maskAt(uv) * 0.34;
+          m += maskAt(uv + radiusX) * 0.165;
+          m += maskAt(uv - radiusX) * 0.165;
+          m += maskAt(uv + radiusY) * 0.165;
+          m += maskAt(uv - radiusY) * 0.165;
+          return clamp(m, 0.0, 1.0);
+        }
+
+        vec2 metricOffset(vec2 direction, float amount) {
+          float pageAspect = u_page_size.y / max(u_page_size.x, 1.0);
+          return vec2(direction.x * amount, direction.y * amount / pageAspect);
+        }
+
+        vec2 projectedUv(vec2 uv, vec2 direction, float distance, float scale, float stretch) {
+          float pageAspect = u_page_size.y / max(u_page_size.x, 1.0);
+          vec2 metricUv = vec2(uv.x, uv.y * pageAspect);
+          vec2 metricPattern = vec2(u_pattern.x, u_pattern.y * pageAspect);
+          vec2 metricCenter = vec2(0.5, 0.5 * pageAspect);
+          vec2 projected = metricUv - direction * distance;
+          vec2 p = projected - metricPattern;
+          float along = dot(p, direction);
+          p += direction * along * ((1.0 / stretch) - 1.0);
+          vec2 metricSample = p / scale + metricCenter;
+          vec2 groundAnchor = vec2(0.5, 0.0);
+          metricSample = groundAnchor + (metricSample - groundAnchor) / u_scale;
+          return vec2(metricSample.x, metricSample.y / pageAspect);
+        }
+
+        void main() {
+          float pageX = v_uv.x * u_viewport_size.x;
+          float pageY = (1.0 - v_uv.y) * u_viewport_size.y;
+          vec2 uv = vec2(pageX / u_page_size.x, 1.0 - pageY / u_page_size.y);
+          float pageAspect = u_page_size.y / max(u_page_size.x, 1.0);
+          float t = u_time;
+          float angle = mix(-1.15, 1.15, u_light * 0.5 + 0.5);
+          vec2 direction = normalize(vec2(cos(angle), sin(angle) * 0.72 - 0.32));
+          float blur = mix(0.003, 0.052, u_blur);
+          float spread = u_softness;
+          float baseDistance = mix(0.03, 0.18, u_depth);
+          float lowLight = u_depth;
+          float scale = 0.74;
+          float contactStretch = 1.0 + lowLight * 0.25;
+          float bodyStretch = 1.0 + lowLight * 1.2;
+          float spreadStretch = 1.0 + lowLight * (1.75 + spread * 1.1);
+          float tailStretch = 1.0 + lowLight * (2.65 + spread * 1.8);
+          float veilStretch = 1.0 + lowLight * (2.18 + spread * 1.42);
+          float mistStretch = 1.0 + lowLight * (3.25 + spread * 2.16);
+          vec2 contactUv = projectedUv(uv, direction, baseDistance * 0.35, scale, contactStretch);
+          vec2 bodyUv = projectedUv(uv, direction, baseDistance, scale, bodyStretch);
+          vec2 spreadUv = projectedUv(uv, direction, baseDistance * (1.0 + spread * 1.6), scale, spreadStretch);
+          vec2 tailUv = projectedUv(uv, direction, baseDistance * (1.0 + spread * 3.0), scale, tailStretch);
+          vec2 veilUv = projectedUv(uv, direction, baseDistance * (1.0 + spread * 2.25), scale, veilStretch);
+          vec2 mistUv = projectedUv(uv, direction, baseDistance * (1.0 + spread * 3.85), scale, mistStretch);
+          float contactFlower = blurredMask(contactUv, blur * 0.58, t);
+          float bodyFlower = blurredMask(bodyUv, blur, t);
+          float spreadFlower = blurredMask(spreadUv, blur * (1.35 + spread * 0.8), t);
+          float tailFlower = blurredMask(tailUv, blur * (1.8 + spread * 1.15), t);
+          float veilFlower = blurredMask(veilUv, blur * (1.58 + spread * 1.0), t);
+          float mistFlower = blurredMask(mistUv, blur * (2.2 + spread * 1.38), t);
+          float unevenLight = 0.0;
+          if (u_haze > 0.5) {
+            unevenLight = smoothstep(0.38, 0.86, fbm((uv + direction * baseDistance) * vec2(6.2, 4.6) + vec2(t, -t * 0.45)));
+          }
+          vec3 inkMint = vec3(0.686, 0.835, 0.769);
+          vec3 inkBlue = vec3(0.169, 0.353, 0.863);
+          vec3 inkBrown = vec3(0.2, 0.125, 0.063);
+          vec3 inkRed = vec3(0.808, 0.02, 0.012);
+          vec3 inkCream = vec3(0.965, 0.925, 0.82);
+          vec3 paperShadow = vec3(0.12, 0.115, 0.105);
+          float lightTexture = mix(1.0, 0.84 + unevenLight * 0.15, u_haze);
+          float contactLayer = smoothstep(0.04, 0.95, contactFlower) * 0.25 * lightTexture;
+          float bodyLayer = smoothstep(0.02, 0.98, bodyFlower) * 0.43 * lightTexture;
+          float spreadEase = smoothstep(0.0, 1.0, spread);
+          float spreadLayer = smoothstep(0.0, 0.88, spreadFlower) * spreadEase * 0.34 * lightTexture;
+          float veilLayer = smoothstep(0.0, 0.84, veilFlower) * spreadEase * 0.28 * lightTexture;
+          float tailLayer = smoothstep(0.0, 0.82, tailFlower) * spreadEase * 0.22 * lightTexture;
+          float mistLayer = smoothstep(0.0, 0.76, mistFlower) * spreadEase * 0.16 * lightTexture;
+          float hazeLayer = smoothstep(0.0, 1.0, bodyFlower + spreadFlower + veilFlower + tailFlower + mistFlower) * 0.012 * lightTexture;
+          float density = contactLayer + bodyLayer + spreadLayer + veilLayer + tailLayer + mistLayer + hazeLayer;
+          float shadowBody = max(max(contactFlower, bodyFlower), max(max(spreadFlower, veilFlower), max(tailFlower, mistFlower)));
+          vec2 perpendicular = vec2(-direction.y, direction.x);
+          float safeSaturation = mix(u_saturation, u_saturation * 0.28, u_safari_fix);
+          float prismSpread = (0.004 + u_depth * 0.019 + spread * 0.014 + u_blur * 0.006) * (0.35 + safeSaturation * 1.85);
+          vec2 prismStep = metricOffset(direction, prismSpread);
+          vec2 prismCross = metricOffset(perpendicular, prismSpread * 0.58);
+          float redPrism = prismMask(spreadUv - prismStep * 1.35 + prismCross * 0.22, blur * 0.86, t);
+          float mintPrism = prismMask(bodyUv - prismStep * 0.48 - prismCross * 1.1, blur * 0.8, t);
+          float bluePrism = prismMask(spreadUv + prismStep * 1.35 - prismCross * 0.18, blur * 0.86, t);
+          float brownPrism = prismMask(tailUv + prismStep * 2.1 + prismCross * 0.42, blur * 1.2, t);
+          float creamPrism = prismMask(contactUv - prismStep * 0.72 + prismCross * 0.9, blur * 0.72, t);
+          float redEdge = max(redPrism - shadowBody * 0.68, 0.0);
+          float mintEdge = max(mintPrism - shadowBody * 0.72, 0.0);
+          float blueEdge = max(bluePrism - shadowBody * 0.68, 0.0);
+          float brownEdge = max(brownPrism - shadowBody * 0.76, 0.0);
+          float creamEdge = max(creamPrism - shadowBody * 0.8, 0.0);
+          creamEdge *= 1.0 - u_safari_fix;
+          float innerEdge = smoothstep(0.025, 0.28, shadowBody) * (1.0 - smoothstep(0.34, 0.82, shadowBody));
+          float innerPrismStrength = mix(1.0, 0.38, u_safari_fix);
+          redEdge += abs(redPrism - spreadFlower) * innerEdge * 0.42 * innerPrismStrength;
+          mintEdge += abs(mintPrism - bodyFlower) * innerEdge * 0.34 * innerPrismStrength;
+          blueEdge += abs(bluePrism - spreadFlower) * innerEdge * 0.42 * innerPrismStrength;
+          brownEdge += abs(brownPrism - tailFlower) * innerEdge * 0.24 * innerPrismStrength;
+          creamEdge += abs(creamPrism - contactFlower) * innerEdge * 0.18 * (1.0 - u_safari_fix);
+          float prismWeight = redEdge + mintEdge + blueEdge + brownEdge + creamEdge;
+          vec3 prismInk = inkRed * redEdge;
+          prismInk += inkMint * mintEdge;
+          prismInk += inkBlue * blueEdge;
+          prismInk += inkBrown * brownEdge;
+          prismInk += inkCream * creamEdge;
+          prismInk /= max(prismWeight, 0.001);
+          prismInk = mix(prismInk, min(prismInk, vec3(0.42)), u_safari_fix);
+          float prismPresence = smoothstep(0.005, 0.16, prismWeight) * safeSaturation;
+          prismPresence *= mix(1.0, 0.48, u_safari_fix);
+          prismPresence *= 1.0 - smoothstep(0.62, 1.12, density);
+          vec3 ink = mix(paperShadow, prismInk, prismPresence);
+          density += prismWeight * safeSaturation * mix(0.19, 0.06, u_safari_fix);
+          float strength = mix(0.18, 0.88, u_contrast);
+          float alpha = clamp(pow(density, 0.82) * strength, 0.0, 0.68);
+          float pointerActive = step(0.0, u_pointer.x) * step(0.0, u_pointer.y);
+          float spotlightDistance = length(v_uv * u_resolution - u_pointer);
+          float spotlight = 1.0 - smoothstep(34.0, 220.0, spotlightDistance);
+          alpha *= 1.0 - spotlight * pointerActive * 0.82;
+          ink = mix(ink, min(ink, vec3(0.34)), u_safari_fix * 0.35);
+          alpha *= mix(1.0, 0.94, u_safari_fix);
+          gl_FragColor = vec4(ink, alpha);
+        }
+      `;
+
+      const program = createProgram(vertexSource, fragmentSource);
+      const buffer = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1]), gl.STATIC_DRAW);
+      const position = gl.getAttribLocation(program, "a_position");
+      gl.enableVertexAttribArray(position);
+      gl.vertexAttribPointer(position, 2, gl.FLOAT, false, 0, 0);
+      const uniforms = {
+        resolution: gl.getUniformLocation(program, "u_resolution"),
+        time: gl.getUniformLocation(program, "u_time"),
+        depth: gl.getUniformLocation(program, "u_depth"),
+        softness: gl.getUniformLocation(program, "u_softness"),
+        blur: gl.getUniformLocation(program, "u_blur"),
+        contrast: gl.getUniformLocation(program, "u_contrast"),
+        saturation: gl.getUniformLocation(program, "u_saturation"),
+        light: gl.getUniformLocation(program, "u_light"),
+        pattern: gl.getUniformLocation(program, "u_pattern"),
+        scale: gl.getUniformLocation(program, "u_scale"),
+        motion: gl.getUniformLocation(program, "u_motion"),
+        haze: gl.getUniformLocation(program, "u_haze"),
+        pointer: gl.getUniformLocation(program, "u_pointer"),
+        flowerMask: gl.getUniformLocation(program, "u_flowerMask"),
+        pageSize: gl.getUniformLocation(program, "u_page_size"),
+        viewportSize: gl.getUniformLocation(program, "u_viewport_size"),
+        scrollY: gl.getUniformLocation(program, "u_scroll_y"),
+        butterflyPrism: gl.getUniformLocation(program, "u_butterfly_prism"),
+        safariFix: gl.getUniformLocation(program, "u_safari_fix")
+      };
+      const flowerTexture = gl.createTexture();
+      gl.useProgram(program);
+      gl.enable(gl.BLEND);
+      gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+      gl.activeTexture(gl.TEXTURE0);
+      gl.bindTexture(gl.TEXTURE_2D, flowerTexture);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([0, 0, 0, 0]));
+      gl.uniform1i(uniforms.flowerMask, 0);
+
+      const masks = new Map();
+      const grains = new Map();
+      let introGrainTile = null;
+      const snapshots = [];
+      const snapshotKey = "koreny-gallery-gif-snapshots-v1";
+      let activeSnapshotId = "";
+      let previewRenderRunning = false;
+      let previewRenderVersion = 0;
+      let previewRenderedVersion = 0;
+
+      function createProgram(vertex, fragment) {
+        const nextProgram = gl.createProgram();
+        gl.attachShader(nextProgram, compile(gl.VERTEX_SHADER, vertex));
+        gl.attachShader(nextProgram, compile(gl.FRAGMENT_SHADER, fragment));
+        gl.linkProgram(nextProgram);
+        if (!gl.getProgramParameter(nextProgram, gl.LINK_STATUS)) {
+          throw new Error(gl.getProgramInfoLog(nextProgram));
+        }
+        gl.useProgram(nextProgram);
+        return nextProgram;
+      }
+
+      function compile(type, source) {
+        const shader = gl.createShader(type);
+        gl.shaderSource(shader, source);
+        gl.compileShader(shader);
+        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+          throw new Error(gl.getShaderInfoLog(shader));
+        }
+        return shader;
+      }
+
+      function smoothstep(value) {
+        const clamped = Math.max(0, Math.min(1, value));
+        return clamped * clamped * (3 - 2 * clamped);
+      }
+
+      function clamp01(value) {
+        return Math.max(0, Math.min(1, value));
+      }
+
+      function easeInQuad(value) {
+        const clamped = clamp01(value);
+        return clamped * clamped;
+      }
+
+      function easeOutQuad(value) {
+        const clamped = clamp01(value);
+        return 1 - (1 - clamped) * (1 - clamped);
+      }
+
+      function easeInOutCubic(value) {
+        return value < 0.5 ? 4 * value * value * value : 1 - Math.pow(-2 * value + 2, 3) / 2;
+      }
+
+      function cubicBezier(a, b, c, d, t) {
+        const mt = 1 - t;
+        return mt * mt * mt * a + 3 * mt * mt * t * b + 3 * mt * t * t * c + t * t * t * d;
+      }
+
+      function transitionProgress(time, start, duration) {
+        return smoothstep((time - start) / duration);
+      }
+
+      function sourceTimeFor(time) {
+        if (time <= START_DARK_HOLD) {
+          return CAPTURE_START;
+        }
+        const activeTime = time - START_DARK_HOLD;
+        if (activeTime <= CAPTURE_SPAN) {
+          return Math.max(0, Math.min(SOURCE_DURATION, CAPTURE_START + activeTime));
+        }
+        return SOURCE_DURATION;
+      }
+
+      function loopCloseProgress(time) {
+        const closeStart = START_DARK_HOLD + CAPTURE_SPAN + LOOP_HOLD;
+        return easeInQuad((time - closeStart) / LOOP_DARKEN);
+      }
+
+      function lightRevealProgress(time) {
+        return easeOutQuad((time - INTRO.shadows) / BRIGHTEN_DURATION);
+      }
+
+      function lightTravelProgress(time) {
+        return easeOutQuad((time - INTRO.shadows) / LIGHT_MOVE_DURATION);
+      }
+
+      function shadowRevealProgress(time) {
+        return transitionProgress(time, INTRO.shadows, SHADOW_REVEAL_DURATION);
+      }
+
+      function introMotion(captureTime, sourceTime) {
+        const ramp = transitionProgress(sourceTime, INTRO.shadows, MOTION_RAMP_DURATION);
+        return state.motion * ramp * (1 - loopCloseProgress(captureTime));
+      }
+
+      function butterflyTimeFor(captureTime) {
+        return INTRO.butterfly + Math.max(0, captureTime);
+      }
+
+      function butterflyFadeIn(captureTime) {
+        return smoothstep(captureTime / GIF_BUTTERFLY_FADE_IN);
+      }
+
+      function grainRandom(seed) {
+        let value = seed >>> 0;
+        return () => {
+          value += 0x6D2B79F5;
+          let next = value;
+          next = Math.imul(next ^ (next >>> 15), next | 1);
+          next ^= next + Math.imul(next ^ (next >>> 7), next | 61);
+          return ((next ^ (next >>> 14)) >>> 0) / 4294967296;
+        };
+      }
+
+      function renderStaticGrain(width, height) {
+        const key = `${width}x${height}`;
+        if (grains.has(key)) {
+          return grains.get(key);
+        }
+        grainCanvas.width = width;
+        grainCanvas.height = height;
+        const ctx = grainCanvas.getContext("2d", { alpha: true });
+        const image = ctx.createImageData(width, height);
+        const data = image.data;
+        const random = grainRandom((width * 73856093) ^ (height * 19349663) ^ 0x9E3779B9);
+        for (let i = 0; i < data.length; i += 4) {
+          const fine = random();
+          const neighbor = random();
+          const value = Math.max(0, Math.min(255, 118 + (fine - 0.5) * 92 + (neighbor - 0.5) * 34));
+          const alpha = Math.max(0, Math.min(255, 24 + Math.abs(fine - 0.5) * 52 + random() * 16));
+          data[i] = value;
+          data[i + 1] = value;
+          data[i + 2] = value;
+          data[i + 3] = alpha;
+        }
+        ctx.putImageData(image, 0, 0);
+        const copy = document.createElement("canvas");
+        copy.width = width;
+        copy.height = height;
+        copy.getContext("2d").drawImage(grainCanvas, 0, 0);
+        grains.set(key, copy);
+        return copy;
+      }
+
+      function renderIntroGrainTile() {
+        if (introGrainTile) {
+          return introGrainTile;
+        }
+
+        introGrainTile = document.createElement("canvas");
+        introGrainTile.width = 220;
+        introGrainTile.height = 220;
+        const ctx = introGrainTile.getContext("2d", { alpha: true });
+        const image = ctx.createImageData(220, 220);
+        const data = image.data;
+        const random = grainRandom(17);
+        for (let i = 0; i < data.length; i += 4) {
+          const fine = random();
+          const neighbor = random();
+          const value = Math.max(0, Math.min(255, 232 + (fine - 0.5) * 42 + (neighbor - 0.5) * 18));
+          const alpha = Math.max(0, Math.min(255, 72 + Math.abs(fine - 0.5) * 116 + random() * 32));
+          data[i] = value;
+          data[i + 1] = value;
+          data[i + 2] = Math.max(0, value - 14);
+          data[i + 3] = alpha;
+        }
+        ctx.putImageData(image, 0, 0);
+        return introGrainTile;
+      }
+
+      function loadImage(src) {
+        return new Promise((resolve, reject) => {
+          const image = new Image();
+          image.onload = () => resolve(image);
+          image.onerror = () => reject(new Error(`Could not load ${src}`));
+          image.src = src;
+        });
+      }
+
+      function drawFlower(ctx, image, x, y, size, rotation, alpha = 1) {
+        ctx.save();
+        ctx.globalAlpha = alpha;
+        ctx.translate(x, y);
+        ctx.rotate(rotation);
+        ctx.drawImage(image, -size / 2, -size / 2, size, size);
+        ctx.restore();
+      }
+
+      function meadowValue(index, salt = 0) {
+        const value = Math.sin(index * 12.9898 + salt * 78.233) * 43758.5453;
+        return value - Math.floor(value);
+      }
+
+      function drawMeadowStem(ctx, x, footY, headY, sway, width, alpha) {
+        ctx.save();
+        ctx.globalAlpha = alpha;
+        ctx.lineWidth = width;
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+        ctx.strokeStyle = "rgba(0, 0, 0, 1)";
+        ctx.beginPath();
+        ctx.moveTo(x, footY);
+        ctx.bezierCurveTo(x + sway * 0.22, footY - (footY - headY) * 0.36, x + sway * 0.82, footY - (footY - headY) * 0.74, x + sway, headY);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      function pointOnStem(x, footY, headY, sway, progress) {
+        const y = footY + (headY - footY) * progress;
+        const curve = Math.sin(progress * Math.PI * 0.72);
+        return { x: x + sway * curve, y };
+      }
+
+      function drawMeadowLeaf(ctx, x, y, size, angle, alpha) {
+        ctx.save();
+        ctx.globalAlpha = alpha;
+        ctx.translate(x, y);
+        ctx.rotate(angle);
+        ctx.fillStyle = "rgba(0, 0, 0, 1)";
+        ctx.beginPath();
+        ctx.ellipse(0, 0, size * 0.34, size, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      function drawMeadowBranch(ctx, x, footY, headY, sway, progress, side, length, width, alpha) {
+        const start = pointOnStem(x, footY, headY, sway, progress);
+        const angle = side * (0.42 + meadowValue(progress * 100, side) * 0.34);
+        const endX = start.x + Math.cos(angle) * length * side;
+        const endY = start.y - Math.sin(Math.abs(angle)) * length * 0.78;
+        ctx.save();
+        ctx.globalAlpha = alpha;
+        ctx.lineWidth = width;
+        ctx.lineCap = "round";
+        ctx.strokeStyle = "rgba(0, 0, 0, 1)";
+        ctx.beginPath();
+        ctx.moveTo(start.x, start.y);
+        ctx.quadraticCurveTo(start.x + side * length * 0.34, start.y - length * 0.16, endX, endY);
+        ctx.stroke();
+        ctx.restore();
+        return { x: endX, y: endY, angle: side * 0.92 };
+      }
+
+      async function createFlowerMask(pageWidth, pageHeight) {
+        const mask = document.createElement("canvas");
+        const pageAspect = Math.max(pageHeight / Math.max(pageWidth, 1), 0.25);
+        const maxTextureSide = 4096;
+        const baseWidth = 1400;
+        const width = Math.max(320, Math.min(baseWidth, Math.floor(maxTextureSide / pageAspect)));
+        const height = Math.max(320, Math.round(width * pageAspect));
+        mask.width = width;
+        mask.height = Math.min(maxTextureSide, height);
+        const ctx = mask.getContext("2d");
+        const flowers = await Promise.all(flowerAssets.map(loadImage));
+        const w = mask.width;
+        const h = mask.height;
+        ctx.clearRect(0, 0, w, h);
+        const meadowCount = 20;
+        const flowerBase = Math.max(24, Math.min(84, w * 0.074));
+        const stemBase = Math.max(1.5, w * 0.0042);
+
+        for (let i = 0; i < meadowCount; i++) {
+          const column = (i + 0.5) / meadowCount;
+          const x = w * (0.03 + column * 0.94 + (meadowValue(i, 1) - 0.5) * 0.09);
+          const footY = h * (0.92 + meadowValue(i, 2) * 0.16);
+          const tall = meadowValue(i, 3);
+          const stemLength = h * (0.14 + Math.pow(tall, 1.75) * 0.58);
+          const headY = Math.max(h * 0.04, footY - stemLength);
+          const sway = w * ((meadowValue(i, 4) - 0.5) * (0.08 + tall * 0.14));
+          const size = flowerBase * (0.52 + meadowValue(i, 5) * 1.05) * (0.72 + tall * 0.55);
+          const alpha = 0.42 + meadowValue(i, 6) * 0.43;
+          const rotation = (meadowValue(i, 7) - 0.5) * 1.7;
+          const image = flowers[i % flowers.length];
+          const stemWidth = stemBase * (0.62 + meadowValue(i, 8) * 0.82);
+          drawMeadowStem(ctx, x, footY, headY, sway, stemWidth, alpha * 0.74);
+          const leafCount = 1 + Math.floor(meadowValue(i, 9) * 3);
+          for (let leaf = 0; leaf < leafCount; leaf++) {
+            const progress = 0.28 + meadowValue(i, 10 + leaf) * 0.52;
+            const point = pointOnStem(x, footY, headY, sway, progress);
+            const side = meadowValue(i, 13 + leaf) > 0.5 ? 1 : -1;
+            drawMeadowLeaf(ctx, point.x + side * stemBase * 2.1, point.y, flowerBase * (0.28 + meadowValue(i, 16 + leaf) * 0.46), side * (0.9 + meadowValue(i, 19 + leaf) * 0.7), alpha * 0.36);
+          }
+          const branchCount = tall > 0.34 ? 1 + Math.floor(meadowValue(i, 22) * 3) : 0;
+          for (let branch = 0; branch < branchCount; branch++) {
+            const side = meadowValue(i, 23 + branch) > 0.5 ? 1 : -1;
+            const progress = 0.38 + meadowValue(i, 26 + branch) * 0.44;
+            const branchEnd = drawMeadowBranch(ctx, x, footY, headY, sway, progress, side, flowerBase * (0.56 + meadowValue(i, 29 + branch) * 0.9), stemWidth * 0.72, alpha * 0.58);
+            if (meadowValue(i, 32 + branch) > 0.38) {
+              drawFlower(ctx, flowers[(i + branch + 2) % flowers.length], branchEnd.x, branchEnd.y, size * (0.34 + meadowValue(i, 35 + branch) * 0.22), branchEnd.angle, alpha * 0.5);
+            } else {
+              drawMeadowLeaf(ctx, branchEnd.x, branchEnd.y, flowerBase * 0.34, branchEnd.angle, alpha * 0.44);
+            }
+          }
+          drawFlower(ctx, image, x + sway, headY, size, rotation, alpha);
+        }
+        return mask;
+      }
+
+      async function getMask(format) {
+        const key = `${format.width}x${format.height}`;
+        if (!masks.has(key)) {
+          masks.set(key, await createFlowerMask(format.width, format.height));
+        }
+        return masks.get(key);
+      }
+
+      function uploadFlowerMask(mask) {
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, flowerTexture);
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, mask);
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+      }
+
+      function introLight(time) {
+        const introEase = lightTravelProgress(time);
+        const introFade = 1 - smoothstep((time - (INTRO.shadows + LIGHT_MOVE_DURATION)) / 1100);
+        const introLightStart = Math.max(-1, Math.min(1, state.light + 0.62));
+        const value = introLightStart + (state.light - introLightStart) * introEase;
+        return value * introFade + state.light * (1 - introFade);
+      }
+
+      function introButterfly(time, width, height, opacityMultiplier = 1) {
+        const local = time - INTRO.butterfly;
+        const duration = 5600;
+        if (local < 0 || local > duration) {
+          return { opacity: 0, flap: 0, x: -1000, y: -1000, wing: 18, spread: 0.9, rotate: 0, scale: 1 };
+        }
+        const progress = Math.min(local / duration, 1);
+        const now = time;
+        const eased = easeInOutCubic(progress);
+        const arc = Math.sin(progress * Math.PI);
+        const seed = 1.18;
+        const isSquare = Math.abs(width - height) < 1;
+        const startX = isSquare ? width * 0.12 : width * 0.58;
+        const startY = isSquare ? height * 0.88 : height * 0.53;
+        const endX = width * 0.66;
+        const endY = -120;
+        const control1X = isSquare ? width * 0.18 : width * 0.76;
+        const control1Y = isSquare ? height * 0.62 : height * 0.44;
+        const control2X = isSquare ? width * 0.58 : width * 0.48;
+        const control2Y = isSquare ? height * 0.18 : height * 0.16;
+        const x = cubicBezier(startX, control1X, control2X, endX, eased) + Math.sin(progress * Math.PI * 4.5 + seed) * 14 * arc;
+        const y = cubicBezier(startY, control1Y, control2Y, endY, eased) + Math.sin(progress * Math.PI * 6.0 + seed * 0.7) * 8 * arc;
+        const nextT = Math.min(eased + 0.012, 1);
+        const nextX = cubicBezier(startX, control1X, control2X, endX, nextT);
+        const nextY = cubicBezier(startY, control1Y, control2Y, endY, nextT);
+        const fadeIn = smoothstep(Math.min(progress / 0.1, 1));
+        const fadeOut = smoothstep(Math.min((1 - progress) / 0.28, 1));
+        const fade = fadeIn * fadeOut;
+        const flap = Math.abs(Math.sin(now * GIF_FLAP_RATE + seed));
+        const wing = 26 + flap * 74 + Math.sin(now * GIF_WING_RATE + seed) * 9;
+        const spread = 0.48 + flap * 1.08;
+        const rotate = Math.atan2(nextY - y, nextX - x) * 180 / Math.PI + 88 + Math.sin(progress * Math.PI * 6 + seed) * 7;
+        const scale = (0.64 + arc * 0.18 - progress * 0.14) * 1.2;
+        return { x, y, opacity: fade * 0.96 * opacityMultiplier, flap, wing, spread, rotate, scale };
+      }
+
+      async function renderShadow(format, time, captureTime) {
+        shadowCanvas.width = format.width;
+        shadowCanvas.height = format.height;
+        gl.viewport(0, 0, format.width, format.height);
+        uploadFlowerMask(await getMask(format));
+        const butterfly = introButterfly(butterflyTimeFor(captureTime), format.width, format.height, butterflyFadeIn(captureTime));
+        gl.clearColor(0, 0, 0, 0);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+        gl.useProgram(program);
+        gl.uniform2f(uniforms.resolution, format.width, format.height);
+        gl.uniform2f(uniforms.pageSize, format.width, format.height);
+        gl.uniform2f(uniforms.viewportSize, format.width, format.height);
+        gl.uniform1f(uniforms.scrollY, 0);
+        gl.uniform1f(uniforms.time, time * 0.001);
+        gl.uniform1f(uniforms.depth, state.depth);
+        gl.uniform1f(uniforms.softness, state.softness);
+        gl.uniform1f(uniforms.blur, state.blur);
+        gl.uniform1f(uniforms.contrast, state.contrast);
+        gl.uniform1f(uniforms.saturation, state.saturation);
+        gl.uniform1f(uniforms.light, introLight(time));
+        gl.uniform2f(uniforms.pattern, state.patternX, state.patternY);
+        gl.uniform1f(uniforms.scale, state.scale);
+        gl.uniform1f(uniforms.motion, introMotion(captureTime, time));
+        gl.uniform1f(uniforms.haze, state.haze);
+        gl.uniform1f(uniforms.safariFix, safariColorFix);
+        gl.uniform2f(uniforms.pointer, -1000, -1000);
+        gl.uniform4f(uniforms.butterflyPrism, butterfly.x / Math.max(format.width, 1), butterfly.y / Math.max(format.height, 1), 0, butterfly.flap);
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, flowerTexture);
+        gl.drawArrays(gl.TRIANGLES, 0, 6);
+        gl.finish();
+        return shadowCanvas;
+      }
+
+      function drawAmbient(ctx, width, height) {
+        const ambient = 0.5;
+        const ambientShadow = 0.035 + (1 - ambient) * 0.105;
+        const ambientMid = 0.014 + (1 - ambient) * 0.06;
+        const ambientLight = 0.12 + ambient * 0.44;
+        const ambientGlow = Math.min(1, 0.3 + ambient * 0.9);
+        const ambientRadial = Math.min(1, 0.56 + ambient * 0.62);
+        const linear = ctx.createLinearGradient(0, 0, width, height);
+        linear.addColorStop(0, `rgba(0,0,0,${ambientShadow.toFixed(3)})`);
+        linear.addColorStop(0.34, `rgba(0,0,0,${ambientMid.toFixed(3)})`);
+        linear.addColorStop(0.72, `rgba(255,255,255,${ambientLight.toFixed(3)})`);
+        linear.addColorStop(1, `rgba(255,255,255,${ambientGlow.toFixed(3)})`);
+        ctx.fillStyle = linear;
+        ctx.fillRect(0, 0, width, height);
+        const radial = ctx.createRadialGradient(width, height, 0, width, height, Math.max(width, height) * 0.52);
+        radial.addColorStop(0, `rgba(255,255,255,${ambientRadial.toFixed(3)})`);
+        radial.addColorStop(1, "rgba(255,255,255,0)");
+        ctx.fillStyle = radial;
+        ctx.fillRect(0, 0, width, height);
+      }
+
+      function drawIntroLight(ctx, width, height, time, captureTime) {
+        let opacity = transitionProgress(time, INTRO.darkening, 1100);
+        if (time >= INTRO.shadows) {
+          opacity = 1 - lightRevealProgress(time);
+        }
+        opacity = Math.max(opacity, loopCloseProgress(captureTime));
+        if (opacity <= 0) {
+          return;
+        }
+        const introEase = lightTravelProgress(time);
+        const lightX = width * 0.82;
+        const lightY = height * ((38 + introEase * 50) / 100);
+        ctx.save();
+        ctx.globalAlpha = opacity;
+        const bg = ctx.createRadialGradient(lightX, lightY, 0, lightX, lightY, Math.max(width, height) * 0.9);
+        bg.addColorStop(0, "rgba(245,245,238,0.035)");
+        bg.addColorStop(0.18, "rgba(62,60,54,0.035)");
+        bg.addColorStop(0.52, "rgba(18,17,16,0.62)");
+        bg.addColorStop(1, "rgba(13,12,11,0.92)");
+        ctx.fillStyle = bg;
+        ctx.fillRect(0, 0, width, height);
+        const linear = ctx.createLinearGradient(0, 0, width, height);
+        linear.addColorStop(0, "rgba(17,16,14,0.96)");
+        linear.addColorStop(1, "rgba(30,28,24,0.9)");
+        ctx.fillStyle = linear;
+        ctx.fillRect(0, 0, width, height);
+        if (time >= INTRO.shadows) {
+          const close = loopCloseProgress(captureTime);
+          const beforeOpacity = lightRevealProgress(time) * (1 - close);
+          const radius = Math.max(width, height) * (0.08 + lightTravelProgress(time) * 0.9);
+          const light = ctx.createRadialGradient(lightX, lightY, 0, lightX, lightY, radius);
+          light.addColorStop(0, `rgba(255,255,245,${0.92 * beforeOpacity})`);
+          light.addColorStop(0.14, `rgba(247,247,239,${0.42 * beforeOpacity})`);
+          light.addColorStop(0.28, `rgba(245,245,238,${0.14 * beforeOpacity})`);
+          light.addColorStop(0.52, "rgba(245,245,238,0)");
+          ctx.fillStyle = light;
+          ctx.fillRect(0, 0, width, height);
+        }
+        drawIntroGrain(ctx, width, height, time);
+        ctx.restore();
+      }
+
+      function drawIntroGrain(ctx, width, height, time) {
+        const x = 0;
+        const y = 0;
+        const pattern = ctx.createPattern(renderIntroGrainTile(), "repeat");
+        if (!pattern) {
+          return;
+        }
+        ctx.save();
+        ctx.globalAlpha = 0.36;
+        ctx.globalCompositeOperation = "screen";
+        ctx.translate(x, y);
+        ctx.fillStyle = pattern;
+        ctx.fillRect(-Math.abs(x) - 220, -Math.abs(y) - 220, width + 440, height + 440);
+        ctx.restore();
+      }
+
+      function mixChannel(a, b, t) {
+        return Math.round(a + (b - a) * t);
+      }
+
+      function titleColor(time, captureTime) {
+        const black = state.titleBlack;
+        const close = loopCloseProgress(captureTime);
+        const titleToBlack = transitionProgress(time, INTRO.shadows, 1450);
+        const titleVisible = transitionProgress(time, INTRO.darkening, 900);
+        const secondVisible = transitionProgress(time, INTRO.shadows, 1200);
+        const dark = [17, 17, 17];
+        const light = [247, 247, 242];
+        const t = Math.max(titleToBlack * (1 - close), 1 - black);
+        const color = `rgba(${mixChannel(light[0], dark[0], t)},${mixChannel(light[1], dark[1], t)},${mixChannel(light[2], dark[2], t)},`;
+        return {
+          first: `${color}${0.96 * titleVisible})`,
+          second: `rgba(17,17,17,${secondVisible * black * (1 - close)})`
+        };
+      }
+
+      function drawTitle(ctx, format, time, captureTime) {
+        const x = state[format.titleX];
+        const y = state[format.titleY];
+        const size = state[format.titleSize];
+        const secondY = y + size * 0.93;
+        const colors = titleColor(time, captureTime);
+        const blurPending = time < INTRO.darkening ? 8 : 0;
+        ctx.save();
+        ctx.font = `700 ${size}px "The Seasons", Georgia, serif`;
+        ctx.textBaseline = "top";
+        ctx.letterSpacing = "0px";
+        if (blurPending) {
+          ctx.filter = `blur(${blurPending}px)`;
+        }
+        ctx.fillStyle = colors.first;
+        ctx.fillText("moravské tradice", x, y);
+        ctx.fillStyle = colors.second;
+        ctx.fillText("v novém světle", x, secondY);
+        ctx.restore();
+      }
+
+      function drawButterfly(ctx, format, time) {
+        const butterfly = introButterfly(butterflyTimeFor(time), format.width, format.height, butterflyFadeIn(time));
+        if (butterfly.opacity <= 0) {
+          return;
+        }
+        const strength = (0.05 + state.contrast * 0.14) * 1.45;
+        ctx.save();
+        ctx.globalAlpha = butterfly.opacity * strength;
+        ctx.filter = `blur(${(1.4 + state.blur * 10).toFixed(2)}px)`;
+        ctx.translate(butterfly.x, butterfly.y);
+        ctx.rotate(butterfly.rotate * Math.PI / 180);
+        ctx.scale(butterfly.scale, butterfly.scale);
+        ctx.fillStyle = "rgba(118,116,108,0.58)";
+        ctx.translate(-39, -27);
+        drawButterflyBody(ctx);
+        drawWing(ctx, -3, 1, 39, 28.5, -10 - butterfly.wing, butterfly.spread, -1);
+        drawWing(ctx, 39, 1, 39, 28.5, 10 + butterfly.wing, butterfly.spread, 1);
+        ctx.restore();
+      }
+
+      function drawButterflyBody(ctx) {
+        ctx.save();
+        ctx.beginPath();
+        ctx.roundRect(37, 13, 5, 27, 3);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      function drawWing(ctx, x, y, originX, originY, rotation, spread, side) {
+        ctx.save();
+        ctx.translate(originX, originY);
+        ctx.rotate(rotation * Math.PI / 180);
+        ctx.scale(spread, 1.08);
+        ctx.translate(-originX, -originY);
+        drawWingShape(ctx, x, y, side);
+        ctx.restore();
+      }
+
+      function drawWingShape(ctx, x, y, side) {
+        const left = x;
+        const top = y;
+        const right = x + 42;
+        const bottom = y + 50;
+        const midX = x + 21;
+        const midY = y + 25;
+        ctx.beginPath();
+        if (side < 0) {
+          ctx.moveTo(right, top + 3);
+          ctx.bezierCurveTo(left + 4, top - 4, left - 3, midY + 4, left + 8, bottom - 4);
+          ctx.bezierCurveTo(left + 18, bottom + 5, right - 3, bottom - 4, right, midY + 4);
+          ctx.bezierCurveTo(right + 2, midY - 7, right + 2, top + 9, right, top + 3);
+        } else {
+          ctx.moveTo(left, top + 3);
+          ctx.bezierCurveTo(right - 4, top - 4, right + 3, midY + 4, right - 8, bottom - 4);
+          ctx.bezierCurveTo(right - 18, bottom + 5, left + 3, bottom - 4, left, midY + 4);
+          ctx.bezierCurveTo(left - 2, midY - 7, left - 2, top + 9, left, top + 3);
+        }
+        ctx.closePath();
+        ctx.fill();
+      }
+
+      async function drawFrame(format, targetCanvas, time) {
+        const renderTime = sourceTimeFor(time);
+        const close = loopCloseProgress(time);
+        targetCanvas.width = format.width;
+        targetCanvas.height = format.height;
+        const ctx = targetCanvas.getContext("2d", { alpha: false });
+        ctx.clearRect(0, 0, format.width, format.height);
+        ctx.fillStyle = "#fafafa";
+        ctx.fillRect(0, 0, format.width, format.height);
+        drawAmbient(ctx, format.width, format.height);
+        const grain = renderStaticGrain(format.width, format.height);
+        ctx.save();
+        ctx.globalAlpha = state.grainOpacity;
+        ctx.globalCompositeOperation = "multiply";
+        ctx.drawImage(grain, 0, 0);
+        ctx.restore();
+        if (renderTime >= INTRO.shadows && close < 1) {
+          const shadowOpacity = shadowRevealProgress(renderTime) * (1 - close);
+          await renderShadow(format, renderTime, time);
+          ctx.save();
+          ctx.globalAlpha = shadowOpacity;
+          ctx.globalCompositeOperation = "multiply";
+          ctx.drawImage(shadowCanvas, 0, 0);
+          ctx.restore();
+        }
+        drawIntroLight(ctx, format.width, format.height, renderTime, time);
+        drawTitle(ctx, format, renderTime, time);
+        drawButterfly(ctx, format, time);
+      }
+
+      async function renderPreviews() {
+        previewRenderVersion += 1;
+        if (previewRenderRunning) {
+          return;
+        }
+        previewRenderRunning = true;
+        try {
+          while (previewRenderedVersion < previewRenderVersion) {
+            const version = previewRenderVersion;
+            await document.fonts.ready;
+            await drawFrame(formats.square, formats.square.canvas, state.time);
+            await drawFrame(formats.wide, formats.wide.canvas, state.time);
+            previewRenderedVersion = version;
+          }
+        } finally {
+          previewRenderRunning = false;
+        }
+      }
+
+      function setTime(value) {
+        state.time = Math.max(0, Math.min(DURATION, Number(value) || 0));
+        const input = document.getElementById("time");
+        input.value = String(Math.round(state.time));
+        input.closest(".control").querySelector("output").textContent = (state.time / 1000).toFixed(2);
+      }
+
+      function animationTick(now) {
+        if (!state.playing) {
+          return;
+        }
+        const next = state.playStartedTime + (now - state.playStartedAt);
+        setTime(next);
+        renderPreviews();
+        if (state.time >= DURATION) {
+          state.playing = false;
+          document.getElementById("play").textContent = "Play";
+          return;
+        }
+        requestAnimationFrame(animationTick);
+      }
+
+      function refreshInput(input) {
+        const name = input.dataset.state;
+        state[name] = Number(input.value);
+        const output = input.closest(".control")?.querySelector("output");
+        if (output) {
+          output.textContent = Number(input.value).toFixed(2);
+        }
+      }
+
+      function resetControlsToMarkupDefaults() {
+        controls.forEach((input) => {
+          input.value = input.getAttribute("value") ?? input.defaultValue;
+        });
+        const haze = document.getElementById("haze");
+        haze.checked = haze.defaultChecked;
+        state.haze = haze.checked ? 1 : 0;
+        setTime(0);
+      }
+
+      function collectSnapshotValues() {
+        const values = {};
+        controls.forEach((input) => {
+          values[input.id] = input.value;
+        });
+        values.haze = document.getElementById("haze").checked ? "1" : "0";
+        values.time = document.getElementById("time").value;
+        return values;
+      }
+
+      function applySnapshotValues(values) {
+        Object.entries(values).forEach(([id, value]) => {
+          if (id === "haze") {
+            document.getElementById("haze").checked = value === "1";
+            state.haze = value === "1" ? 1 : 0;
+            return;
+          }
+          if (id === "time") {
+            setTime(value);
+            return;
+          }
+          const input = document.getElementById(id);
+          if (!input) {
+            return;
+          }
+          input.value = value;
+          refreshInput(input);
+        });
+        renderPreviews();
+      }
+
+      function persistSnapshots() {
+        try {
+          localStorage.setItem(snapshotKey, JSON.stringify(snapshots));
+        } catch (error) {
+          console.warn("Snapshots could not be saved.", error);
+        }
+      }
+
+      function loadSnapshots() {
+        try {
+          const stored = JSON.parse(localStorage.getItem(snapshotKey) || "[]");
+          if (Array.isArray(stored)) {
+            stored.forEach((snapshot) => {
+              if (snapshot && snapshot.id && snapshot.values) {
+                snapshots.push(snapshot);
+              }
+            });
+          }
+        } catch (error) {
+          console.warn("Snapshots could not be loaded.", error);
+        }
+      }
+
+      function renderSnapshotButtons() {
+        const root = document.getElementById("snapshots");
+        root.replaceChildren();
+        snapshots.forEach((snapshot, index) => {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = `snapshot${snapshot.id === activeSnapshotId ? " is-active" : ""}`;
+          button.textContent = String(index + 1);
+          button.addEventListener("click", () => {
+            activeSnapshotId = snapshot.id;
+            applySnapshotValues(snapshot.values);
+            renderSnapshotButtons();
+          });
+          root.appendChild(button);
+        });
+      }
+
+      function saveSnapshot() {
+        const snapshot = {
+          id: `snapshot-${Date.now()}-${Math.round(Math.random() * 1000)}`,
+          values: collectSnapshotValues()
+        };
+        snapshots.push(snapshot);
+        activeSnapshotId = snapshot.id;
+        persistSnapshots();
+        renderSnapshotButtons();
+      }
+
+      function setStatus(message) {
+        statusElement.textContent = message;
+      }
+
+      async function exportGif(formatName) {
+        const format = formats[formatName];
+        const button = document.getElementById(formatName === "square" ? "export-square" : "export-wide");
+        const idleText = button.textContent;
+        const frameCount = Math.round(DURATION / 1000 * FPS) + 1;
+        button.disabled = true;
+        button.textContent = "Exportuji...";
+        setStatus(`Připravuji ${frameCount} snímků pro ${format.width} x ${format.height} px.`);
+        try {
+          const encoder = new SimpleGifEncoder(format.width, format.height, FRAME_DELAY);
+          for (let frame = 0; frame < frameCount; frame++) {
+            const time = Math.min(DURATION, frame / (frameCount - 1) * DURATION);
+            await drawFrame(format, frameCanvas, time);
+            const ctx = frameCanvas.getContext("2d", { alpha: false });
+            const image = ctx.getImageData(0, 0, format.width, format.height);
+            encoder.addFrame(image.data);
+            if (frame % 6 === 0 || frame === frameCount - 1) {
+              setStatus(`Exportuji ${frame + 1}/${frameCount} snímků...`);
+              await new Promise((resolve) => setTimeout(resolve, 0));
+            }
+          }
+          const blob = encoder.finish();
+          const url = URL.createObjectURL(blob);
+          await verifyGifBlob(url, format);
+          const link = document.createElement("a");
+          link.href = url;
+          link.download = format.filename;
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+          setTimeout(() => URL.revokeObjectURL(url), 15000);
+          setStatus(`Hotovo: ${format.filename}`);
+        } catch (error) {
+          console.error(error);
+          setStatus("Export se nepodařil. Zkus obnovit stránku a export spustit znovu.");
+        } finally {
+          button.disabled = false;
+          button.textContent = idleText;
+          renderPreviews();
+        }
+      }
+
+      function verifyGifBlob(url, format) {
+        return new Promise((resolve, reject) => {
+          const image = new Image();
+          image.onload = () => {
+            if (image.naturalWidth !== format.width || image.naturalHeight !== format.height) {
+              reject(new Error(`GIF decode size mismatch: ${image.naturalWidth}x${image.naturalHeight}`));
+              return;
+            }
+
+            const checkCanvas = document.createElement("canvas");
+            checkCanvas.width = format.width;
+            checkCanvas.height = format.height;
+            const checkCtx = checkCanvas.getContext("2d", { alpha: false });
+            checkCtx.drawImage(image, 0, 0);
+            const data = checkCtx.getImageData(0, 0, format.width, format.height).data;
+            let maxBrightness = 0;
+            const sampledColors = new Set();
+            for (let i = 0; i < data.length; i += 400) {
+              const brightness = data[i] + data[i + 1] + data[i + 2];
+              maxBrightness = Math.max(maxBrightness, brightness);
+              sampledColors.add(`${data[i]},${data[i + 1]},${data[i + 2]}`);
+            }
+            if (maxBrightness < 24 || sampledColors.size < 3) {
+              reject(new Error("GIF decode produced an empty-looking frame."));
+              return;
+            }
+            resolve();
+          };
+          image.onerror = () => reject(new Error("GIF decode failed before download."));
+          image.src = url;
+        });
+      }
+
+      class ByteWriter {
+        constructor() {
+          this.bytes = [];
+        }
+
+        byte(value) {
+          this.bytes.push(value & 255);
+        }
+
+        word(value) {
+          this.byte(value);
+          this.byte(value >> 8);
+        }
+
+        string(value) {
+          for (let i = 0; i < value.length; i++) {
+            this.byte(value.charCodeAt(i));
+          }
+        }
+
+        subBlocks(data) {
+          for (let i = 0; i < data.length; i += 255) {
+            const size = Math.min(255, data.length - i);
+            this.byte(size);
+            for (let j = 0; j < size; j++) {
+              this.byte(data[i + j]);
+            }
+          }
+          this.byte(0);
+        }
+
+        blob() {
+          return new Blob([new Uint8Array(this.bytes)], { type: "image/gif" });
+        }
+      }
+
+      class BitWriter {
+        constructor() {
+          this.bytes = [];
+          this.accumulator = 0;
+          this.bits = 0;
+        }
+
+        write(code, size) {
+          this.accumulator |= code << this.bits;
+          this.bits += size;
+          while (this.bits >= 8) {
+            this.bytes.push(this.accumulator & 255);
+            this.accumulator >>= 8;
+            this.bits -= 8;
+          }
+        }
+
+        finish() {
+          if (this.bits > 0) {
+            this.bytes.push(this.accumulator & 255);
+          }
+          return this.bytes;
+        }
+      }
+
+      class SimpleGifEncoder {
+        constructor(width, height, delay) {
+          this.width = width;
+          this.height = height;
+          this.delay = delay;
+          this.previousFrame = null;
+          this.transparentIndex = 127;
+          this.writer = new ByteWriter();
+          const palette = fixedPalette();
+          this.writer.string("GIF89a");
+          this.writer.word(width);
+          this.writer.word(height);
+          this.writer.byte(0xF6);
+          this.writer.byte(nearestFixedPaletteIndex(250, 250, 250));
+          this.writer.byte(0);
+          for (const color of palette) {
+            this.writer.byte(color[0]);
+            this.writer.byte(color[1]);
+            this.writer.byte(color[2]);
+          }
+          this.writer.string("!\xFF\x0BNETSCAPE2.0\x03\x01");
+          this.writer.word(0);
+          this.writer.byte(0);
+        }
+
+        addFrame(rgba) {
+          const indexed = new Uint8Array(this.width * this.height);
+          for (let i = 0, p = 0; i < rgba.length; i += 4, p++) {
+            indexed[p] = nearestFixedPaletteIndex(rgba[i], rgba[i + 1], rgba[i + 2]);
+          }
+          const rect = this.changedRect(indexed);
+          const useTransparency = Boolean(this.previousFrame);
+          const framePixels = this.framePixels(indexed, rect, useTransparency);
+
+          this.writer.byte(0x21);
+          this.writer.byte(0xF9);
+          this.writer.byte(4);
+          this.writer.byte(useTransparency ? 0x05 : 0x04);
+          this.writer.word(this.delay);
+          this.writer.byte(this.transparentIndex);
+          this.writer.byte(0);
+          this.writer.byte(0x2C);
+          this.writer.word(rect.x);
+          this.writer.word(rect.y);
+          this.writer.word(rect.width);
+          this.writer.word(rect.height);
+          this.writer.byte(0x00);
+          this.writer.byte(7);
+          this.writer.subBlocks(lzwEncode(framePixels, 7));
+          this.previousFrame = indexed;
+        }
+
+        finish() {
+          this.writer.byte(0x3B);
+          return this.writer.blob();
+        }
+
+        changedRect(indexed) {
+          if (!this.previousFrame) {
+            return { x: 0, y: 0, width: this.width, height: this.height };
+          }
+
+          let minX = this.width;
+          let minY = this.height;
+          let maxX = -1;
+          let maxY = -1;
+          for (let y = 0; y < this.height; y++) {
+            const row = y * this.width;
+            for (let x = 0; x < this.width; x++) {
+              const index = row + x;
+              if (indexed[index] === this.previousFrame[index]) {
+                continue;
+              }
+              minX = Math.min(minX, x);
+              minY = Math.min(minY, y);
+              maxX = Math.max(maxX, x);
+              maxY = Math.max(maxY, y);
+            }
+          }
+
+          if (maxX < minX || maxY < minY) {
+            return { x: 0, y: 0, width: 1, height: 1 };
+          }
+          return {
+            x: minX,
+            y: minY,
+            width: maxX - minX + 1,
+            height: maxY - minY + 1
+          };
+        }
+
+        framePixels(indexed, rect, useTransparency) {
+          const pixels = new Uint8Array(rect.width * rect.height);
+          let target = 0;
+          for (let y = 0; y < rect.height; y++) {
+            const sourceRow = (rect.y + y) * this.width;
+            for (let x = 0; x < rect.width; x++) {
+              const sourceIndex = sourceRow + rect.x + x;
+              const value = indexed[sourceIndex];
+              pixels[target] = useTransparency && this.previousFrame[sourceIndex] === value
+                ? this.transparentIndex
+                : value;
+              target += 1;
+            }
+          }
+          return pixels;
+        }
+      }
+
+      let paletteCache = null;
+      function fixedPalette() {
+        if (paletteCache) {
+          return paletteCache;
+        }
+        const palette = [];
+        for (let i = 0; i < 32; i++) {
+          const value = Math.round(i / 31 * 250);
+          palette.push([value, value, Math.max(0, value - 4)]);
+        }
+
+        const levels = [32, 96, 160, 224];
+        for (const r of levels) {
+          for (const g of levels) {
+            for (const b of levels) {
+              palette.push([r, g, b]);
+            }
+          }
+        }
+
+        [
+          [247, 247, 242],
+          [250, 250, 250],
+          [17, 17, 17],
+          [35, 34, 31],
+          [72, 72, 67],
+          [118, 116, 108],
+          [175, 213, 196],
+          [142, 169, 157],
+          [104, 124, 115],
+          [43, 90, 220],
+          [84, 118, 226],
+          [122, 145, 216],
+          [52, 32, 16],
+          [96, 72, 48],
+          [142, 112, 82],
+          [206, 5, 3],
+          [178, 34, 28],
+          [210, 74, 58],
+          [246, 236, 209],
+          [230, 216, 188],
+          [202, 194, 178],
+          [154, 154, 148],
+          [116, 118, 114],
+          [72, 74, 72],
+          [30, 50, 112],
+          [24, 24, 24],
+          [58, 56, 52],
+          [92, 90, 84],
+          [132, 130, 122],
+          [188, 187, 180],
+          [224, 222, 216]
+        ].forEach((color) => palette.push(color));
+
+        while (palette.length < 128) {
+          palette.push([0, 0, 0]);
+        }
+        paletteCache = palette;
+        return palette;
+      }
+
+      function nearestFixedPaletteIndex(r, g, b) {
+        const palette = fixedPalette();
+        let bestIndex = 0;
+        let bestDistance = Infinity;
+        for (let index = 0; index < 127; index++) {
+          const color = palette[index];
+          const distance = colorDistance(r, g, b, color[0], color[1], color[2]);
+          if (distance < bestDistance) {
+            bestDistance = distance;
+            bestIndex = index;
+          }
+        }
+        return bestIndex;
+      }
+
+      function colorDistance(r1, g1, b1, r2, g2, b2) {
+        const dr = r1 - r2;
+        const dg = g1 - g2;
+        const db = b1 - b2;
+        return dr * dr * 0.3 + dg * dg * 0.59 + db * db * 0.11;
+      }
+
+      function lzwEncode(indices, minCodeSize) {
+        const clearCode = 1 << minCodeSize;
+        const endCode = clearCode + 1;
+        const codeSize = minCodeSize + 1;
+        const bits = new BitWriter();
+
+        for (let index = 0; index < indices.length;) {
+          bits.write(clearCode, codeSize);
+          const chunkEnd = Math.min(indices.length, index + 120);
+          while (index < chunkEnd) {
+            bits.write(indices[index], codeSize);
+            index += 1;
+          }
+        }
+
+        bits.write(endCode, codeSize);
+        return bits.finish();
+      }
+
+      resetControlsToMarkupDefaults();
+      controls.forEach((input) => {
+        refreshInput(input);
+        input.addEventListener("input", () => {
+          activeSnapshotId = "";
+          refreshInput(input);
+          renderSnapshotButtons();
+          renderPreviews();
+        });
+      });
+      document.getElementById("haze").addEventListener("change", (event) => {
+        state.haze = event.target.checked ? 1 : 0;
+        renderPreviews();
+      });
+      document.getElementById("time").addEventListener("input", (event) => {
+        state.playing = false;
+        document.getElementById("play").textContent = "Play";
+        setTime(event.target.value);
+        renderPreviews();
+      });
+      document.getElementById("play").addEventListener("click", () => {
+        state.playing = !state.playing;
+        document.getElementById("play").textContent = state.playing ? "Pause" : "Play";
+        if (state.playing) {
+          state.playStartedAt = performance.now();
+          state.playStartedTime = state.time >= DURATION ? 0 : state.time;
+          if (state.time >= DURATION) {
+            setTime(0);
+          }
+          requestAnimationFrame(animationTick);
+        }
+      });
+      document.getElementById("restart").addEventListener("click", () => {
+        state.playing = false;
+        document.getElementById("play").textContent = "Play";
+        setTime(0);
+        renderPreviews();
+      });
+      document.getElementById("save-snapshot").addEventListener("click", saveSnapshot);
+      document.getElementById("export-square").addEventListener("click", () => exportGif("square"));
+      document.getElementById("export-wide").addEventListener("click", () => exportGif("wide"));
+      loadSnapshots();
+      renderSnapshotButtons();
+      renderPreviews().then(() => setStatus("Připraveno."));
+    </script>
+  </body>
+</html>

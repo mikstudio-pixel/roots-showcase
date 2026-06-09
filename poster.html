@@ -1537,6 +1537,7 @@
     <img id="poster-logo" class="poster-logo" src="assets/Logo_mono_dark.svg" alt="" aria-hidden="true">
     <div class="gallery-light-intro" aria-hidden="true"></div>
     <script src="assets/koreny-transitions.js"></script>
+    <script src="assets/pako_deflate.min.js"></script>
     <canvas id="page-shadow"></canvas>
     <div class="gallery-butterfly-shadow" aria-hidden="true">
       <div class="gallery-butterfly">
@@ -2435,8 +2436,9 @@
         }
 
         void main() {
-          float pageX = u_render_origin.x + v_uv.x * u_viewport_size.x;
-          float pageY = u_render_origin.y + (1.0 - v_uv.y) * u_viewport_size.y;
+          vec2 fragmentPixel = vec2(gl_FragCoord.x - 0.5, u_resolution.y - gl_FragCoord.y + 0.5) * (u_viewport_size / max(u_resolution, vec2(1.0)));
+          float pageX = u_render_origin.x + fragmentPixel.x;
+          float pageY = u_render_origin.y + fragmentPixel.y;
           vec2 uv = vec2(pageX / u_page_size.x, 1.0 - pageY / u_page_size.y);
           float pageAspect = u_page_size.y / max(u_page_size.x, 1.0);
           float t = u_time;
@@ -4385,9 +4387,15 @@
           object("<< >>");
 
           tiles.forEach((tile, index) => {
+            const streamLength = tile.length || tile.bytes?.length || 0;
+            const filter = tile.filter ? ` /Filter /${tile.filter}` : "";
             beginObject();
-            appendText(`<< /Type /XObject /Subtype /Image /Width ${tile.width} /Height ${tile.height} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${tile.bytes.length} >>\nstream\n`);
-            appendBytes(tile.bytes);
+            appendText(`<< /Type /XObject /Subtype /Image /Width ${tile.width} /Height ${tile.height} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Interpolate false${filter} /Length ${streamLength} >>\nstream\n`);
+            if (tile.chunks) {
+              tile.chunks.forEach(appendBytes);
+            } else {
+              appendBytes(tile.bytes);
+            }
             appendText(`\nendstream`);
             endObject();
           });
@@ -4408,8 +4416,138 @@
           return new Blob(parts, { type: "application/pdf" });
         }
 
+        function createPosterPdfFromImageStream(image, imageWidth, imageHeight) {
+          const encoder = new TextEncoder();
+          const parts = [];
+          const offsets = [];
+          let length = 0;
+          const appendText = (text) => {
+            const bytes = encoder.encode(text);
+            parts.push(bytes);
+            length += bytes.length;
+          };
+          const appendBytes = (bytes) => {
+            parts.push(bytes);
+            length += bytes.length;
+          };
+          const object = (body) => {
+            offsets.push(length);
+            appendText(`${offsets.length} 0 obj\n${body}\nendobj\n`);
+          };
+          const pageWidth = 70 / 2.54 * 72;
+          const pageHeight = 100 / 2.54 * 72;
+          const filter = image.filter ? ` /Filter /${image.filter}` : "";
+
+          appendText("%PDF-1.7\n%\xE2\xE3\xCF\xD3\n");
+          object("<< /Type /Catalog /Pages 2 0 R >>");
+          object("<< /Type /Pages /Kids [3 0 R] /Count 1 >>");
+          object(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${pageWidth.toFixed(4)} ${pageHeight.toFixed(4)}] /Resources << /XObject << /Im0 4 0 R >> >> /Contents 5 0 R >>`);
+          offsets.push(length);
+          appendText(`4 0 obj\n<< /Type /XObject /Subtype /Image /Width ${imageWidth} /Height ${imageHeight} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Interpolate false${filter} /Length ${image.length} >>\nstream\n`);
+          image.chunks.forEach(appendBytes);
+          appendText("\nendstream\nendobj\n");
+          const content = `q\n${pageWidth.toFixed(4)} 0 0 ${pageHeight.toFixed(4)} 0 0 cm\n/Im0 Do\nQ\n`;
+          object(`<< /Length ${encoder.encode(content).length} >>\nstream\n${content}endstream`);
+
+          const xrefOffset = length;
+          appendText(`xref\n0 ${offsets.length + 1}\n0000000000 65535 f \n`);
+          offsets.forEach((offset) => appendText(`${String(offset).padStart(10, "0")} 00000 n \n`));
+          appendText(`trailer\n<< /Size ${offsets.length + 1} /Root 1 0 R >>\nstartxref\n${xrefOffset}\n%%EOF\n`);
+          return new Blob(parts, { type: "application/pdf" });
+        }
+
         function nextFrame() {
           return new Promise((resolve) => requestAnimationFrame(resolve));
+        }
+
+        function canvasToRgbChunks(sourceCanvas, chunkRows = 128) {
+          const sourceCtx = sourceCanvas.getContext("2d", { alpha: false });
+          const chunks = [];
+          let length = 0;
+          for (let y = 0; y < sourceCanvas.height; y += chunkRows) {
+            const height = Math.min(chunkRows, sourceCanvas.height - y);
+            const rgba = sourceCtx.getImageData(0, y, sourceCanvas.width, height).data;
+            const rgb = new Uint8Array(sourceCanvas.width * height * 3);
+            for (let source = 0, target = 0; source < rgba.length; source += 4, target += 3) {
+              rgb[target] = rgba[source];
+              rgb[target + 1] = rgba[source + 1];
+              rgb[target + 2] = rgba[source + 2];
+            }
+            chunks.push(rgb);
+            length += rgb.length;
+          }
+          return { chunks, length };
+        }
+
+        async function createPdfImageWriter() {
+          if (!("CompressionStream" in window)) {
+            if (!window.pako?.Deflate) {
+              throw new Error("PDF compression is not available in this browser.");
+            }
+
+            const deflate = new window.pako.Deflate({ level: 6 });
+            const compressedChunks = [];
+            let compressedLength = 0;
+            deflate.onData = (chunk) => {
+              compressedChunks.push(chunk);
+              compressedLength += chunk.length;
+            };
+
+            return {
+              filter: "FlateDecode",
+              async write(chunks) {
+                chunks.forEach((chunk) => deflate.push(chunk, false));
+                if (deflate.err) {
+                  throw new Error(deflate.msg || "PDF compression failed.");
+                }
+              },
+              async close() {
+                deflate.push(new Uint8Array(0), true);
+                if (deflate.err) {
+                  throw new Error(deflate.msg || "PDF compression failed.");
+                }
+                return {
+                  chunks: compressedChunks,
+                  length: compressedLength,
+                  filter: this.filter
+                };
+              }
+            };
+          }
+
+          const compression = new CompressionStream("deflate");
+          const writer = compression.writable.getWriter();
+          const reader = compression.readable.getReader();
+          const compressedChunks = [];
+          let compressedLength = 0;
+          const readCompressed = (async () => {
+            while (true) {
+              const { done, value } = await reader.read();
+              if (done) {
+                break;
+              }
+              compressedChunks.push(value);
+              compressedLength += value.length;
+            }
+          })();
+
+          return {
+            filter: "FlateDecode",
+            async write(chunks) {
+              for (const chunk of chunks) {
+                await writer.write(chunk);
+              }
+            },
+            async close() {
+              await writer.close();
+              await readCompressed;
+              return {
+                chunks: compressedChunks,
+                length: compressedLength,
+                filter: this.filter
+              };
+            }
+          };
         }
 
         async function renderExportTile(tileConfig) {
@@ -4442,8 +4580,9 @@
           const maxViewport = gl.getParameter(gl.MAX_VIEWPORT_DIMS);
           const maxRenderbuffer = gl.getParameter(gl.MAX_RENDERBUFFER_SIZE);
           const tileSize = Math.max(512, Math.min(window.__posterExportTileSizeOverride || 2048, maxViewport[0], maxViewport[1], maxRenderbuffer));
+          const exportBandHeight = Math.min(window.__posterExportBandHeightOverride || 512, tileSize);
           const tileColumns = Math.ceil(targetWidth / tileSize);
-          const tileRows = Math.ceil(targetHeight / tileSize);
+          const tileRows = Math.ceil(targetHeight / exportBandHeight);
           const totalTiles = tileColumns * tileRows;
           const idleButtonText = button.textContent;
           const previewWidth = Math.max(1, document.body.getBoundingClientRect().width || targetWidth);
@@ -4451,7 +4590,7 @@
           const compositionBlur = cssNumber("--poster-output-blur", 0) * exportScale;
           const maxPaddedTileSize = Math.max(512, Math.min(maxViewport[0], maxViewport[1], maxRenderbuffer));
           const maxRenderPadding = Math.max(0, Math.floor((maxPaddedTileSize - tileSize) * 0.5));
-          const tileSeamBleed = Math.min(4, maxRenderPadding);
+          const tileSeamBleed = Math.min(2, maxRenderPadding);
           const renderPadding = Math.min(Math.max(tileSeamBleed, Math.ceil(compositionBlur * 3)), maxRenderPadding);
 
           button.disabled = true;
@@ -4460,7 +4599,7 @@
           status.textContent = `Renderuji ${targetWidth} x ${targetHeight} px po ${totalTiles} dlaždicích...`;
 
           try {
-            const tiles = [];
+            const imageWriter = await createPdfImageWriter();
             let tileIndex = 0;
             posterExportSize = {
               tileWidth: Math.min(tileSize, targetWidth),
@@ -4476,24 +4615,23 @@
             await waitForPosterLogo();
             await refreshFlowerMask(true);
             await nextFrame();
-            for (let y = 0; y < targetHeight; y += tileSize) {
+            for (let y = 0; y < targetHeight; y += exportBandHeight) {
+              const bandHeight = Math.min(exportBandHeight, targetHeight - y);
+              const bandCanvas = document.createElement("canvas");
+              bandCanvas.width = targetWidth;
+              bandCanvas.height = bandHeight;
+              const bandCtx = bandCanvas.getContext("2d", { alpha: false });
+
               for (let x = 0; x < targetWidth; x += tileSize) {
                 const tileWidth = Math.min(tileSize, targetWidth - x);
-                const tileHeight = Math.min(tileSize, targetHeight - y);
                 const renderX = Math.max(0, x - renderPadding);
                 const renderY = Math.max(0, y - renderPadding);
                 const renderRight = Math.min(targetWidth, x + tileWidth + renderPadding);
-                const renderBottom = Math.min(targetHeight, y + tileHeight + renderPadding);
+                const renderBottom = Math.min(targetHeight, y + bandHeight + renderPadding);
                 const renderWidth = renderRight - renderX;
                 const renderHeight = renderBottom - renderY;
-                const outputX = Math.max(0, x - tileSeamBleed);
-                const outputY = Math.max(0, y - tileSeamBleed);
-                const outputRight = Math.min(targetWidth, x + tileWidth + tileSeamBleed);
-                const outputBottom = Math.min(targetHeight, y + tileHeight + tileSeamBleed);
-                const outputWidth = outputRight - outputX;
-                const outputHeight = outputBottom - outputY;
-                const sourceX = outputX - renderX;
-                const sourceY = outputY - renderY;
+                const sourceX = x - renderX;
+                const sourceY = y - renderY;
                 const tileConfig = {
                   tileWidth: renderWidth,
                   tileHeight: renderHeight,
@@ -4530,28 +4668,20 @@
                 renderCtx.drawImage(canvas, 0, 0, renderWidth, renderHeight);
                 renderCtx.restore();
 
-                const tileCanvas = document.createElement("canvas");
-                tileCanvas.width = outputWidth;
-                tileCanvas.height = outputHeight;
-                const tileCtx = tileCanvas.getContext("2d", { alpha: false });
-                tileCtx.drawImage(renderCanvas, sourceX, sourceY, outputWidth, outputHeight, 0, 0, outputWidth, outputHeight);
-
-                tiles.push({
-                  x: outputX,
-                  y: outputY,
-                  width: outputWidth,
-                  height: outputHeight,
-                  bytes: dataUrlToBytes(tileCanvas.toDataURL("image/jpeg", 0.96))
-                });
+                bandCtx.drawImage(renderCanvas, sourceX, sourceY, tileWidth, bandHeight, x, 0, tileWidth, bandHeight);
                 tileIndex += 1;
                 button.textContent = `Renderuji ${tileIndex}/${totalTiles}`;
                 status.textContent = `Renderuji dlaždici ${tileIndex}/${totalTiles}...`;
                 await new Promise((resolve) => window.setTimeout(resolve, 0));
               }
+
+              status.textContent = `Zapisuji pás ${Math.floor(y / exportBandHeight) + 1}/${tileRows} do jednoho obrazu...`;
+              await imageWriter.write(canvasToRgbChunks(bandCanvas).chunks);
             }
             button.textContent = "Skládám PDF";
             status.textContent = "Skládám PDF...";
-            const pdf = createPosterPdfFromTiles(tiles, targetWidth, targetHeight);
+            const pdfImage = await imageWriter.close();
+            const pdf = createPosterPdfFromImageStream(pdfImage, targetWidth, targetHeight);
             const url = URL.createObjectURL(pdf);
             const link = document.createElement("a");
             link.href = url;

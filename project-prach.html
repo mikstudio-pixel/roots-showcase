@@ -188,13 +188,29 @@
         align-content: center;
         grid-column: 2;
         grid-row: 1;
-        min-height: calc(100vh - 160px);
+        align-self: start;
+        min-height: clamp(420px, 61vh, 690px);
+        height: calc(100vh - 260px);
+        margin-top: -52px;
+        margin-bottom: 72px;
         overflow: hidden;
-        border-left: 1px solid rgba(0, 0, 0, 0.1);
         background:
           radial-gradient(circle at 100% 18%, rgba(255, 255, 255, 0.58), rgba(255, 255, 255, 0) 46%),
           rgba(247, 247, 245, 0.42);
       }
+
+      .shadow-field::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 1px;
+        background: linear-gradient(180deg, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.13) 18%, rgba(0, 0, 0, 0.13) 74%, rgba(0, 0, 0, 0));
+        pointer-events: none;
+      }
+
+
 
       .shadow-field::after {
         content: "";
@@ -278,6 +294,8 @@
 
       .image-stage {
         position: relative;
+        width: 100%;
+        margin: 0;
         min-height: 74vh;
         overflow: hidden;
         background: #e8e3da;
@@ -378,6 +396,9 @@
 
         .shadow-field {
           min-height: 44vh;
+          height: auto;
+          margin-top: 0;
+          margin-bottom: 0;
           border-left: 0;
           border-top: 1px solid rgba(0, 0, 0, 0.1);
         }
@@ -434,6 +455,7 @@
       }
     </style>
     <link rel="stylesheet" href="assets/project-window-shadow.css">
+    <link rel="stylesheet" href="assets/project-flower-index.css">
     <link rel="stylesheet" href="assets/koreny-transitions.css">
   </head>
   <body data-shadow-variant="moon">
@@ -519,6 +541,7 @@
         <p>Jsem studentka 4.ročníku na ateliéru Průmyslovém designu. U svých designů ráda experimentuji a hledám nová a neobvyklá řešení, či techniky. Ráda navrhuji interiéry, protože zde mohu uplatnit jak možnost experimentování, tak důkladné analýzi a detailního provední.</p>
       </section>
     </main>
+    <script src="assets/project-flower-index.js"></script>
     <script src="assets/project-window-shadow.js"></script>
   </body>
 </html>

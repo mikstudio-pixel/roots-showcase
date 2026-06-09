@@ -1,0 +1,36 @@
+.flower-index {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.42em;
+}
+
+.flower-index__icon {
+  flex: 0 0 auto;
+  width: 1.05em;
+  height: 1.05em;
+  background: currentColor;
+  opacity: 0.72;
+  transform: translateY(0.04em) rotate(var(--flower-index-rotation, 0deg));
+  -webkit-mask-image: var(--flower-index-icon);
+  mask-image: var(--flower-index-icon);
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+}
+
+.flower-index__text {
+  display: inline-block;
+}
+
+.eyebrow .flower-index {
+  gap: 0.5em;
+}
+
+.eyebrow .flower-index__icon {
+  width: 0.92em;
+  height: 0.92em;
+  opacity: 0.62;
+}
