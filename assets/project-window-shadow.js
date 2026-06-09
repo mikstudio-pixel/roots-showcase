@@ -273,17 +273,16 @@
     }
 
     const drops = [
-      { x: "49%", y: "18%", size: "10px", fall: "92vh", duration: "5.2s", delay: "0.4s" },
-      { x: "57%", y: "12%", size: "8px", fall: "98vh", duration: "6.6s", delay: "2.6s" },
-      { x: "63%", y: "17%", size: "7px", fall: "93vh", duration: "7.4s", delay: "4.1s" },
-      { x: "42%", y: "27%", size: "9px", fall: "83vh", duration: "8.2s", delay: "5.8s" }
+      { x: "44%", size: "16px", fall: "106vh", duration: "1.42s", delay: "0.8s" },
+      { x: "52%", size: "14px", fall: "106vh", duration: "1.65s", delay: "3.4s" },
+      { x: "61%", size: "13px", fall: "106vh", duration: "1.89s", delay: "6.0s" },
+      { x: "68%", size: "15px", fall: "106vh", duration: "2.07s", delay: "8.8s" }
     ];
 
     waterLayer.replaceChildren(...drops.map((drop) => {
       const element = document.createElement("span");
       element.className = "cave-drop-shadow";
       element.style.setProperty("--drop-x", drop.x);
-      element.style.setProperty("--drop-y", drop.y);
       element.style.setProperty("--drop-size", drop.size);
       element.style.setProperty("--drop-fall", drop.fall);
       element.style.setProperty("--drop-duration", drop.duration);

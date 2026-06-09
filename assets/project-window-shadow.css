@@ -111,40 +111,48 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath fill='%23fff' d='M57 5C52 7 50 13 47 19C43 27 37 31 31 37C25 43 21 51 16 61C12 70 8 80 5 91C3 99 1 107 -1 118H82C80 109 78 100 75 91C72 81 70 72 68 63C66 53 65 43 64 33C63 23 62 13 57 5z'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath fill='%23fff' d='M57 5C52 7 50 13 47 19C43 27 37 31 31 37C25 43 21 51 16 61C12 70 8 80 5 91C3 99 1 107 -1 118H82C80 109 78 100 75 91C72 81 70 72 68 63C66 53 65 43 64 33C63 23 62 13 57 5z'/%3E%3C/svg%3E");
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
 }
 
 .cave-drop-shadow {
   position: absolute;
   left: var(--drop-x);
-  top: var(--drop-y);
-  --drop-fall: 100vh;
+  top: 0;
+  --drop-fall: 106vh;
   width: var(--drop-size);
   height: var(--drop-size);
   border-radius: 50%;
-  background: rgba(48, 42, 36, 0.34);
+  background: rgba(48, 42, 36, var(--window-shadow-opacity));
   filter: blur(1.5px);
+  mix-blend-mode: normal;
   opacity: 0;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, calc(-1 * var(--drop-size)));
   animation: cave-drop-fall var(--drop-duration) linear var(--drop-delay) infinite;
+  will-change: transform, opacity;
 }
 
 @keyframes cave-drop-fall {
-  0%,
-  76% {
+  0% {
     opacity: 0;
-    transform: translate(-50%, -50%);
+    transform: translate(-50%, calc(-1 * var(--drop-size)));
   }
 
-  78% {
-    opacity: 0.34;
-    transform: translate(-50%, -50%);
+  4% {
+    opacity: 1;
+    transform: translate(-50%, calc(-1 * var(--drop-size)));
   }
 
-  98% {
-    opacity: 0.34;
+  42% {
+    opacity: 1;
     transform: translate(-50%, var(--drop-fall));
   }
 
+  46%,
   100% {
     opacity: 0;
     transform: translate(-50%, var(--drop-fall));

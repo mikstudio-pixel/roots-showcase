@@ -4451,7 +4451,8 @@
           const compositionBlur = cssNumber("--poster-output-blur", 0) * exportScale;
           const maxPaddedTileSize = Math.max(512, Math.min(maxViewport[0], maxViewport[1], maxRenderbuffer));
           const maxRenderPadding = Math.max(0, Math.floor((maxPaddedTileSize - tileSize) * 0.5));
-          const renderPadding = Math.min(Math.ceil(compositionBlur * 3), maxRenderPadding);
+          const tileSeamBleed = Math.min(4, maxRenderPadding);
+          const renderPadding = Math.min(Math.max(tileSeamBleed, Math.ceil(compositionBlur * 3)), maxRenderPadding);
 
           button.disabled = true;
           button.classList.add("is-rendering");
@@ -4485,8 +4486,14 @@
                 const renderBottom = Math.min(targetHeight, y + tileHeight + renderPadding);
                 const renderWidth = renderRight - renderX;
                 const renderHeight = renderBottom - renderY;
-                const sourceX = x - renderX;
-                const sourceY = y - renderY;
+                const outputX = Math.max(0, x - tileSeamBleed);
+                const outputY = Math.max(0, y - tileSeamBleed);
+                const outputRight = Math.min(targetWidth, x + tileWidth + tileSeamBleed);
+                const outputBottom = Math.min(targetHeight, y + tileHeight + tileSeamBleed);
+                const outputWidth = outputRight - outputX;
+                const outputHeight = outputBottom - outputY;
+                const sourceX = outputX - renderX;
+                const sourceY = outputY - renderY;
                 const tileConfig = {
                   tileWidth: renderWidth,
                   tileHeight: renderHeight,
@@ -4499,35 +4506,41 @@
                 status.textContent = `Připravuji dlaždici ${tileIndex + 1}/${totalTiles}...`;
                 await renderExportTile(tileConfig);
 
-                const tileCanvas = document.createElement("canvas");
-                tileCanvas.width = tileWidth;
-                tileCanvas.height = tileHeight;
-                const tileCtx = tileCanvas.getContext("2d", { alpha: false });
+                const renderCanvas = document.createElement("canvas");
+                renderCanvas.width = renderWidth;
+                renderCanvas.height = renderHeight;
+                const renderCtx = renderCanvas.getContext("2d", { alpha: false });
                 const bodyColor = parseRgb(getComputedStyle(document.body).backgroundColor);
-                tileCtx.fillStyle = `rgb(${bodyColor.map((value) => Math.round(value)).join(", ")})`;
-                tileCtx.fillRect(0, 0, tileWidth, tileHeight);
-                drawAmbient(tileCtx, tileWidth, tileHeight, targetWidth, targetHeight, x, y);
+                renderCtx.fillStyle = `rgb(${bodyColor.map((value) => Math.round(value)).join(", ")})`;
+                renderCtx.fillRect(0, 0, renderWidth, renderHeight);
+                drawAmbient(renderCtx, renderWidth, renderHeight, targetWidth, targetHeight, renderX, renderY);
 
-                tileCtx.save();
-                tileCtx.globalCompositeOperation = canvasBlendMode(grainCanvas);
-                tileCtx.globalAlpha = Number.parseFloat(getComputedStyle(grainCanvas).opacity) || 0.44;
-                tileCtx.filter = getComputedStyle(grainCanvas).filter || "none";
-                tileCtx.drawImage(grainCanvas, sourceX, sourceY, tileWidth, tileHeight, 0, 0, tileWidth, tileHeight);
-                tileCtx.restore();
+                renderCtx.save();
+                renderCtx.globalCompositeOperation = canvasBlendMode(grainCanvas);
+                renderCtx.globalAlpha = Number.parseFloat(getComputedStyle(grainCanvas).opacity) || 0.44;
+                renderCtx.filter = getComputedStyle(grainCanvas).filter || "none";
+                renderCtx.drawImage(grainCanvas, 0, 0, renderWidth, renderHeight);
+                renderCtx.restore();
 
-                drawPosterLogo(tileCtx, tileWidth, tileHeight, targetWidth, targetHeight, x, y, exportScale);
+                drawPosterLogo(renderCtx, renderWidth, renderHeight, targetWidth, targetHeight, renderX, renderY, exportScale);
 
-                tileCtx.save();
-                tileCtx.globalCompositeOperation = canvasBlendMode(canvas);
-                tileCtx.filter = elementFilter(canvas, exportScale);
-                tileCtx.drawImage(canvas, sourceX, sourceY, tileWidth, tileHeight, 0, 0, tileWidth, tileHeight);
-                tileCtx.restore();
+                renderCtx.save();
+                renderCtx.globalCompositeOperation = canvasBlendMode(canvas);
+                renderCtx.filter = elementFilter(canvas, exportScale);
+                renderCtx.drawImage(canvas, 0, 0, renderWidth, renderHeight);
+                renderCtx.restore();
+
+                const tileCanvas = document.createElement("canvas");
+                tileCanvas.width = outputWidth;
+                tileCanvas.height = outputHeight;
+                const tileCtx = tileCanvas.getContext("2d", { alpha: false });
+                tileCtx.drawImage(renderCanvas, sourceX, sourceY, outputWidth, outputHeight, 0, 0, outputWidth, outputHeight);
 
                 tiles.push({
-                  x,
-                  y,
-                  width: tileWidth,
-                  height: tileHeight,
+                  x: outputX,
+                  y: outputY,
+                  width: outputWidth,
+                  height: outputHeight,
                   bytes: dataUrlToBytes(tileCanvas.toDataURL("image/jpeg", 0.96))
                 });
                 tileIndex += 1;
