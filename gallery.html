@@ -72,6 +72,12 @@
         scroll-behavior: smooth;
       }
 
+      html.gallery-intro-scroll-lock,
+      body.gallery-intro-scroll-lock {
+        overflow: hidden;
+        overscroll-behavior: none;
+      }
+
       body {
         position: relative;
         overflow-x: hidden;
@@ -140,6 +146,18 @@
       body.gallery-intro-pending .projects-scroll,
       body.gallery-intro-pending .controls {
         filter: blur(8px);
+      }
+
+      body.gallery-intro-butterfly .gallery-butterfly-shadow {
+        z-index: 92;
+        opacity: calc(var(--gallery-butterfly-opacity, 0) * var(--gallery-butterfly-strength, 0) * 1.45);
+        filter: blur(var(--gallery-butterfly-blur, 0px));
+        mix-blend-mode: normal;
+      }
+
+      body.gallery-intro-butterfly .gallery-butterfly::before,
+      body.gallery-intro-butterfly .gallery-butterfly-wing {
+        background: rgba(118, 116, 108, 0.58);
       }
 
       body.gallery-intro-shadows #page-shadow {
@@ -448,6 +466,10 @@
           opacity 620ms cubic-bezier(0.2, 0, 0.18, 1),
           filter 620ms cubic-bezier(0.2, 0, 0.18, 1),
           transform 620ms cubic-bezier(0.2, 0, 0.18, 1);
+      }
+
+      body.gallery-title-no-transition .intro-title-text {
+        transition: none !important;
       }
 
       .intro-title-text.is-hidden-left {
@@ -1220,7 +1242,7 @@
     </style>
     <link rel="stylesheet" href="assets/koreny-transitions.css">
   </head>
-  <body class="gallery-page gallery-intro-pending">
+  <body class="gallery-page gallery-intro-pending gallery-intro-scroll-lock">
     <canvas id="grain-canvas" aria-hidden="true"></canvas>
     <div class="gallery-light-intro" aria-hidden="true"></div>
     <script src="assets/koreny-transitions.js"></script>
@@ -1675,6 +1697,7 @@
       let galleryIntroStart = 0;
       let galleryIntroActive = false;
       let galleryIntroMotionStart = 0;
+      let galleryIntroButterflyDone = false;
       const userAgent = navigator.userAgent || "";
       const isIOSWebKit = /iP(ad|hone|od)/.test(userAgent)
         || navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1;
@@ -1682,6 +1705,39 @@
       const safariColorFix = isIOSWebKit || isSafari ? 1 : 0;
       if (safariColorFix) {
         document.body.classList.add("is-webkit-color-fix");
+      }
+
+      function isGalleryIntroLocked() {
+        return document.body.classList.contains("gallery-intro-scroll-lock");
+      }
+
+      function lockGalleryIntroScroll() {
+        document.documentElement.classList.add("gallery-intro-scroll-lock");
+        document.body.classList.add("gallery-intro-scroll-lock");
+        state.galleryVirtualScroll = 0;
+        state.galleryVirtualTarget = 0;
+        state.smoothScrollTarget = 0;
+        state.isSmoothScrolling = false;
+        if (window.scrollY !== 0) {
+          jumpScrollTo(0);
+        }
+      }
+
+      function unlockGalleryIntroScroll() {
+        document.documentElement.classList.remove("gallery-intro-scroll-lock");
+        document.body.classList.remove("gallery-intro-scroll-lock");
+        if (window.scrollY !== 0) {
+          jumpScrollTo(0);
+        }
+      }
+
+      function releaseGalleryIntroControls() {
+        if (!isGalleryIntroLocked()) {
+          return;
+        }
+
+        setGalleryTitleImmediate("default");
+        unlockGalleryIntroScroll();
       }
       const gl = canvas.getContext("webgl", {
         alpha: true,
@@ -1691,6 +1747,8 @@
 
       function runGalleryIntro() {
         if (!document.body.classList.contains("gallery-intro-pending")) {
+          unlockGalleryIntroScroll();
+          setGalleryTitleImmediate("default");
           return;
         }
 
@@ -1700,10 +1758,12 @@
           document.querySelector(".gallery-light-intro")?.remove();
           galleryIntroActive = false;
           galleryIntroMotionStart = 0;
-          primeGalleryTitleForScroll();
+          unlockGalleryIntroScroll();
+          setGalleryTitleImmediate("default");
           return;
         }
 
+        lockGalleryIntroScroll();
         galleryIntroStart = performance.now();
         galleryIntroActive = true;
         galleryIntroMotionStart = 0;
@@ -1714,12 +1774,16 @@
           }, 320);
 
           window.setTimeout(() => {
+            runIntroButterflyFlight();
+          }, 460);
+
+          window.setTimeout(() => {
             document.body.classList.add("gallery-intro-shadows");
           }, 2500);
 
           window.setTimeout(() => {
             document.body.classList.add("gallery-intro-content");
-            primeGalleryTitleForScroll();
+            releaseGalleryIntroControls();
           }, 4200);
 
           window.setTimeout(() => {
@@ -1727,12 +1791,13 @@
               "gallery-intro-pending",
               "gallery-intro-darkening",
               "gallery-intro-shadows",
-              "gallery-intro-content"
+              "gallery-intro-content",
+              "gallery-intro-butterfly"
             );
             document.querySelector(".gallery-light-intro")?.remove();
             galleryIntroActive = false;
             galleryIntroMotionStart = performance.now();
-            primeGalleryTitleForScroll();
+            releaseGalleryIntroControls();
             scheduleButterflyFlight();
           }, 7200);
         });
@@ -2911,9 +2976,34 @@
         }
       }
 
-      function primeGalleryTitleForScroll() {
-        state.galleryTitleMode = null;
-        updateGalleryTitle(state.galleryTitleSectionActive ? state.galleryTitleSection : "default");
+      function setGalleryTitleImmediate(mode = "default") {
+        const titleOrder = ["default", "apd", "space"];
+        const activeIndex = Math.max(0, titleOrder.indexOf(mode));
+        document.body.classList.add("gallery-title-no-transition");
+        state.galleryTitleMode = mode;
+        state.galleryTitleSectionActive = mode !== "default";
+        if (mode !== "default") {
+          state.galleryTitleSection = mode;
+        }
+        state.galleryTitleDirection = 1;
+        updateCategoryIndex(mode);
+        updateStudentProjectsLink(mode);
+
+        for (const [titleMode, title] of Object.entries(galleryTitles)) {
+          if (!title) {
+            continue;
+          }
+          const index = titleOrder.indexOf(titleMode);
+          const active = titleMode === mode;
+          title.classList.toggle("is-hidden-left", !active && index < activeIndex);
+          title.classList.toggle("is-hidden-right", !active && index > activeIndex);
+        }
+
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            document.body.classList.remove("gallery-title-no-transition");
+          });
+        });
       }
 
       function gallerySectionTarget(section) {
@@ -2933,6 +3023,10 @@
 
       categoryMarkers.forEach((marker) => {
         marker.addEventListener("click", () => {
+          if (isGalleryIntroLocked()) {
+            return;
+          }
+
           const section = marker.dataset.galleryJump || "default";
           if (window.innerWidth <= 960) {
             const target = section === "default"
@@ -2956,6 +3050,10 @@
 
       if (studentProjectsLink) {
         studentProjectsLink.addEventListener("click", () => {
+          if (isGalleryIntroLocked()) {
+            return;
+          }
+
           const section = "apd";
           studentProjectsLink.classList.add("is-hidden");
 
@@ -3101,7 +3199,43 @@
         state.mouseBrightness = 0.5;
       });
 
+      window.addEventListener("touchmove", (event) => {
+        if (isGalleryIntroLocked()) {
+          event.preventDefault();
+        }
+      }, { passive: false });
+
+      window.addEventListener("keydown", (event) => {
+        if (!isGalleryIntroLocked()) {
+          return;
+        }
+
+        const scrollKeys = new Set([
+          " ",
+          "ArrowDown",
+          "ArrowUp",
+          "ArrowLeft",
+          "ArrowRight",
+          "PageDown",
+          "PageUp",
+          "Home",
+          "End"
+        ]);
+        if (scrollKeys.has(event.key)) {
+          event.preventDefault();
+        }
+      });
+
       window.addEventListener("wheel", (event) => {
+        if (isGalleryIntroLocked()) {
+          event.preventDefault();
+          state.galleryVirtualScroll = 0;
+          state.galleryVirtualTarget = 0;
+          state.smoothScrollTarget = 0;
+          state.isSmoothScrolling = false;
+          return;
+        }
+
         if (event.ctrlKey || event.metaKey || event.altKey) {
           return;
         }
@@ -3140,6 +3274,13 @@
       }, { passive: false });
 
       window.addEventListener("scroll", () => {
+        if (isGalleryIntroLocked()) {
+          if (window.scrollY !== 0) {
+            jumpScrollTo(0);
+          }
+          return;
+        }
+
         if (window.innerWidth > 960) {
           if (window.scrollY !== 0) {
             jumpScrollTo(0);
@@ -3179,6 +3320,73 @@
         root.style.setProperty("--gallery-butterfly-opacity", "0");
         state.butterflyOpacity = 0;
         state.butterflyFlap = 0;
+      }
+
+      function runIntroButterflyFlight() {
+        if (galleryIntroButterflyDone || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+          return;
+        }
+
+        galleryIntroButterflyDone = true;
+        cancelButterflyFlight();
+        document.body.classList.add("gallery-intro-butterfly");
+
+        const start = performance.now();
+        const duration = 5600;
+        const seed = 1.18;
+        const startX = window.innerWidth * 0.58;
+        const startY = window.innerHeight * 0.53;
+        const endX = window.innerWidth * 0.66;
+        const endY = -120;
+        const control1X = window.innerWidth * 0.76;
+        const control1Y = window.innerHeight * 0.44;
+        const control2X = window.innerWidth * 0.48;
+        const control2Y = window.innerHeight * 0.16;
+
+        function tick(now) {
+          const progress = Math.min((now - start) / duration, 1);
+          const eased = easeInOutCubic(progress);
+          const arc = Math.sin(progress * Math.PI);
+          const x = cubicBezier(startX, control1X, control2X, endX, eased)
+            + Math.sin(progress * Math.PI * 4.5 + seed) * 14 * arc;
+          const y = cubicBezier(startY, control1Y, control2Y, endY, eased)
+            + Math.sin(progress * Math.PI * 6.0 + seed * 0.7) * 8 * arc;
+          const nextT = Math.min(eased + 0.012, 1);
+          const nextX = cubicBezier(startX, control1X, control2X, endX, nextT);
+          const nextY = cubicBezier(startY, control1Y, control2Y, endY, nextT);
+          const fadeIn = smoothstep(Math.min(progress / 0.2, 1));
+          const fadeOut = smoothstep(Math.min((1 - progress) / 0.28, 1));
+          const fade = fadeIn * fadeOut;
+          const flap = Math.abs(Math.sin(now * 0.072 + seed));
+          const wing = 26 + flap * 74 + Math.sin(now * 0.13 + seed) * 9;
+          const wingSpread = 0.48 + flap * 1.08;
+          const rotation = Math.atan2(nextY - y, nextX - x) * 180 / Math.PI + 88 + Math.sin(progress * Math.PI * 6 + seed) * 7;
+          const scale = (0.64 + arc * 0.18 - progress * 0.14) * 1.2;
+
+          root.style.setProperty("--gallery-butterfly-x", `${x.toFixed(2)}px`);
+          root.style.setProperty("--gallery-butterfly-y", `${y.toFixed(2)}px`);
+          root.style.setProperty("--gallery-butterfly-opacity", (fade * 0.96).toFixed(3));
+          root.style.setProperty("--gallery-butterfly-wing", `${wing.toFixed(3)}deg`);
+          root.style.setProperty("--gallery-butterfly-wing-spread", wingSpread.toFixed(3));
+          root.style.setProperty("--gallery-butterfly-rotate", `${rotation.toFixed(3)}deg`);
+          root.style.setProperty("--gallery-butterfly-scale", scale.toFixed(3));
+          state.butterflyX = x;
+          state.butterflyY = y;
+          state.butterflyOpacity = fade * 0.96;
+          state.butterflyFlap = flap;
+
+          if (progress < 1) {
+            state.butterflyFrame = requestAnimationFrame(tick);
+          } else {
+            state.butterflyFrame = 0;
+            document.body.classList.remove("gallery-intro-butterfly");
+            root.style.setProperty("--gallery-butterfly-opacity", "0");
+            state.butterflyOpacity = 0;
+            state.butterflyFlap = 0;
+          }
+        }
+
+        state.butterflyFrame = requestAnimationFrame(tick);
       }
 
       function smoothstep(value) {
