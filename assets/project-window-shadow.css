@@ -128,7 +128,7 @@
   height: var(--drop-size);
   border-radius: 50%;
   background: rgba(48, 42, 36, var(--window-shadow-opacity));
-  filter: blur(1.5px);
+  filter: blur(4px);
   mix-blend-mode: normal;
   opacity: 0;
   transform: translate(-50%, calc(-1 * var(--drop-size)));
@@ -142,17 +142,17 @@
     transform: translate(-50%, calc(-1 * var(--drop-size)));
   }
 
-  2% {
+  1% {
     opacity: 1;
     transform: translate(-50%, calc(-1 * var(--drop-size)));
   }
 
-  18% {
+  10% {
     opacity: 1;
     transform: translate(-50%, var(--drop-fall));
   }
 
-  21%,
+  12%,
   100% {
     opacity: 0;
     transform: translate(-50%, var(--drop-fall));

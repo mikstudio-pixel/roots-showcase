@@ -279,8 +279,8 @@
     }
 
     const drops = [
-      { x: "55.5%", size: "15px", fall: "106vh", duration: "3.8s", delay: "0.7s" },
-      { x: "58.5%", size: "13px", fall: "106vh", duration: "4.2s", delay: "2.9s" }
+      { x: "55.5%", size: "15px", fall: "106vh", duration: "6.2s", delay: "0.7s" },
+      { x: "58.5%", size: "13px", fall: "106vh", duration: "7.1s", delay: "4.1s" }
     ];
 
     waterLayer.replaceChildren(...drops.map((drop) => {
