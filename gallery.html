@@ -971,6 +971,10 @@
         backdrop-filter: blur(14px);
       }
 
+      .controls {
+        display: none;
+      }
+
       .controls.is-collapsed {
         width: auto;
         overflow: visible;
@@ -1216,10 +1220,23 @@
       }
 
       @media (max-width: 560px) {
-        .topbar {
+        .gallery-page .topbar {
           align-items: flex-start;
-          flex-direction: column;
-          padding-bottom: 14px;
+          flex-direction: row;
+          gap: 12px;
+          padding-bottom: 0;
+        }
+
+        .gallery-page .nav {
+          justify-content: flex-end;
+          gap: 12px;
+          margin-left: auto;
+          padding-top: 16px;
+          text-align: right;
+        }
+
+        .overview {
+          display: none;
         }
 
         .content {
@@ -2850,10 +2867,15 @@
       });
 
       function syncShadowClearImage() {
-        if (!projectsScroll || window.innerWidth <= 960) {
+        if (!projectsScroll) {
           for (const overlay of autoClearOverlays.values()) {
             overlay.style.opacity = "0";
           }
+          return;
+        }
+
+        if (window.innerWidth <= 960) {
+          syncMobileShadowClearImage();
           return;
         }
 
@@ -2905,6 +2927,55 @@
         syncGallerySectionTitle(strongestSectionProject, strongestSectionValue);
       }
 
+      function syncMobileShadowClearImage() {
+        const viewportTop = 0;
+        const viewportBottom = window.innerHeight;
+        const focusStart = viewportBottom * 1.08;
+        const focusEnd = viewportBottom * 0.82;
+        const holdEnd = viewportBottom * 0.18;
+        const fadeOutEnd = viewportBottom * -0.16;
+        const activeImages = new Set();
+        let strongestSectionProject = null;
+        let strongestSectionValue = 0;
+
+        for (const project of projectsScroll.querySelectorAll(".project")) {
+          const rect = project.getBoundingClientRect();
+          const strength = focusedVerticalRectStrength(rect, viewportTop, viewportBottom, focusStart, focusEnd, holdEnd, fadeOutEnd);
+          if (strength > strongestSectionValue) {
+            strongestSectionValue = strength;
+            strongestSectionProject = project;
+          }
+        }
+
+        for (const image of projectsScroll.querySelectorAll(".project-media img")) {
+          let overlay = autoClearOverlays.get(image);
+          if (!overlay) {
+            overlay = createClearOverlay("shadow-clear-image shadow-clear-image--auto");
+            autoClearOverlays.set(image, overlay);
+            document.body.appendChild(overlay);
+          }
+
+          const rect = image.getBoundingClientRect();
+          const visible = rect.bottom > viewportTop && rect.top < viewportBottom && rect.width > 0 && rect.height > 0;
+          if (!visible || !positionClearOverlay(overlay, image)) {
+            overlay.style.opacity = "0";
+            continue;
+          }
+
+          activeImages.add(image);
+          const strength = focusedVerticalRectStrength(rect, viewportTop, viewportBottom, focusStart, focusEnd, holdEnd, fadeOutEnd);
+          overlay.style.opacity = strength.toFixed(3);
+        }
+
+        for (const [image, overlay] of autoClearOverlays) {
+          if (!activeImages.has(image)) {
+            overlay.style.opacity = "0";
+          }
+        }
+
+        syncGallerySectionTitle(strongestSectionProject, strongestSectionValue);
+      }
+
       function focusedRectStrength(rect, viewportLeft, viewportRight, focusStart, focusEnd, holdEnd, fadeOutEnd) {
         if (rect.width <= 0 || rect.height <= 0 || rect.right <= viewportLeft || rect.left >= viewportRight) {
           return 0;
@@ -2915,6 +2986,19 @@
         const visibleLeft = Math.max(0, Math.min(1, (rect.right - viewportLeft) / Math.max(1, rect.width)));
         const visibleRight = Math.max(0, Math.min(1, (viewportRight - rect.left) / Math.max(1, rect.width)));
         const visibility = smoothstep(Math.min(visibleLeft, visibleRight));
+        return Math.max(0, Math.min(1, Math.min(leading, trailing) * visibility));
+      }
+
+      function focusedVerticalRectStrength(rect, viewportTop, viewportBottom, focusStart, focusEnd, holdEnd, fadeOutEnd) {
+        if (rect.width <= 0 || rect.height <= 0 || rect.bottom <= viewportTop || rect.top >= viewportBottom) {
+          return 0;
+        }
+
+        const leading = Math.max(0, Math.min(1, (focusStart - rect.top) / Math.max(1, focusStart - focusEnd)));
+        const trailing = 1 - Math.max(0, Math.min(1, (holdEnd - rect.top) / Math.max(1, holdEnd - fadeOutEnd)));
+        const visibleTop = Math.max(0, Math.min(1, (rect.bottom - viewportTop) / Math.max(1, rect.height)));
+        const visibleBottom = Math.max(0, Math.min(1, (viewportBottom - rect.top) / Math.max(1, rect.height)));
+        const visibility = smoothstep(Math.min(visibleTop, visibleBottom));
         return Math.max(0, Math.min(1, Math.min(leading, trailing) * visibility));
       }
 

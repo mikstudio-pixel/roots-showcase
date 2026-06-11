@@ -217,6 +217,10 @@ body[data-shadow-variant="moon"] .window-shadow-glass::before {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 220 160' preserveAspectRatio='none'%3E%3Cpath fill='%23b9c8d8' fill-opacity='0.58' d='M98 60H124V88H98z M128 60H154V88H128z M98 92H124V120H98z M128 92H154V120H128z'/%3E%3C/svg%3E");
 }
 
+body[data-shadow-variant="moon"] .brand-logo {
+  filter: brightness(0) saturate(100%) invert(81%) sepia(15%) saturate(642%) hue-rotate(174deg) brightness(92%) contrast(90%);
+}
+
 body[data-shadow-variant="moon"] .page,
 body[data-shadow-variant="moon"] .project-copy,
 body[data-shadow-variant="moon"] .project-title,
@@ -244,7 +248,7 @@ body[data-shadow-variant="moon"] .shadow-field {
 }
 
 body[data-shadow-variant="moon"] .fact {
-  background: rgba(255, 255, 255, 0.055);
+  background: transparent;
 }
 
 body[data-shadow-variant="moon"] .fact span,
@@ -367,6 +371,7 @@ body[data-shadow-variant="cave"]::after {
   right: 18px;
   bottom: 18px;
   z-index: 80;
+  display: none;
   width: min(310px, calc(100vw - 36px));
   border: 1px solid rgba(0, 0, 0, 0.16);
   border-radius: 8px;

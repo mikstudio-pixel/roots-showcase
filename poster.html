@@ -935,6 +935,10 @@
         backdrop-filter: blur(14px);
       }
 
+      .controls {
+        display: none;
+      }
+
       .controls.is-collapsed {
         width: auto;
         overflow: visible;
@@ -1239,10 +1243,21 @@
         --poster-logo-y: 14;
         --poster-logo-size: 38;
         --poster-logo-invert: 1;
+        --poster-logo-flower-x: 50%;
+        --poster-logo-flower-y: 14%;
+        --poster-logo-flower-size: 7%;
+        --poster-logo-flower-stem-height: 40%;
+        --poster-ambient-opacity: 1;
+        --poster-title-x: 50;
+        --poster-title-y: 26;
+        --poster-title-size: 4.8;
+        --poster-title-color: #f6ecd1;
+        --poster-title-opacity: 0.82;
         width: min(calc(100vw - 382px), 70vh);
         height: min(100vh, 142.857vw);
         margin: 0;
         background: #080808;
+        container-type: inline-size;
       }
 
       body.poster-page::after {
@@ -1250,6 +1265,7 @@
         inset: 0;
         width: 100%;
         height: 100%;
+        opacity: var(--poster-ambient-opacity);
       }
 
       @media print {
@@ -1273,6 +1289,8 @@
 
       body.poster-page #grain-canvas,
       body.poster-page #page-shadow,
+      body.poster-page .poster-logo-flower,
+      body.poster-page .poster-title,
       body.poster-page .poster-logo {
         position: absolute;
         pointer-events: none;
@@ -1307,6 +1325,97 @@
         transform-origin: 50% 50%;
         mix-blend-mode: screen;
         filter: invert(var(--poster-logo-invert)) blur(var(--poster-output-blur));
+      }
+
+      body.poster-page .poster-logo-flower {
+        z-index: 19;
+        left: var(--poster-logo-flower-x);
+        top: var(--poster-logo-flower-y);
+        width: var(--poster-logo-flower-size);
+        aspect-ratio: 1;
+        opacity: 0;
+        transform: translate(-50%, -50%);
+        transform-origin: 50% 50%;
+        mix-blend-mode: screen;
+      }
+
+      body.poster-page.poster-integrated-logo-flower .poster-logo-flower {
+        opacity: 0.78;
+      }
+
+      body.poster-page .poster-logo-flower::before {
+        content: "";
+        position: absolute;
+        left: 50%;
+        top: 48%;
+        width: max(1px, 1.2%);
+        height: var(--poster-logo-flower-stem-height);
+        border-radius: 999px;
+        background:
+          linear-gradient(90deg, rgba(43, 90, 220, 0.52), rgba(246, 236, 209, 0.55), rgba(206, 5, 3, 0.45)),
+          linear-gradient(180deg, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0));
+        filter: blur(0.8px);
+        opacity: 0.62;
+        transform: translateX(-50%) rotate(-1.4deg);
+        transform-origin: 50% 0;
+      }
+
+      body.poster-page .poster-logo-flower img {
+        position: relative;
+        z-index: 1;
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        filter: invert(var(--poster-logo-invert)) blur(var(--poster-output-blur));
+      }
+
+      body.poster-page .poster-logo-flower::after {
+        content: "";
+        position: absolute;
+        inset: -18%;
+        z-index: 0;
+        border-radius: 999px;
+        background:
+          radial-gradient(circle at 42% 45%, rgba(246, 236, 209, 0.34), rgba(246, 236, 209, 0) 42%),
+          radial-gradient(circle at 56% 52%, rgba(206, 5, 3, 0.24), rgba(206, 5, 3, 0) 54%),
+          radial-gradient(circle at 48% 58%, rgba(43, 90, 220, 0.24), rgba(43, 90, 220, 0) 56%);
+        filter: blur(2.2px);
+      }
+
+      body.poster-page .poster-title {
+        z-index: 21;
+        left: calc(var(--poster-title-x) * 1%);
+        top: calc(var(--poster-title-y) * 1%);
+        width: max-content;
+        max-width: 86%;
+        color: var(--poster-title-color);
+        font-family: "The Seasons", Georgia, serif;
+        font-size: calc(var(--poster-title-size) * 1cqw);
+        font-weight: 300;
+        line-height: 0.96;
+        letter-spacing: 0;
+        text-align: center;
+        text-wrap: balance;
+        opacity: var(--poster-title-opacity);
+        transform: translate(-50%, -50%);
+        transform-origin: 50% 50%;
+        mix-blend-mode: normal;
+        filter: blur(var(--poster-output-blur));
+      }
+
+      body.poster-page .poster-title span {
+        display: block;
+        white-space: nowrap;
+      }
+
+      .poster-experiment-panel .toggle-control {
+        color: rgba(238, 242, 244, 0.86);
+        margin-top: 4px;
+      }
+
+      .poster-experiment-panel .toggle-control input {
+        accent-color: #e45c66;
       }
 
       .poster-experiment-panel {
@@ -1534,10 +1643,16 @@
   </head>
   <body class="gallery-page poster-page">
     <canvas id="grain-canvas" aria-hidden="true"></canvas>
+    <span id="poster-logo-flower" class="poster-logo-flower" aria-hidden="true">
+      <img src="assets/Logo_mono_dark_flower.svg" alt="">
+    </span>
     <img id="poster-logo" class="poster-logo" src="assets/Logo_mono_dark.svg" alt="" aria-hidden="true">
+    <div id="poster-title" class="poster-title" aria-hidden="true">
+      <span>moravské tradice</span>
+      <span>v novém světle</span>
+    </div>
     <div class="gallery-light-intro" aria-hidden="true"></div>
     <script src="assets/koreny-transitions.js"></script>
-    <script src="assets/pako_deflate.min.js"></script>
     <canvas id="page-shadow"></canvas>
     <div class="gallery-butterfly-shadow" aria-hidden="true">
       <div class="gallery-butterfly">
@@ -1971,6 +2086,9 @@
       const grainCanvas = document.getElementById("grain-canvas");
       const grainCtx = grainCanvas.getContext("2d", { alpha: true });
       const posterLogo = document.getElementById("poster-logo");
+      const posterLogoFlower = document.getElementById("poster-logo-flower");
+      const posterLogoFlowerImage = posterLogoFlower?.querySelector("img");
+      const posterTitle = document.getElementById("poster-title");
       const canvas = document.getElementById("page-shadow");
       const projectsScroll = document.querySelector(".projects-scroll");
       const projectsTrack = document.querySelector(".projects-scroll .gallery");
@@ -1988,6 +2106,7 @@
       let hoverClearImage = null;
       let hoverClearOverlay = null;
       const fadingClearOverlays = [];
+      let posterExportRendering = false;
       let galleryIntroStart = 0;
       let galleryIntroActive = false;
       let galleryIntroMotionStart = 0;
@@ -3700,6 +3819,8 @@
       function render(now) {
         resize();
         const renderTime = posterMode ? 0 : now * 0.001;
+        const activeExport = posterMode ? posterExportSize : null;
+        const exportRendering = !!activeExport || posterExportRendering;
         const introWaitingForLight = galleryIntroActive && !document.body.classList.contains("gallery-intro-shadows");
         if (!introWaitingForLight) {
           syncButterflySurface();
@@ -3708,12 +3829,20 @@
         }
         const delta = state.lastFrameTime ? Math.min((now - state.lastFrameTime) / 1000, 0.1) : 0;
         state.lastFrameTime = now;
-        const pointerEase = 0.12;
-        state.smoothPointerX += (state.pointerX - state.smoothPointerX) * pointerEase;
-        state.smoothPointerY += (state.pointerY - state.smoothPointerY) * pointerEase;
-        state.smoothMouseLight += (state.mouseLight - state.smoothMouseLight) * 0.035;
-        state.smoothMousePatternY += (state.mousePatternY - state.smoothMousePatternY) * 0.035;
-        state.smoothMouseBrightness += (state.mouseBrightness - state.smoothMouseBrightness) * 0.03;
+        if (exportRendering) {
+          state.smoothPointerX = state.pointerX;
+          state.smoothPointerY = state.pointerY;
+          state.smoothMouseLight = state.mouseLight;
+          state.smoothMousePatternY = state.mousePatternY;
+          state.smoothMouseBrightness = state.mouseBrightness;
+        } else {
+          const pointerEase = 0.12;
+          state.smoothPointerX += (state.pointerX - state.smoothPointerX) * pointerEase;
+          state.smoothPointerY += (state.pointerY - state.smoothPointerY) * pointerEase;
+          state.smoothMouseLight += (state.mouseLight - state.smoothMouseLight) * 0.035;
+          state.smoothMousePatternY += (state.mousePatternY - state.smoothMousePatternY) * 0.035;
+          state.smoothMouseBrightness += (state.mouseBrightness - state.smoothMouseBrightness) * 0.03;
+        }
         const ambient = state.smoothMouseBrightness;
         root.style.setProperty("--ambient-shadow", (0.035 + (1 - ambient) * 0.105).toFixed(3));
         root.style.setProperty("--ambient-mid", (0.014 + (1 - ambient) * 0.06).toFixed(3));
@@ -3800,7 +3929,6 @@
         }
         gl.clearColor(0, 0, 0, 0);
         gl.clear(gl.COLOR_BUFFER_BIT);
-        const activeExport = posterMode ? posterExportSize : null;
         const renderPageWidth = activeExport?.pageWidth || state.viewportWidth;
         const renderPageHeight = activeExport?.pageHeight || state.viewportHeight;
         const renderOriginX = activeExport?.originX || 0;
@@ -3881,6 +4009,10 @@
           <label for="poster-mode">Světlý / tmavý režim <output>0.00</output></label>
           <input id="poster-mode" type="range" min="0" max="1" step="0.01" value="0" data-poster-css="mode">
         </div>
+        <label class="toggle-control" for="poster-ambient-gradient">
+          <span>Zesvětlující gradient</span>
+          <input id="poster-ambient-gradient" type="checkbox" checked>
+        </label>
         <div class="poster-control">
           <label for="poster-depth">Depth offset <output>0.32</output></label>
           <input id="poster-depth" type="range" min="0" max="1" step="0.01" value="0.32" data-shadow-control="depth">
@@ -3954,6 +4086,28 @@
           <label for="poster-logo-size">Logo size <output>38.00</output></label>
           <input id="poster-logo-size" type="range" min="8" max="86" step="0.1" value="38" data-poster-css="--poster-logo-size">
         </div>
+        <label class="toggle-control" for="poster-integrated-logo-flower">
+          <span>Logo jako květina</span>
+          <input id="poster-integrated-logo-flower" type="checkbox">
+        </label>
+      </div>
+      <div class="poster-control-group poster-control-section">
+        <label class="toggle-control" for="poster-title-visible">
+          <span>Podtext</span>
+          <input id="poster-title-visible" type="checkbox" checked>
+        </label>
+        <div class="poster-control">
+          <label for="poster-title-x">Text X <output>50.00</output></label>
+          <input id="poster-title-x" type="range" min="0" max="100" step="0.1" value="50" data-poster-css="--poster-title-x">
+        </div>
+        <div class="poster-control">
+          <label for="poster-title-y">Text Y <output>26.00</output></label>
+          <input id="poster-title-y" type="range" min="0" max="100" step="0.1" value="26" data-poster-css="--poster-title-y">
+        </div>
+        <div class="poster-control">
+          <label for="poster-title-size">Text size <output>4.80</output></label>
+          <input id="poster-title-size" type="range" min="1.6" max="16" step="0.1" value="4.8" data-poster-css="--poster-title-size">
+        </div>
       </div>
       <button class="poster-snapshot-button" type="button" id="poster-save-snapshot">Uložit snapshot</button>
       <button class="poster-export-button" type="button" id="poster-export-pdf">Render PDF 600 DPI</button>
@@ -3964,6 +4118,7 @@
       (() => {
         const panel = document.querySelector(".poster-experiment-panel");
         const controls = Array.from(document.querySelectorAll(".poster-experiment-panel input[type='range']"));
+        const toggleControls = Array.from(document.querySelectorAll(".poster-experiment-panel input[type='checkbox']"));
         const snapshotStorageKey = "koreny-poster-snapshots-v1";
         const snapshots = [];
         let activeSnapshotId = "";
@@ -4013,6 +4168,7 @@
           const t = Number(value);
           const pigment = smoothstep(t);
           const background = darkTheme.background.map((channel, index) => Math.round(mix(channel, lightTheme.background[index], t)));
+          const titleColor = [246, 236, 209].map((channel, index) => Math.round(mix(channel, [51, 32, 16][index], pigment)));
           document.body.style.backgroundColor = `rgb(${background.join(", ")})`;
           document.body.style.setProperty("--ambient-shadow", format(mix(darkTheme.ambientShadow, lightTheme.ambientShadow, t)));
           document.body.style.setProperty("--ambient-mid", format(mix(darkTheme.ambientMid, lightTheme.ambientMid, t)));
@@ -4026,6 +4182,7 @@
           document.body.style.setProperty("--poster-mode-grain-contrast", format(mix(1, 0.72, pigment)));
           document.body.style.setProperty("--poster-mode-grain-invert", format(mix(1, 0, pigment)));
           document.body.style.setProperty("--poster-logo-invert", format(mix(1, 0, pigment)));
+          document.body.style.setProperty("--poster-title-color", `rgb(${titleColor.join(", ")})`);
 
           const shadowBlend = t > 0.42 ? "multiply" : "screen";
           const grainBlend = t > 0.42 ? "multiply" : "screen";
@@ -4033,6 +4190,47 @@
           document.getElementById("page-shadow").style.mixBlendMode = shadowBlend;
           document.getElementById("grain-canvas").style.mixBlendMode = grainBlend;
           document.getElementById("poster-logo").style.mixBlendMode = logoBlend;
+          document.getElementById("poster-logo-flower").style.mixBlendMode = logoBlend;
+          document.getElementById("poster-title").style.mixBlendMode = logoBlend;
+        }
+
+        function refreshIntegratedLogoFlower(input) {
+          const enabled = !!input.checked;
+          document.body.classList.toggle("poster-integrated-logo-flower", enabled);
+          if (typeof posterLogo !== "undefined" && posterLogo) {
+            const nextSrc = enabled ? posterLogoNoFlowerSrc : posterLogoDefaultSrc;
+            if (!posterLogo.src.endsWith(nextSrc)) {
+              posterLogo.addEventListener("load", () => {
+                updatePosterLogoFlowerLayout();
+                render(0);
+              }, { once: true });
+              posterLogo.src = nextSrc;
+            }
+          }
+          if (typeof updatePosterLogoFlowerLayout === "function") {
+            updatePosterLogoFlowerLayout();
+          }
+          if (typeof render === "function") {
+            render(0);
+          }
+        }
+
+        function refreshToggle(input) {
+          if (input.id === "poster-integrated-logo-flower") {
+            refreshIntegratedLogoFlower(input);
+          }
+          if (input.id === "poster-ambient-gradient") {
+            document.body.style.setProperty("--poster-ambient-opacity", input.checked ? "1" : "0");
+            if (typeof render === "function") {
+              render(0);
+            }
+          }
+          if (input.id === "poster-title-visible") {
+            document.body.style.setProperty("--poster-title-opacity", input.checked ? "0.82" : "0");
+            if (typeof render === "function") {
+              render(0);
+            }
+          }
         }
 
         function refresh(input) {
@@ -4058,6 +4256,10 @@
           } else if (cssControl) {
             document.body.style.setProperty(cssControl, `${value}${input.dataset.cssUnit || ""}`);
           }
+
+          if (input.id === "poster-logo-x" || input.id === "poster-logo-y" || input.id === "poster-logo-size") {
+            updatePosterLogoFlowerLayout();
+          }
         }
 
         function parseRgb(color) {
@@ -4070,22 +4272,27 @@
 
         function drawAmbient(ctx, width, height, fullWidth = width, fullHeight = height, offsetX = 0, offsetY = 0) {
           const styles = getComputedStyle(document.body);
+          const ambientOpacity = Number.parseFloat(styles.getPropertyValue("--poster-ambient-opacity"));
+          const opacity = Number.isFinite(ambientOpacity) ? ambientOpacity : 1;
+          if (opacity <= 0) {
+            return;
+          }
           const ambientShadow = Number.parseFloat(styles.getPropertyValue("--ambient-shadow")) || 0;
           const ambientMid = Number.parseFloat(styles.getPropertyValue("--ambient-mid")) || 0;
           const ambientLight = Number.parseFloat(styles.getPropertyValue("--ambient-light")) || 0;
           const ambientGlow = Number.parseFloat(styles.getPropertyValue("--ambient-glow")) || 0;
           const ambientRadial = Number.parseFloat(styles.getPropertyValue("--ambient-radial")) || 0;
           const linear = ctx.createLinearGradient(-offsetX, -offsetY, fullWidth - offsetX, fullHeight - offsetY);
-          linear.addColorStop(0, `rgba(0, 0, 0, ${ambientShadow})`);
-          linear.addColorStop(0.34, `rgba(0, 0, 0, ${ambientMid})`);
-          linear.addColorStop(0.72, `rgba(255, 255, 255, ${ambientLight})`);
-          linear.addColorStop(1, `rgba(255, 255, 255, ${ambientGlow})`);
+          linear.addColorStop(0, `rgba(0, 0, 0, ${ambientShadow * opacity})`);
+          linear.addColorStop(0.34, `rgba(0, 0, 0, ${ambientMid * opacity})`);
+          linear.addColorStop(0.72, `rgba(255, 255, 255, ${ambientLight * opacity})`);
+          linear.addColorStop(1, `rgba(255, 255, 255, ${ambientGlow * opacity})`);
           ctx.fillStyle = linear;
           ctx.fillRect(0, 0, width, height);
 
           const radius = Math.max(fullWidth, fullHeight) * 0.52;
           const radial = ctx.createRadialGradient(fullWidth - offsetX, fullHeight - offsetY, 0, fullWidth - offsetX, fullHeight - offsetY, radius);
-          radial.addColorStop(0, `rgba(255, 255, 255, ${ambientRadial})`);
+          radial.addColorStop(0, `rgba(255, 255, 255, ${ambientRadial * opacity})`);
           radial.addColorStop(1, "rgba(255, 255, 255, 0)");
           ctx.fillStyle = radial;
           ctx.fillRect(0, 0, width, height);
@@ -4124,14 +4331,120 @@
           return scaleBlurInFilter(getComputedStyle(element).filter || "none", scale);
         }
 
-        function waitForPosterLogo() {
-          if (!posterLogo || posterLogo.complete) {
+        const logoFlowerAnchor = {
+          x: 147.12 / 527,
+          y: 78.06 / 156,
+          size: 91 / 527
+        };
+        const posterLogoDefaultSrc = "assets/Logo_mono_dark.svg";
+        const posterLogoNoFlowerSrc = "assets/Logo_mono_dark_no_flower.svg";
+
+        function integratedLogoFlowerEnabled() {
+          return document.body.classList.contains("poster-integrated-logo-flower");
+        }
+
+        function posterLogoGeometry(fullWidth, fullHeight, offsetX = 0, offsetY = 0) {
+          const naturalWidth = posterLogo?.naturalWidth || 527;
+          const naturalHeight = posterLogo?.naturalHeight || 156;
+          const logoX = fullWidth * cssNumber("--poster-logo-x", 50) / 100 - offsetX;
+          const logoY = fullHeight * cssNumber("--poster-logo-y", 14) / 100 - offsetY;
+          const logoWidth = fullWidth * cssNumber("--poster-logo-size", 38) / 100;
+          const logoHeight = logoWidth * naturalHeight / naturalWidth;
+          const flowerX = logoX - logoWidth * 0.5 + logoWidth * logoFlowerAnchor.x;
+          const flowerY = logoY - logoHeight * 0.5 + logoHeight * logoFlowerAnchor.y;
+          const flowerWidth = logoWidth * logoFlowerAnchor.size;
+          const flowerHeight = flowerWidth * ((posterLogoFlowerImage?.naturalHeight || 96) / (posterLogoFlowerImage?.naturalWidth || 91));
+          return {
+            logoX,
+            logoY,
+            logoWidth,
+            logoHeight,
+            flowerX,
+            flowerY,
+            flowerWidth,
+            flowerHeight,
+            stemBottom: fullHeight - offsetY + fullHeight * 0.018
+          };
+        }
+
+        function updatePosterLogoFlowerLayout() {
+          if (!posterMode || !posterLogoFlower) {
+            return;
+          }
+          const rect = document.body.getBoundingClientRect();
+          const geometry = posterLogoGeometry(rect.width || 1, rect.height || 1);
+          posterLogoFlower.style.setProperty("--poster-logo-flower-x", `${geometry.flowerX}px`);
+          posterLogoFlower.style.setProperty("--poster-logo-flower-y", `${geometry.flowerY}px`);
+          posterLogoFlower.style.setProperty("--poster-logo-flower-size", `${geometry.flowerWidth}px`);
+          const stemStart = geometry.flowerY - geometry.flowerWidth * 0.5 + geometry.flowerWidth * 0.48;
+          posterLogoFlower.style.setProperty("--poster-logo-flower-stem-height", `${Math.max(0, geometry.stemBottom - stemStart)}px`);
+        }
+
+        function waitForImage(image) {
+          if (!image || image.complete) {
             return Promise.resolve();
           }
           return new Promise((resolve) => {
-            posterLogo.addEventListener("load", resolve, { once: true });
-            posterLogo.addEventListener("error", resolve, { once: true });
+            image.addEventListener("load", resolve, { once: true });
+            image.addEventListener("error", resolve, { once: true });
           });
+        }
+
+        function waitForPosterLogo() {
+          return Promise.all([
+            waitForImage(posterLogo),
+            waitForImage(posterLogoFlowerImage)
+          ]);
+        }
+
+        function drawIntegratedLogoFlower(ctx, width, height, fullWidth = width, fullHeight = height, offsetX = 0, offsetY = 0, filterScale = 1) {
+          if (!integratedLogoFlowerEnabled() || !posterLogoFlowerImage?.complete || !posterLogoFlowerImage.naturalWidth) {
+            return;
+          }
+
+          const geometry = posterLogoGeometry(fullWidth, fullHeight, offsetX, offsetY);
+          const flowerStyles = getComputedStyle(posterLogoFlower);
+          const stemTop = geometry.flowerY + geometry.flowerHeight * 0.18;
+          const stemBottom = geometry.stemBottom;
+          const stemLean = geometry.flowerWidth * -0.16;
+          const stemWidth = Math.max(1, geometry.logoWidth * 0.0028);
+
+          ctx.save();
+          ctx.globalCompositeOperation = canvasBlendMode(posterLogoFlower);
+          ctx.lineCap = "round";
+          ctx.lineJoin = "round";
+          ctx.filter = `blur(${Math.max(0.45, 0.8 * filterScale).toFixed(2)}px)`;
+          [
+            ["rgba(246, 236, 209, 0.34)", -stemWidth * 1.5, stemWidth * 1.1],
+            ["rgba(43, 90, 220, 0.28)", stemWidth * 1.2, stemWidth * 1.3],
+            ["rgba(206, 5, 3, 0.24)", stemWidth * 2.5, stemWidth]
+          ].forEach(([strokeStyle, dx, widthMultiplier]) => {
+            ctx.beginPath();
+            ctx.moveTo(geometry.flowerX + dx, stemTop);
+            ctx.quadraticCurveTo(
+              geometry.flowerX + dx + stemLean,
+              stemTop + (stemBottom - stemTop) * 0.52,
+              geometry.flowerX + dx + stemLean * 0.55,
+              stemBottom
+            );
+            ctx.strokeStyle = strokeStyle;
+            ctx.lineWidth = stemWidth * widthMultiplier;
+            ctx.stroke();
+          });
+          ctx.restore();
+
+          ctx.save();
+          ctx.globalCompositeOperation = canvasBlendMode(posterLogoFlower);
+          ctx.globalAlpha = Number.parseFloat(flowerStyles.opacity) || 0.78;
+          ctx.filter = elementFilter(posterLogoFlowerImage, filterScale);
+          ctx.drawImage(
+            posterLogoFlowerImage,
+            geometry.flowerX - geometry.flowerWidth * 0.5,
+            geometry.flowerY - geometry.flowerHeight * 0.5,
+            geometry.flowerWidth,
+            geometry.flowerHeight
+          );
+          ctx.restore();
         }
 
         function drawPosterLogo(ctx, width, height, fullWidth = width, fullHeight = height, offsetX = 0, offsetY = 0, filterScale = 1) {
@@ -4139,10 +4452,9 @@
             return;
           }
 
-          const logoX = fullWidth * cssNumber("--poster-logo-x", 50) / 100 - offsetX;
-          const logoY = fullHeight * cssNumber("--poster-logo-y", 14) / 100 - offsetY;
-          const logoWidth = fullWidth * cssNumber("--poster-logo-size", 38) / 100;
-          const logoHeight = logoWidth * posterLogo.naturalHeight / posterLogo.naturalWidth;
+          drawIntegratedLogoFlower(ctx, width, height, fullWidth, fullHeight, offsetX, offsetY, filterScale);
+
+          const { logoX, logoY, logoWidth, logoHeight } = posterLogoGeometry(fullWidth, fullHeight, offsetX, offsetY);
           const logoStyles = getComputedStyle(posterLogo);
 
           ctx.save();
@@ -4156,6 +4468,37 @@
             logoWidth,
             logoHeight
           );
+          ctx.restore();
+        }
+
+        function drawPosterTitle(ctx, width, height, fullWidth = width, fullHeight = height, offsetX = 0, offsetY = 0, filterScale = 1) {
+          if (!posterTitle) {
+            return;
+          }
+
+          const styles = getComputedStyle(posterTitle);
+          const alpha = Number.parseFloat(styles.opacity) || 0;
+          if (alpha <= 0) {
+            return;
+          }
+          const x = fullWidth * cssNumber("--poster-title-x", 50) / 100 - offsetX;
+          const y = fullHeight * cssNumber("--poster-title-y", 26) / 100 - offsetY;
+          const fontSize = fullWidth * cssNumber("--poster-title-size", 4.8) / 100;
+          const lineHeight = fontSize * 0.96;
+          const lines = ["moravské tradice", "v novém světle"];
+
+          ctx.save();
+          ctx.globalCompositeOperation = canvasBlendMode(posterTitle);
+          ctx.globalAlpha = alpha;
+          ctx.filter = elementFilter(posterTitle, filterScale);
+          ctx.fillStyle = styles.color || "#332010";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.font = `300 ${fontSize}px "The Seasons", Georgia, serif`;
+          const firstBaseline = y - lineHeight * (lines.length - 1) * 0.5;
+          lines.forEach((line, index) => {
+            ctx.fillText(line, x, firstBaseline + index * lineHeight);
+          });
           ctx.restore();
         }
 
@@ -4183,6 +4526,7 @@
           ctx.save();
           ctx.scale(size / cropSize, size / cropSize);
           drawPosterLogo(ctx, cropSize, cropSize, sourceWidth, sourceHeight, cropX, cropY, size / cropSize);
+          drawPosterTitle(ctx, cropSize, cropSize, sourceWidth, sourceHeight, cropX, cropY, size / cropSize);
           ctx.restore();
 
           ctx.save();
@@ -4196,6 +4540,9 @@
           const values = {};
           controls.forEach((input) => {
             values[input.id] = input.value;
+          });
+          toggleControls.forEach((input) => {
+            values[input.id] = input.checked;
           });
           return values;
         }
@@ -4235,8 +4582,13 @@
             if (!input) {
               return;
             }
-            input.value = value;
-            refresh(input);
+            if (input.type === "checkbox") {
+              input.checked = value === true || value === "true";
+              refreshToggle(input);
+            } else {
+              input.value = value;
+              refresh(input);
+            }
           });
           if (typeof render === "function") {
             render(0);
@@ -4590,16 +4942,17 @@
           const compositionBlur = cssNumber("--poster-output-blur", 0) * exportScale;
           const maxPaddedTileSize = Math.max(512, Math.min(maxViewport[0], maxViewport[1], maxRenderbuffer));
           const maxRenderPadding = Math.max(0, Math.floor((maxPaddedTileSize - tileSize) * 0.5));
-          const tileSeamBleed = Math.min(2, maxRenderPadding);
+          const tileSeamBleed = Math.min(4, maxRenderPadding);
           const renderPadding = Math.min(Math.max(tileSeamBleed, Math.ceil(compositionBlur * 3)), maxRenderPadding);
 
           button.disabled = true;
           button.classList.add("is-rendering");
           button.textContent = "Připravuji render";
           status.textContent = `Renderuji ${targetWidth} x ${targetHeight} px po ${totalTiles} dlaždicích...`;
+          posterExportRendering = true;
 
           try {
-            const imageWriter = await createPdfImageWriter();
+            const tiles = [];
             let tileIndex = 0;
             posterExportSize = {
               tileWidth: Math.min(tileSize, targetWidth),
@@ -4613,24 +4966,30 @@
             state.maskPageHeight = 0;
             status.textContent = "Připravuji exportní masku...";
             await waitForPosterLogo();
+            if (document.fonts?.ready) {
+              await document.fonts.ready;
+            }
             await refreshFlowerMask(true);
             await nextFrame();
-            for (let y = 0; y < targetHeight; y += exportBandHeight) {
-              const bandHeight = Math.min(exportBandHeight, targetHeight - y);
-              const bandCanvas = document.createElement("canvas");
-              bandCanvas.width = targetWidth;
-              bandCanvas.height = bandHeight;
-              const bandCtx = bandCanvas.getContext("2d", { alpha: false });
+            for (let x = 0; x < targetWidth; x += tileSize) {
+              const tileWidth = Math.min(tileSize, targetWidth - x);
+              const outputX = Math.max(0, x - tileSeamBleed);
+              const outputRight = Math.min(targetWidth, x + tileWidth + tileSeamBleed);
+              const outputWidth = outputRight - outputX;
+              const stripCanvas = document.createElement("canvas");
+              stripCanvas.width = outputWidth;
+              stripCanvas.height = targetHeight;
+              const stripCtx = stripCanvas.getContext("2d", { alpha: false });
 
-              for (let x = 0; x < targetWidth; x += tileSize) {
-                const tileWidth = Math.min(tileSize, targetWidth - x);
-                const renderX = Math.max(0, x - renderPadding);
+              for (let y = 0; y < targetHeight; y += exportBandHeight) {
+                const bandHeight = Math.min(exportBandHeight, targetHeight - y);
+                const renderX = Math.max(0, outputX - renderPadding);
                 const renderY = Math.max(0, y - renderPadding);
-                const renderRight = Math.min(targetWidth, x + tileWidth + renderPadding);
+                const renderRight = Math.min(targetWidth, outputRight + renderPadding);
                 const renderBottom = Math.min(targetHeight, y + bandHeight + renderPadding);
                 const renderWidth = renderRight - renderX;
                 const renderHeight = renderBottom - renderY;
-                const sourceX = x - renderX;
+                const sourceX = outputX - renderX;
                 const sourceY = y - renderY;
                 const tileConfig = {
                   tileWidth: renderWidth,
@@ -4668,20 +5027,28 @@
                 renderCtx.drawImage(canvas, 0, 0, renderWidth, renderHeight);
                 renderCtx.restore();
 
-                bandCtx.drawImage(renderCanvas, sourceX, sourceY, tileWidth, bandHeight, x, 0, tileWidth, bandHeight);
+                drawPosterTitle(renderCtx, renderWidth, renderHeight, targetWidth, targetHeight, renderX, renderY, exportScale);
+
+                stripCtx.drawImage(renderCanvas, sourceX, sourceY, outputWidth, bandHeight, 0, y, outputWidth, bandHeight);
                 tileIndex += 1;
                 button.textContent = `Renderuji ${tileIndex}/${totalTiles}`;
                 status.textContent = `Renderuji dlaždici ${tileIndex}/${totalTiles}...`;
                 await new Promise((resolve) => window.setTimeout(resolve, 0));
               }
 
-              status.textContent = `Zapisuji pás ${Math.floor(y / exportBandHeight) + 1}/${tileRows} do jednoho obrazu...`;
-              await imageWriter.write(canvasToRgbChunks(bandCanvas).chunks);
+              status.textContent = `Komprimuji svislý pás ${tiles.length + 1}/${tileColumns}...`;
+              tiles.push({
+                x: outputX,
+                y: 0,
+                width: outputWidth,
+                height: targetHeight,
+                bytes: dataUrlToBytes(stripCanvas.toDataURL("image/jpeg", 0.97)),
+                filter: "DCTDecode"
+              });
             }
             button.textContent = "Skládám PDF";
             status.textContent = "Skládám PDF...";
-            const pdfImage = await imageWriter.close();
-            const pdf = createPosterPdfFromImageStream(pdfImage, targetWidth, targetHeight);
+            const pdf = createPosterPdfFromTiles(tiles, targetWidth, targetHeight);
             const url = URL.createObjectURL(pdf);
             const link = document.createElement("a");
             link.href = url;
@@ -4695,6 +5062,7 @@
             console.error(error);
             status.textContent = "Export se nepodařil. Zkus snížit velikost okna nebo obnovit stránku.";
           } finally {
+            posterExportRendering = false;
             posterExportSize = null;
             state.maskPageWidth = 0;
             state.maskPageHeight = 0;
@@ -4714,6 +5082,16 @@
             renderSnapshotRail();
           });
         });
+        toggleControls.forEach((input) => {
+          refreshToggle(input);
+          input.addEventListener("change", () => {
+            activeSnapshotId = "";
+            refreshToggle(input);
+            renderSnapshotRail();
+          });
+        });
+        window.addEventListener("resize", updatePosterLogoFlowerLayout);
+        updatePosterLogoFlowerLayout();
         loadSnapshots();
         renderSnapshotRail();
         document.getElementById("poster-save-snapshot")?.addEventListener("click", saveSnapshot);
