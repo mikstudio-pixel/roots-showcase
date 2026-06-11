@@ -351,21 +351,6 @@ body[data-shadow-variant="cave"]::after {
   transform-origin: 0 55%;
 }
 
-.shadow-clear-image {
-  position: fixed;
-  z-index: 70;
-  display: block;
-  pointer-events: none;
-  opacity: 0;
-  object-fit: cover;
-  object-position: center;
-  transition: opacity 2s cubic-bezier(0.2, 0, 0.18, 1);
-}
-
-.shadow-clear-image--auto {
-  transition: none;
-}
-
 .shadow-panel {
   position: fixed;
   right: 18px;
@@ -480,6 +465,13 @@ body[data-shadow-variant="cave"]::after {
   min-height: 14px;
   color: #777;
   font-size: 11px;
+}
+
+@media (min-width: 1200px) {
+  .window-shadow {
+    --window-shadow-edge-x: 92vw;
+    --window-shadow-edge-y: 92vh;
+  }
 }
 
 @media (max-width: 560px) {

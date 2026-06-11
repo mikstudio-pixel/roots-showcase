@@ -494,21 +494,33 @@
         --category-gap: 18px;
         --category-apd-open: 206px;
         --category-space-open: 136px;
-        --category-width: calc(var(--category-gap) * 2 + var(--category-apd-open) + var(--category-space-open));
+        --category-apd-width: var(--category-gap);
+        --category-space-width: var(--category-gap);
+        --category-width: calc(var(--category-apd-width) + var(--category-space-width));
         --tick-1-x: 0px;
-        --tick-2-x: var(--category-gap);
-        --tick-3-x: calc(var(--category-gap) * 2);
+        --tick-2-x: var(--category-apd-width);
+        --tick-3-x: var(--category-width);
         position: absolute;
         left: 0;
         top: -28px;
         z-index: 8;
         display: grid;
-        grid-template-columns: var(--category-apd-open) var(--category-space-open);
+        grid-template-columns: var(--category-apd-width) var(--category-space-width);
         align-items: center;
-        gap: var(--category-gap);
         width: var(--category-width);
         height: 22px;
         pointer-events: auto;
+        transition:
+          width 420ms cubic-bezier(0.2, 0, 0.18, 1),
+          grid-template-columns 420ms cubic-bezier(0.2, 0, 0.18, 1);
+      }
+
+      .category-index[data-active-category="apd"] {
+        --category-apd-width: var(--category-apd-open);
+      }
+
+      .category-index[data-active-category="space"] {
+        --category-space-width: var(--category-space-open);
       }
 
       .category-tick {
@@ -537,20 +549,6 @@
       .category-tick:nth-of-type(3) {
         left: 0;
         --tick-x: var(--tick-3-x);
-      }
-
-      .category-index:has([data-gallery-jump="apd"]:hover),
-      .category-index:has([data-gallery-jump="apd"]:focus-visible) {
-        --tick-1-x: 0px;
-        --tick-2-x: calc(var(--category-gap) + var(--category-apd-open));
-        --tick-3-x: calc(var(--category-gap) * 2 + var(--category-apd-open));
-      }
-
-      .category-index:has([data-gallery-jump="space"]:hover),
-      .category-index:has([data-gallery-jump="space"]:focus-visible) {
-        --tick-1-x: 0px;
-        --tick-2-x: var(--category-gap);
-        --tick-3-x: calc(var(--category-gap) * 2 + var(--category-space-open));
       }
 
       .category-marker {
@@ -589,31 +587,29 @@
         filter: blur(5px);
         pointer-events: none;
         text-align: center;
-        translate: -50% calc(-50% + 7px);
+        transform: translate3d(-50%, calc(-50% + 7px), 0);
         transform-origin: 50% 50%;
         transition:
           opacity 0ms linear,
           filter 0ms linear,
-          translate 0ms linear;
+          transform 0ms linear;
         transition-delay: 0ms;
         white-space: nowrap;
       }
 
-      .category-marker:hover span,
-      .category-marker:focus-visible span,
       .category-marker.is-active span {
         opacity: 0.62;
         filter: blur(0);
-        translate: -50% -50%;
+        transform: translate3d(-50%, -50%, 0);
         transition:
           opacity 260ms cubic-bezier(0.2, 0, 0.18, 1),
           filter 360ms cubic-bezier(0.2, 0, 0.18, 1),
-          translate 360ms cubic-bezier(0.2, 0, 0.18, 1);
-        transition-delay: 60ms;
+          transform 360ms cubic-bezier(0.2, 0, 0.18, 1);
+        transition-delay: 430ms;
       }
 
-      .category-marker:hover span,
-      .category-marker:focus-visible span {
+      .category-marker.is-active:hover span,
+      .category-marker.is-active:focus-visible span {
         opacity: 1;
       }
 
@@ -2100,12 +2096,10 @@
         space: document.querySelector('[data-gallery-title="space"]')
       };
       const categoryMarkers = Array.from(document.querySelectorAll("[data-gallery-jump]"));
+      const categoryIndex = document.querySelector(".category-index");
       const studentProjectsLink = document.querySelector(".student-projects-link");
       const shadowDprCap = 1.25;
       const autoClearOverlays = new Map();
-      let hoverClearImage = null;
-      let hoverClearOverlay = null;
-      const fadingClearOverlays = [];
       let posterExportRendering = false;
       let galleryIntroStart = 0;
       let galleryIntroActive = false;
@@ -3402,6 +3396,14 @@
       }
 
       function updateCategoryIndex(mode) {
+        if (categoryIndex) {
+          if (mode === "default") {
+            delete categoryIndex.dataset.activeCategory;
+          } else {
+            categoryIndex.dataset.activeCategory = mode;
+          }
+        }
+
         categoryMarkers.forEach((marker) => {
           marker.classList.toggle("is-active", mode !== "default" && marker.dataset.galleryJump === mode);
         });
@@ -3509,109 +3511,9 @@
         });
       }
 
-      function trackFadingClearOverlay(overlay, sourceImage, duration = 2200) {
-        if (!overlay || !sourceImage) {
-          return;
-        }
-
-        const item = { overlay, sourceImage };
-        fadingClearOverlays.push(item);
-        overlay.style.opacity = "0";
-        window.setTimeout(() => {
-          const index = fadingClearOverlays.indexOf(item);
-          if (index !== -1) {
-            fadingClearOverlays.splice(index, 1);
-          }
-          overlay.remove();
-        }, duration);
-      }
-
-      function syncFadingClearOverlays() {
-        for (const item of fadingClearOverlays) {
-          positionClearOverlay(item.overlay, item.sourceImage);
-        }
-      }
-
-      function releaseHoverOverlay() {
-        if (!hoverClearOverlay) {
-          hoverClearImage = null;
-          return;
-        }
-
-        const overlay = hoverClearOverlay;
-        const sourceImage = hoverClearImage;
-        hoverClearImage = null;
-        hoverClearOverlay = null;
-        trackFadingClearOverlay(overlay, sourceImage, 2200);
-      }
-
-      function showHoverClearImage(image) {
-        if (!image || image === hoverClearImage || image.classList.contains("shadow-clear-image")) {
-          return;
-        }
-
-        releaseHoverOverlay();
-        const overlay = createClearOverlay("shadow-clear-image shadow-clear-image--hover");
-        if (!positionClearOverlay(overlay, image)) {
-          return;
-        }
-
-        hoverClearImage = image;
-        hoverClearOverlay = overlay;
-        document.body.appendChild(overlay);
-        requestAnimationFrame(() => {
-          overlay.style.opacity = "1";
-        });
-      }
-
-      function syncHoverClearImage() {
-        if (hoverClearOverlay && hoverClearImage) {
-          positionClearOverlay(hoverClearOverlay, hoverClearImage);
-        }
-        syncFadingClearOverlays();
-      }
-
       function syncFocusedProjectImage() {
         syncShadowClearImage();
       }
-
-      document.querySelectorAll("img").forEach((image) => {
-        image.addEventListener("mouseenter", () => {
-          showHoverClearImage(image);
-        });
-        image.addEventListener("mousemove", syncHoverClearImage);
-        image.addEventListener("mouseleave", () => {
-          if (hoverClearImage === image) {
-            releaseHoverOverlay();
-          }
-        });
-      });
-
-      document.addEventListener("pointerover", (event) => {
-        const image = event.target.closest?.("img");
-        if (!image || image.classList.contains("shadow-clear-image")) {
-          return;
-        }
-
-        showHoverClearImage(image);
-      }, true);
-
-      document.addEventListener("mouseover", (event) => {
-        const image = event.target.closest?.("img");
-        if (!image || image.classList.contains("shadow-clear-image")) {
-          return;
-        }
-
-        showHoverClearImage(image);
-      }, true);
-
-      document.addEventListener("pointerout", (event) => {
-        if (!hoverClearImage || event.target !== hoverClearImage) {
-          return;
-        }
-
-        releaseHoverOverlay();
-      }, true);
 
       function updateMouseLight(event) {
         const x = event.clientX / Math.max(window.innerWidth, 1);
@@ -3825,7 +3727,6 @@
         if (!introWaitingForLight) {
           syncButterflySurface();
           syncShadowClearImage();
-          syncHoverClearImage();
         }
         const delta = state.lastFrameTime ? Math.min((now - state.lastFrameTime) / 1000, 0.1) : 0;
         state.lastFrameTime = now;
@@ -3871,7 +3772,6 @@
             syncHorizontalGallery();
             syncProjectFlight();
             syncShadowClearImage();
-            syncHoverClearImage();
           } else if (Math.abs(state.galleryVirtualTarget - state.galleryVirtualScroll) > 0.01) {
             state.galleryTitleDirection = state.galleryVirtualTarget >= state.galleryVirtualScroll ? 1 : -1;
             state.lastGalleryVirtualScroll = state.galleryVirtualScroll;
@@ -3879,7 +3779,6 @@
             syncHorizontalGallery();
             syncProjectFlight();
             syncShadowClearImage();
-            syncHoverClearImage();
           }
         } else if (Math.abs(window.scrollY - state.smoothScrollTarget) > 0.5) {
           const scrollEase = 1 - Math.pow(0.012, delta);
